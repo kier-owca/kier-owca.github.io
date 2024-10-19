@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<title>Agro-skrzynki</title>
+<meta name="description" content="program ułatwiający liczenie opakowań zwrotnych Agro">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		background: rgba(0,0,0,0);
+	}
+	body
+	{
+		background: black;
+		color: white;
+		font-size: 1.7vh;
+		font-family: 'Courier New', monospace;
+	}
+	button
+	{
+		display: flex;
+		align-items: center;
+		box-sizing: border-box;
+		justify-content: center;
+		height: 5vh;
+		min-width: 5vh;
+		font-weight: 700;
+		letter-spacing: 0.1vh;
+		font-size: 1.4rem;
+		color: #939393;
+		border: solid 0.4vh #939393;
+		border-radius: 0.7vh;
+		background: rgba(0,0,0,0.2);
+		transition: 0.2s;
+	}
+	button svg
+	{
+		height: 4.5vh;
+	}
+	button.marked
+	{
+		background: rgba(0,0,0,0.5);
+		border-color: white;
+		color: white;
+	}
+	tr.marked td:first-child, tr.marked td:nth-child(2)
+	{
+		background: #d9d9d9;
+	}
+	tr.marked td:nth-child(2).flash
+	{
+		background: white;
+	}
+	button.flash
+	{
+		background: white;
+	}
+	nav
+	{
+		box-sizing: border-box;
+		padding-left: 1vh;
+		padding-right: 1vh;
+		position: fixed;
+		justify-content: space-between;
+		align-items: center;
+		top: 0;
+		width: 100%;
+		height: 7vh;
+		background: #464646;
+		border-bottom: solid 0.4vh #8c8c8c;
+		display: flex;
+	}
+	#navButtons
+	{
+		display: flex;
+		justify-content: space-around;
+		flex-wrap: wrap;
+		align-content: center;
+		height: 100%;
+		width: 42vh;
+	}
+	#navButtons button
+	{
+		width: 17vh;
+		height: 5.5vh;
+	}
+	#hamburger
+	{
+		height: 4.5vh;
+	}
+	#hamburger svg
+	{
+		height: 100%;
+	}
+	main
+	{
+		width: 48vh;
+		min-height: 80vh;
+		margin: auto;
+		margin-top: 9.5vh;
+		margin-bottom: 9.5vh;
+	}
+	.hidden
+	{
+		display: none;
+	}
+	#valuesBox
+	{
+		user-select: none;
+		position: fixed;
+		display: flex;
+		justify-content: space-around;
+		top: 19vh;
+		left: 50%;
+		margin-left: 13vh;
+		height: 61vh;
+		width: 11vh;
+		background: #252525;
+	}
+	#valuesBox div
+	{
+		width: 5vh;
+		height: 100%;
+	}
+	#valuesBox button
+	{
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+	}
+	#tools
+	{
+		user-select: none;
+		width: 100%;
+		height: 7vh;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: space-around;
+		background: #252525;
+	}
+	#tools button
+	{
+		width: 6vh;
+		height: 6vh;
+	}
+	#cargoArea
+	{
+		user-select: none;
+		position: relative;
+		width: 36.5vh;
+		min-height: 63.5vh;
+		margin-top: 2.5vh;
+		background: #252525;
+	}
+	#cargoArea div
+	{
+		position: absolute;
+		box-sizing: border-box;
+		text-align: center;
+		padding-top: 2vh;
+		font-weight: 700;
+		font-size: 1.7rem;
+		color: black;
+	}
+	.section_2
+	{
+		padding-top: 7vh;
+	}
+	.paper
+	{
+		position: relative;
+		box-sizing: border-box;
+		width: 36.5vh;
+		height: 54vh;
+		margin-top: 2.5vh;
+		background: #c5c5c5;
+		border: solid 0.5vh #464646;
+		border-top: none;
+		border-left: none;
+		clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 9% 0%, 0% 7%);
+		padding: 2vh;
+		color: black;
+	}
+	.paper span.title
+	{
+		display: block;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 0.5vh;
+		text-align: center;
+		font-weight: 700;
+		margin-top: 1.5vh;
+		margin-bottom: 0.5vh;
+		background: #9d9d9d;
+	}
+	.paper span.title::after
+	{
+		content: "ZAMÓWIENIE"
+	}
+	#addPaper
+	{
+		position: absolute;
+		top: 9vh;
+		left: 2vh;
+		width: 32.5vh;
+		height: 32.5vh;
+		background: #4d8c00;
+		clip-path: polygon(30% 0%, 70% 0%, 70% 30%, 100% 30%, 100% 70%, 70% 70%, 70% 100%, 30% 100%, 30% 70%, 0% 70%, 0% 30%, 30% 30%);
+		animation: blink 3s infinite;
+	}
+	table
+	{
+		user-select: none;
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.7rem;
+		text-align: center;
+		margin-top: 1.5vh;
+		margin-bottom: 1.5vh;
+	}
+	th, td
+	{
+		border: 0.25vh solid black;
+		padding: 0.3vh;
+		padding-top: 1vh;
+		padding-bottom: 1vh;
+	}
+	th
+	{
+		background: #9d9d9d;
+	}
+	th:first-child, td:first-child
+	{
+		width: 60%;
+		text-align: left;
+		text-transform: uppercase;
+		letter-spacing: 0.02rem;
+	}
+	th
+	{
+		text-transform: uppercase;
+		letter-spacing: 0.02rem;
+	}
+	td:nth-child(2)
+	{
+		width: 27%;
+		font-weight: 900;
+		font-size: 0.8rem;
+		letter-spacing: 0;
+	}
+	td:nth-child(2)::after
+	{
+		content: ".000";
+		font-weight: 100;
+		letter-spacing: -0.01rem;
+	}
+	th:last-child, td:last-child
+	{
+		padding: 0;
+		border-right: none;
+		border-top: none;
+		border-bottom: none;
+		background: rgba(0,0,0,0);
+		font-weight: 900;
+		font-size: 1.4rem;
+	}
+	.additionalData
+	{
+		display: block;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+		font-size: 0.8rem;
+		padding: 0.5vh;
+		margin-top: 0.4vh;
+		margin-bottom: 0.4vh;
+	}
+	.additionalData span::first-letter
+	{
+		text-transform: uppercase;
+	}
+	.options
+	{
+		width: 80%;
+		height: 5vh;
+		margin-top: 1.5vh;
+		display: flex;
+		justify-content: space-between;
+	}
+	.summary
+	{
+		position: relative;
+		width: 36.5vh;
+		min-height: 15vh;
+		margin-top: 2.5vh;
+		background: #252525;
+	}
+	.summary div
+	{
+		width: 100%;
+		min-height: 3vh;
+		font-size: 1.2rem;
+		border-top: solid 0.2vh #1b1b1b;
+		border-bottom: solid 0.2vh #1b1b1b;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: space-around;
+	}
+	.summary span
+	{
+		display: inline-block;
+		min-width: 40%;
+		color: #7f7f7f;
+	}
+	.summary span.marked
+	{
+		font-weight: 700;
+		color: white;
+	}
+	@keyframes blink
+	{
+		0%, 100%
+		{
+			opacity: 1;
+		}
+		50%
+		{
+			opacity: 0.2;
+ 		}
+	}
+	.blinking
+	{
+		border: solid 0.7vh white;
+		animation: blink 2s infinite;
+	}
+	#window
+	{
+		position: fixed;
+		box-sizing: border-box;
+		width: 46vh;
+		left: 50%;
+		margin-left: -23vh;
+		top: 20vh;
+		height: 30vh;
+		background: #464646;
+		border: solid 0.4vh #8c8c8c;
+		box-shadow: 0 0 7vh 3vh black;
+	}
+	#window span
+	{
+		position: absolute;
+		left: 0;
+		top: 1.5vh;
+		width: 100%;
+		text-align: center;
+		font-weight: 500;
+		letter-spacing: 0.02rem;
+	}
+	#window div
+	{
+		position: absolute;
+		left: 0;
+		top: 55%;
+		height: 45%;
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: center;
+	}
+	#window button
+	{
+		padding-left: 0.7vh;
+		padding-right: 0.7vh;
+		min-width: 11vh;
+	}
+	#window input
+	{
+		width: 50%;
+		font-size: 1.4rem;
+		color: white;
+		text-align: center;
+		padding: 0.2vh;
+		border: solid 0.6vh white;
+	}
+	#menu
+	{
+		position: fixed;
+		box-sizing: border-box;
+		width: 46vh;
+		left: 50%;
+		margin-left: -23vh;
+		top: 9vh;
+		height: 80vh;
+		background: #464646;
+		border: solid 0.4vh #8c8c8c;
+		box-shadow: 0 0 7vh 3vh black;
+		overflow-y: auto;
+		overflow-x: hidden;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	#menu::-webkit-scrollbar
+	{
+		isplay: none;
+	}
+	#menu section
+	{
+		position: relative;
+		width: 97%;
+		left: 1%;
+		min-height: 70%;
+	}
+	#menu div
+	{
+		width: 100%;
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: center;
+	}
+	#menu .separator
+	{
+		height: 1vh;
+		opacity: 0;
+	}
+	#menu button
+	{
+		min-width: 30vh;
+	}
+	#menu span
+	{
+		box-sizing: border-box;
+		min-width: 16%;
+		padding-top: 0.5vh;
+		padding-bottom: 0.5vh;
+		background: #393939;
+		text-align: center;
+		font-size: 0.8rem;
+	}
+</style>
+<script type="text/javascript">
+	const carLength = 8
+	const typesOfPackaging =
+	[
+		{
+			name: "none",
+			namePL: "nic",
+			namePaper: "nic",
+			visible: false,
+			pairing: "all",
+			default: 0,
+			maxValue: 0,
+			color: "white",
+			points: '40,40 40,60 60,60 60,40',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					for (const el of row.pairing)
+					{
+						if (el.present())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+					for (const el of row.noPairing)
+					{
+						if (el.present())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+			},
+		},
+		{
+			name: "palette",
+			namePL: "półpalety",
+			namePaper: "półpaleta",
+			visible: true,
+			pairing: "pairing",
+			default: 10,
+			maxValue: 15,
+			color: "#4d4d4d",
+			points: '0,40 0,70 10,70 10,60 45,60 45,70 55,70 55,60 90,60 90,70 100,70 100,40',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					let v = 0
+					for (const el of row.pairing)
+					{
+						if (v===0 && el.absent())
+						{
+							el.active()
+							v = 1
+						}
+						else
+						{
+							el.deActive()
+							v = 0
+						}
+					}
+					for (const el of row.noPairing)
+					{
+						el.deActive()
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+				if (element.absent())
+				{
+					element.add(1)
+				}
+			},
+		},
+		{
+			name: "chicken",
+			namePL: "drób",
+			namePaper: "pojemnik drób",
+			visible: true,
+			pairing: "noPairing",
+			default: 10,
+			maxValue: 14,
+			color: "#f71b00",
+			points: '0,20 0,90 100,90 100,20 90,20 90,40 10,40 10,20',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					for (const el of row.pairing)
+					{
+						el.deActive()
+					}
+					for (const el of row.noPairing)
+					{
+						if (el.absent())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+				if (element.absent())
+				{
+					element.add(2)
+				}
+			},
+		},
+		{
+			name: "meat",
+			namePL: "mięso",
+			namePaper: "pojemnik mięso",
+			visible: true,
+			pairing: "noPairing",
+			default: 20,
+			maxValue: 30,
+			color: "#fff79d",
+			points: '0,30 0,75 5,80 95,80 100,75 100,30 90,30 90,40 10,40 10,30',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					for (const el of row.pairing)
+					{
+						el.deActive()
+					}
+					for (const el of row.noPairing)
+					{
+						if (el.absent())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+				if (element.absent())
+				{
+					element.add(3)
+				}
+			},
+		},
+		{
+			name: "coldCuts",
+			namePL: "wędliny",
+			namePaper: "pojemnik wędliny",
+			visible: true,
+			pairing: "noPairing",
+			default: 15,
+			maxValue: 20,
+			color: "#9de3f7",
+			points: '0,30 0,85 5,90 95,90 100,85 100,30 90,30 90,40 10,40 10,30',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					for (const el of row.pairing)
+					{
+						el.deActive()
+					}
+					for (const el of row.noPairing)
+					{
+						if (el.absent())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+				if (element.absent())
+				{
+					element.add(4)
+				}
+			},
+		},
+		{
+			name: "lids",
+			namePL: "pokrywy",
+			namePaper: "pokrywy",
+			visible: true,
+			papairing: "noPairing",
+			default: 15,
+			maxValue: 25,
+			color: "#b1c5f7",
+			points: '45,0 57,0 57,5 55,5 55,95 57,95 57,100 45,100 43,70 43,30',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					for (const el of row.pairing)
+					{
+						el.deActive()
+					}
+					for (const el of row.noPairing)
+					{
+						if (el.absent())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+				if (element.absent())
+				{
+					element.add(5)
+				}
+			},
+			calc(packaging,square)
+			{
+				const lids = typesOfPackaging.findIndex(obj => obj.name === "lids")
+				const coldCuts = typesOfPackaging.findIndex(obj => obj.name === "coldCuts")
+				packaging[lids] += square.value
+				packaging[coldCuts] += 1
+				return packaging
+			}
+		},
+		{
+			name: "delete",
+			namePL: "kasowanie",
+			namePaper: "kasowanie",
+			visible: false,
+			pairing: "all",
+			default: 0,
+			maxValue: 0,
+			color: "white",
+			points: '20,10 10,20 45,50 10,80 20,90 50,55 80,90 90,80 55,50 90,20, 80,10 50,45',
+			load: function()
+			{
+				for (let row of cargoAreaWork)
+				{
+					for (const el of row.pairing)
+					{
+						if (el.present())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+					for (const el of row.noPairing)
+					{
+						if (el.present())
+						{
+							el.active()
+						}
+						else
+						{
+							el.deActive()
+						}
+					}
+				}
+			},
+			action(element)
+			{
+				setValue(element.getBox().value)
+				marked.place = ["cargoArea",element.box[0][0],element.box[0][1]]
+				if (element.present())
+				{
+					element.add(0)
+				}
+			},
+		},
+	]
+	const marked =
+	{
+		tool: 0,
+		place: ["",0,0],
+	}
+	data =
+	{
+		base62:
+		{
+			chars: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			code: function(num,length)
+			{
+				num = BigInt(num)
+				let code = ''
+				while (num > 0)
+				{
+					code = this.chars[Number(num) % 62] + code
+					num = num / BigInt(62)
+				}
+				if (length && code.length>length)
+				{
+					console.log("błąd")
+					debugger
+				}
+				if (!length)
+				{
+					return code
+				}
+				for (let i=0 ; i<length ; i++)
+				{
+					if (code.length < length)
+					{
+						code = "0"+code
+					}
+				}
+				return code
+			},
+			deCode(code)
+			{
+				if (!code || typeof code!="string"){return 0}
+				let num = BigInt(0)
+				for (let i = 0; i < code.length; i++)
+				{
+					num = num * BigInt(62) + BigInt(this.chars.indexOf(code[i]))
+				}
+				return Number(num)
+			},
+		},
+		cargoArea:
+		{
+			// maksymalną kodowaną wartością skrzynek w cargoArea jest 29
+			// value jest kodowane za pomocą 30 pozycji licząc 0
+			// kodowane są grupy po 2 pola za pomocą 3 znaków
+			code: function()
+			{
+				let code = ""
+				let jump = 0
+				let pieceValue = 0
+				for (const row of cargoArea)
+				{
+					for (const square of row)
+					{
+						if (jump === 2)
+						{
+							code += data.base62.code(pieceValue,3)
+							jump = 0
+							pieceValue = 0
+						}
+						let squareValue = 0
+						squareValue += (Number(square.value)||0) * 1
+						squareValue += (Number(square.type)||0) * (30*1)
+						squareValue += (Number(square.pairing)||0) * (30*8*1)
+						pieceValue += squareValue*Math.pow(30*8*2,jump)
+						jump += 1
+					}
+				}
+				if (jump != 2)
+				{
+					console.log("błąd podczas kodowania")
+					debugger
+				}
+				code += data.base62.code(pieceValue,3)
+				return code
+			},
+			deCode: function(code)
+			{
+				if (!code || typeof code!="string"){return 0}
+				let pieceCode = ""
+				const giveBack = [[]]
+				for (let char of code)
+				{
+					pieceCode += char
+					if (pieceCode.length === 3)
+					{
+						let pieceValue = data.base62.deCode(pieceCode)
+						const squares = []
+						for (let i=1 ; i>=0 ; i--)
+						{
+							let squaresValue = Math.floor(pieceValue/Math.pow(30*8*2,i))
+							pieceValue -= squaresValue*Math.pow(30*8*2,i)
+							const square = {}
+							square.pairing = Math.min(1,Math.abs(Math.floor(squaresValue/(30*8*1))))
+							squaresValue -= square.pairing*(30*8*1)
+							square.type = Math.floor(squaresValue/(30*1))
+							squaresValue -= square.type*(30*1)
+							square.value = Math.min(29,Math.floor(squaresValue/(1)))
+							squaresValue -= square.value*(1)
+							if (typesOfPackaging[square.type])
+							{
+								if (!typesOfPackaging[square.type].visible)
+								{
+									square.type = 0
+									square.value = 0
+								}
+							}
+							else
+							{
+								square.type = 0
+								square.value = 0
+							}
+							squares.push(square)
+						}
+						for (let i=1 ; i>=0 ; i--)
+						{
+							if (giveBack[giveBack.length-1].length === 6)
+							{
+								giveBack[giveBack.length] = []
+							}
+							giveBack[giveBack.length-1].push(squares[i])
+						}
+						pieceCode = ""
+					}
+				}
+				return giveBack
+			},
+		},
+		paper:
+		{
+			chars: " aąbcćdeęfghijklłmnńoóprsśtuwvxyzżź0123456789",
+			code: function()
+			{
+				//kodowanie wartości max 99+4znaczniki, 6 pozycji plus czas w formacie 17h * 12(po 5 min)
+				let code = ""
+				for (const paper of papers.list)
+				{
+					let paperCode = ""
+					let nameValue = 0
+					for (let i=0 ; i<paper.name.length ; i++)
+					{
+						const num = this.chars.indexOf(paper.name[i])
+						nameValue += num*Math.pow(this.chars.length,i)
+					}
+					const nameCode = data.base62.code(nameValue)
+					paperCode += data.base62.code(nameCode.length,1)
+					paperCode += nameCode
+					let paperValue = 0
+					for (let i=0 ; i<paper.value.length ; i++)
+					{
+						let num = 0
+						num += Math.min(99,paper.value[i][0])*4
+						num += Math.min(3,paper.value[i][1])
+						paperValue += num*Math.pow(400,i)
+					}
+					paperValue *= (17*12)//zwiększenie o kod godziny
+					if (paper.hour[0] < 18)
+					{
+						paperValue += Math.min(16,Math.max(0,(paper.hour[0]+24)-18))*12
+					}
+					else
+					{
+						paperValue += Math.min(59,Math.max(0,(paper.hour[0])-18)*12)
+					}
+					paperValue += Math.floor(paper.hour[1]/5)*1
+					paperCode += data.base62.code(paperValue,10)
+					//
+					code += paperCode||""
+				}
+				return code
+			},
+			deCode: function(code)
+			{
+				if (!code || typeof code!="string"){return 0}
+				const list = []
+				let mode = 0
+				let nameLength = 0
+				let nameCode = ""
+				let valueCode = ""
+				for (let char of code)
+				{
+					if (mode === 0)
+					{
+						nameLength = data.base62.deCode(char)
+						if (nameLength > 0)
+						{
+							mode = 1
+						}
+						else
+						{
+							mode = 2
+						}
+					}
+					else if (mode === 1)
+					{
+						nameCode += char
+						if (nameCode.length == nameLength)
+						{
+							mode = 2
+						}
+					}
+					else if (mode === 2)
+					{
+						valueCode += char
+						if (valueCode.length === 10)
+						{
+							list.push(decodePaper(data.base62.deCode(nameCode),data.base62.deCode(valueCode)))
+							mode = 0
+							nameLength = 0
+							nameCode = ""
+							valueCode = ""
+						}
+					}
+				}
+				return list
+				function decodePaper(nameValue,paperValue)
+				{
+					const paper = {name:"",value:[],hour:[0,0]}
+					for (let i=0 ; i<7 ; i++)
+					{
+						if (nameValue > 0)
+						{
+							paper.name += data.paper.chars[nameValue%data.paper.chars.length]
+							nameValue = Math.floor(nameValue/data.paper.chars.length)
+						}
+					}
+					const hourValue = paperValue%(17*12)
+					paper.hour[0] = Math.floor(hourValue/12)+18
+					if (paper.hour[0]>24)
+					{
+						paper.hour[0] -=24
+					}
+					paper.hour[1] = (hourValue%12)*5
+					paperValue = Math.floor(paperValue/(17*12))
+					for (let i=0 ; i<6 ; i++)
+					{
+						let num = paperValue%400
+						paper.value.push([Math.floor(num/4),num%4])
+						paperValue = Math.floor(paperValue/400)
+					}
+					return paper
+				}
+			},
+			test: function()
+			{
+				data.paper.deCode(data.paper.code())
+			}
+		},
+		time:
+		{
+			code: function(time)
+			{
+				let t = Number(time)
+				t = Math.floor(Math.floor(t/60000) - 15778019)
+				if (t > 0 && t < 60466170)
+				{
+					// 60466170 jest maksymalnym możliwym czasem do zapisu
+					return t.toString(36).padStart(5, "0")
+				}
+				return 0
+			},
+			deCode: function(code)
+			{
+				if (!code || typeof code != "string")
+				{
+					return 0
+				}
+				if (code.length != 5)
+				{
+					return 0
+				}
+				let t = parseInt(code,36)
+				t += 15778019 // czas start rok 2000
+				t *= 60000 // dokładność co do minuty
+				return new Date(t)
+			},
+		}
+	}
+	let createTime = data.time.deCode(localStorage.getItem("createTime")) || new Date()
+	const cargoArea = data.cargoArea.deCode(localStorage.getItem("cargoArea")) || createCargoArea()
+	localStorage.setItem("cargoArea",data.cargoArea.code())
+	const cargoAreaWork = []
+	function load()
+	{
+		document.getElementById("cargoArea").style.height = `${(carLength*9)+0.5}vh`
+		document.getElementById("addPaper").onclick = papers.add
+		loadNavButton()
+		loadToolButton()
+		loadValueButton()
+		loadPackageSquare()
+		refreshCargoArea()
+		loadPaper()
+		loadMenu()
+		calc.cargoArea()
+		calc.papers()
+		function loadNavButton()
+		{
+			let buttons = document.getElementById("navButtons").getElementsByTagName("button")
+			for (let button of buttons)
+			{
+				button.onclick = changeOfView
+			}
+		}
+		function loadToolButton()
+		{
+			const tools = document.getElementById("tools")
+			for (let i=0 ; i<typesOfPackaging.length ; i++)
+			{
+				const button = document.createElement("button")
+				button.dataset.type = i
+				button.onclick = toolSelect
+				if (i === marked.tool)
+				{
+					button.classList.add("marked")
+				}
+				button.innerHTML = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon fill="${typesOfPackaging[i].color}" points="${typesOfPackaging[i].points}"/></svg>`
+				tools.appendChild(button)
+			}
+		}
+		function loadValueButton()
+		{
+			const valuesBox = document.getElementById("valuesBox")
+			for (let i=0 ; i<2 ; i++)
+			{
+				for (let j=9 ; j>=0 ; j--)
+				{
+					const button = document.createElement("button")
+					if (i)
+					{
+						button.onclick = ()=>{assign([0,j+1])}
+						//button.ondblclick = ()=>{assign([0,j+1],"double")}
+					}
+					else
+					{
+						button.onclick = ()=>{assign([j+1,0])}
+					}
+					button.innerHTML = j
+					button.dataset.value = j
+					valuesBox.children[i].appendChild(button)
+				}
+			}
+			setValue(typesOfPackaging[marked.tool].default)
+		}
+		function loadPackageSquare()
+		{
+			const packageSizeYX = [8.5,5.5]
+			const packageDystans = 0.5
+			for (let i=0 ; i<carLength ; i++)
+			{
+				cargoAreaWork[i] = {pairing:[],noPairing:[]}
+				for (let j=0 ; j<6 ; j++)
+				{
+					const div = document.createElement("div")
+					div.style.width = `${packageSizeYX[1]}vh`
+					div.style.height = `${packageSizeYX[0]}vh`
+					div.style.top = `${packageDystans+(i*(packageSizeYX[0]+packageDystans))}vh`
+					div.style.left = `${packageDystans+(j*(packageSizeYX[1]+packageDystans))}vh`
+					cargoAreaWork[i].noPairing.push(new work(div,[[i,j]]))
+				}
+				for (let j=0 ; j<5 ; j++)
+				{
+					const div = document.createElement("div")
+					div.style.width = `${(packageSizeYX[1]*2)+packageDystans}vh`
+					div.style.height = `${packageSizeYX[0]}vh`
+					div.style.top = `${packageDystans+(i*(packageSizeYX[0]+packageDystans))}vh`
+					div.style.left = `${packageDystans+(j*(packageSizeYX[1]+packageDystans))}vh`
+					cargoAreaWork[i].pairing.push(new work(div,[[i,j],[i,j+1]]))
+				}
+			}
+		}
+		function loadMenu()
+		{
+			const actions =
+			{
+				close: function()
+				{
+					const open = Number(document.getElementById("menu").dataset.open)
+					if (open)
+					{
+						document.getElementById("menu").classList.add("hidden")
+						document.getElementById("menu").dataset.open = 0
+					}
+					else
+					{
+						document.getElementById("menu").classList.remove("hidden")
+						document.getElementById("menu").dataset.open = 1
+					}
+				},
+				summary: function()
+				{
+					const packagingOfCargoArea = calc.cargoArea()
+					const packagingOfPapers = calc.papers()
+					console.log(packagingOfCargoArea,packagingOfPapers)
+					const content = document.getElementById("summary").getElementsByClassName("content")[0]
+					content.innerHTML = ""
+					const width = [30,25,25,16]
+					if (true)
+					{
+						const div = document.createElement("div")
+						for (let i=0 ; i<4 ; i++)
+						{
+							const span = document.createElement("span")
+							span.innerHTML = ["typ","paka","dokumenty","wynik"][i]
+							span.style.width = `${width[i]}%`
+							div.appendChild(span)
+						}
+						content.appendChild(div)
+					}
+					let time = 700
+					for (const key in packagingOfPapers)
+					{
+						const div = document.createElement("div")
+						div.style.marginTop = "0.2vh"
+						div.style.marginBottom = "0.2vh"
+						for (let i=0 ; i<4 ; i++)
+						{
+							const span = document.createElement("span")
+							if (i === 0)
+							{
+								const type = typesOfPackaging[Math.max(0,typesOfPackaging.findIndex(type => type.name === key))]
+								span.innerHTML = type.namePL
+							}
+							else if (i === 1)
+							{
+								span.innerHTML = Number(packagingOfCargoArea[key])||0
+							}
+							else if (i === 2)
+							{
+								span.innerHTML = Number(packagingOfPapers[key])||0
+							}
+							else if (i === 3)
+							{
+								span.innerHTML = "?"
+								if (packagingOfCargoArea[key] === packagingOfPapers[key])
+								{
+									setTimeout(()=>{span.innerHTML = "OK";span.style.background = "#2f5700"},time)
+									time += 500
+								}
+								else if (packagingOfCargoArea[key] > packagingOfPapers[key])
+								{
+									setTimeout(()=>{span.innerHTML = "+";span.style.background = "#754d00"},time)
+									time += 500
+								}
+								else
+								{
+									setTimeout(()=>{span.innerHTML = "-";span.style.background = "#750700"},time)
+									time += 500
+								}
+							}
+							span.style.width = `${width[i]}%`
+							div.appendChild(span)
+						}
+						content.appendChild(div)
+					}
+				},
+				clearCargoArea: function()
+				{
+					const c = createCargoArea()
+					for (let i=0 ; i<c.length ; i++)
+					{
+						cargoArea[i] = c[i]
+					}
+					localStorage.setItem("cargoArea",data.cargoArea.code())
+					refreshCargoArea()
+				},
+				clearPapers: function()
+				{
+					papers.list = []
+					localStorage.setItem("papers",data.paper.code())
+					papers.refresh()
+				},
+				clearAll: function()
+				{
+					this.clearCargoArea()
+					this.clearPapers()
+					this.close()
+				},
+				save: function()
+				{
+					this.close()
+					const packaging = [calc.cargoArea(),calc.papers()]
+					const sum = [0,0]
+					for (let i=0 ; i<2 ; i++)
+					{
+						for (let key in packaging[i])
+						{
+							sum[i] += packaging[i][key]
+						}
+					}
+					const content = document.getElementById("window").getElementsByTagName("div")[0]
+					content.innerHTML = ""
+					if (sum[0] + sum[1] > 0)
+					{
+						document.getElementById("window").getElementsByTagName("span")[0].innerHTML = "Czy na pewno zapisać raport?<br>(zapisanie uniemożliwi zmiany)"
+						document.getElementById("window").getElementsByTagName("span")[0].innerHTML += `<br><br>${createTime.getDate()}.${createTime.getMonth()+1}.${createTime.getFullYear()}r. ${createTime.getHours()}:${createTime.getMinutes()}`
+						for (let i=0 ; i<2 ; i++)
+						{
+							const button = document.createElement("button")
+							button.innerHTML = ["nie","tak"][i]
+							if (i)
+							{
+								button.onclick = function()
+								{
+									document.getElementById("window").classList.add("hidden")
+									document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+									content.innerHTML = ""
+									const raport = [Math.max(sum[0],sum[1]),Number(sum[0]==sum[1]),`${data.time.code(createTime)}!${data.cargoArea.code()}!${data.paper.code()}`]
+									console.log(raport)
+								}
+							}
+							else
+							{
+								button.onclick = function()
+								{
+									document.getElementById("window").classList.add("hidden")
+									document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+									content.innerHTML = ""
+								}
+							}
+							content.appendChild(button)
+						}
+					}
+					else
+					{
+						document.getElementById("window").getElementsByTagName("span")[0].innerHTML = "Nie można zapisać raportu bez utworzenia danych."
+						const button = document.createElement("button")
+						button.innerHTML = "rozumiem"
+						button.onclick = function()
+						{
+							document.getElementById("window").classList.add("hidden")
+							document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+							content.innerHTML = ""
+						}
+						content.appendChild(button)
+					}
+					document.getElementById("window").classList.remove("hidden")
+				},
+			}
+			document.getElementById("hamburger").onclick = changeMenu
+			const buttons = document.getElementById("menu").getElementsByTagName("button")
+			for (let button of buttons)
+			{
+				button.onclick = changeMenu
+			}
+			function changeMenu(event)
+			{
+				const sections = document.getElementById("menu").getElementsByTagName("section")
+				if (event)
+				{
+					const action = event.currentTarget.dataset.action
+					const path = event.currentTarget.dataset.path
+					if (action)
+					{
+						actions[action]()
+					}
+					if (path)
+					{
+						for (const section of sections)
+						{
+							if (section.id == path)
+							{
+								section.classList.remove("hidden")
+							}
+							else
+							{
+								section.classList.add("hidden")
+							}
+						}
+					}
+				}
+			}
+		}
+		function changeOfView(event)
+		{
+			marked.place = ["",0,0]
+			const typeClick = Number(event.currentTarget.dataset.type)
+			const buttons = document.getElementById("navButtons").getElementsByTagName("button")
+			for (let button of buttons)
+			{
+				if (button.dataset.type == typeClick)
+				{
+					button.classList.add('marked')
+				}
+				else
+				{
+					button.classList.remove('marked')
+				}
+			}
+			for (let i=1 ; i<3 ; i++)
+			{
+				const elements = document.getElementsByClassName(`section_${i}`)
+				for (let j=0 ; j<elements.length ; j++)
+				{
+					if (i === typeClick)
+					{
+						elements[j].classList.remove('hidden')
+					}
+					else
+					{
+						elements[j].classList.add('hidden');
+					}
+				}
+			}
+		}
+		function toolSelect(event)
+		{
+			const typeClick = Number((((event||{}).currentTarget||{}).dataset||{}).type||marked.tool)
+			if (typeClick>0 || typeClick==0)
+			{
+				marked.tool = typeClick
+			}
+			typesOfPackaging[marked.tool].load()
+			const buttons = document.getElementById("tools").getElementsByTagName("button")
+			for (let button of buttons)
+			{
+				if (button.dataset.type == typeClick)
+				{
+					button.classList.add('marked')
+				}
+				else
+				{
+					button.classList.remove('marked')
+				}
+			}
+		}
+		function assign(value,double)
+		{
+			if (marked.place[0] == "cargoArea")
+			{
+				const box = cargoArea[marked.place[1]||0][marked.place[2]||0]
+				if (box.type > 0)
+				{
+					if (value[0])
+					{
+						box.value = (box.value%10)+((value[0]-1)*10)
+					}
+					else if (value[1])
+					{
+						if (double)
+						{
+							box.value = (value[1]-1)
+						}
+						else
+						{
+							box.value = Math.floor(box.value/10)*10 + (value[1]-1)
+						}
+					}
+					// maksymalną wartością jaką koduje system to 29 pojemniki w cargoArea
+					const maxValue = Math.min(29,typesOfPackaging[box.type].maxValue)
+					for (let i=0 ; i<10 ; i++)
+					{
+						if (box.value > maxValue)
+						{
+							if (value[0])
+							{
+								box.value -= 1
+							}
+							else
+							{
+								box.value -= 10
+							}
+						}
+						else
+						{
+							break
+						}
+					}
+					if (box.value > maxValue)
+					{
+						box.value = maxValue
+					}
+					box.value = Number(box.value)||1
+				}
+				else
+				{
+					box.value = 0
+				}
+				setValue(box.value)
+				refreshCargoArea()
+				toolSelect()
+			}
+			else if (marked.place[0] == "paper")
+			{
+				const paper = papers.find(marked.place[1])
+				let newValue = paper.value[marked.place[2]][0]
+				if (value[0])
+				{
+					newValue = (newValue%10)+((value[0]-1)*10)
+				}
+				else if (value[1])
+				{
+					if (double)
+					{
+						newValue = (value[1]-1)
+					}
+					else
+					{
+						newValue = Math.floor(newValue/10)*10 + (value[1]-1)
+					}
+				}
+				// maksymalną wartością jaką koduje system to 99 pojemniki w paper
+				const maxValue = 99
+				for (let i=0 ; i<10 ; i++)
+				{
+					if (newValue > maxValue)
+					{
+						if (value[0])
+						{
+							newValue -= 1
+						}
+						else
+						{
+							newValue -= 10
+						}
+					}
+					else
+					{
+						break
+					}
+				}
+				if (newValue > maxValue)
+				{
+					newValue = maxValue
+				}
+				setValue(newValue)
+				paper.setValue(marked.place[2],newValue)
+			}
+		}
+		function loadPaper()
+		{
+			const papersList = data.paper.deCode(localStorage.getItem("papers"))
+			if (Array.isArray(papersList))
+			{
+				for (const paper of papersList)
+				{
+					papers.add(paper)
+				}
+			}
+		}
+	}
+	function createCargoArea()
+	{
+		const giveBack = []
+		for (let y=0 ; y<carLength ; y++)
+		{
+			giveBack[y] = []
+			for (let x=0 ; x<6 ; x++)
+			{
+				giveBack[y][x] = {type:0,value:0,pairing:0}
+			}
+		}
+		return giveBack
+	}
+	function refreshCargoArea()
+	{
+		for (let row of cargoAreaWork)
+		{
+			for (const el of row.pairing)
+			{
+				el.refresh()
+			}
+			for (const el of row.noPairing)
+			{
+				el.refresh()
+			}
+		}
+		calc.cargoArea()
+		localStorage.setItem("cargoArea",data.cargoArea.code())
+	}
+	const calc =
+	{
+		cargoArea: function()
+		{
+			const summary = document.getElementsByClassName(`section_1`)[0].getElementsByClassName("summary")[0]
+			summary.innerHTML = ""
+			let packaging = [0,0,0,0,0,0,0]
+			const giveBack = {}
+			for (const row of cargoArea)
+			{
+				for (const square of row)
+				{
+					packaging = (typesOfPackaging[square.type].calc || new Function("packaging, square","packaging[square.type]+=square.value;return packaging"))(packaging,square)||packaging
+				}
+			}
+			for (let i=0 ; i<typesOfPackaging.length ; i++)
+			{
+				if (typesOfPackaging[i].visible)
+				{
+					const div = document.createElement("div")
+					const span = []
+					span[0] = document.createElement("span")
+					span[1] = document.createElement("span")
+					span[1].classList.add("marked")
+					span[0].innerHTML = `${typesOfPackaging[i].namePL}:`
+					span[1].innerHTML = packaging[i]
+					div.appendChild(span[0])
+					div.appendChild(span[1])
+					summary.appendChild(div)
+				}
+			}
+			//obydwie tablice z powodu makaronu w kodzie nie są tak samo iterowane dlatego występuje konieczność przypisania nazw dla wartości
+			for (let i=0 ; i<typesOfPackaging.length ; i++)
+			{
+				if (typesOfPackaging[i].visible)
+				{
+					giveBack[typesOfPackaging[i].name] = packaging[i]
+				}
+			}
+			return giveBack
+		},
+		papers: function()
+		{
+			const summary = document.getElementsByClassName(`section_2`)[0].getElementsByClassName("summary")[0]
+			summary.innerHTML = ""
+			let packaging = [0,0,0,0,0,0,0]
+			const giveBack = {}
+			for (const paper of papers.list)
+			{
+				for (let i=0 ; i<packaging.length ; i++)
+				{
+					packaging[i] += (paper.value[i]||[0])[0]
+				}
+			}
+			let valueNr = 0
+			for (let i=0 ; i<typesOfPackaging.length ; i++)
+			{
+				if (typesOfPackaging[i].visible)
+				{
+					const div = document.createElement("div")
+					const span = []
+					span[0] = document.createElement("span")
+					span[1] = document.createElement("span")
+					span[1].classList.add("marked")
+					span[0].innerHTML = `${typesOfPackaging[i].namePL}:`
+					span[1].innerHTML = packaging[valueNr]
+					valueNr++
+					div.appendChild(span[0])
+					div.appendChild(span[1])
+					summary.appendChild(div)
+				}
+			}
+			//obydwie tablice z powodu makaronu w kodzie nie są tak samo iterowane dlatego występuje konieczność przypisania nazw dla wartości
+			valueNr = 0
+			for (let i=0 ; i<typesOfPackaging.length ; i++)
+			{
+				if (typesOfPackaging[i].visible)
+				{
+					giveBack[typesOfPackaging[i].name] = packaging[valueNr]
+					valueNr++
+				}
+			}
+			return giveBack
+		},
+	}
+	function setValue(value)
+	{
+		const valuesBox = document.getElementById("valuesBox")
+		for (let i=0 ; i<2 ; i++)
+		{
+			let v = 0
+			if (i)
+			{
+				v = value%10
+			}
+			else
+			{
+				v = Math.floor(value/10)
+			}
+			const buttons = valuesBox.children[i].getElementsByTagName("button")
+			for (let button of buttons)
+			{
+				if (Number(button.dataset.value) == v)
+				{
+					button.classList.add('marked')
+					if (value>0 && (i || v>0))
+					{
+						button.classList.add("flash")
+						setTimeout(()=>{button.classList.remove("flash")},100)
+					}
+				}
+				else
+				{
+					button.classList.remove('marked')
+				}
+			}
+		}
+	}
+	class work
+	{
+		constructor(div,box)
+		{
+			this.div = div
+			div.classList.add("blinking")
+			div.classList.add("hidden")
+			div.onclick = ()=>{typesOfPackaging[marked.tool].action(this)}
+			document.getElementById("cargoArea").appendChild(div)
+			this.box = box
+		}
+		active()
+		{
+			this.div.classList.add("blinking")
+			this.div.classList.remove("hidden")
+		}
+		deActive()
+		{
+			this.div.classList.remove("blinking")
+			if (this.present())
+			{
+				this.div.classList.remove("hidden")
+			}
+			else
+			{
+				this.div.classList.add("hidden")
+			}
+		}
+		getBox(adress)
+		{
+			adress = adress || this.box[0]
+			if (adress[0]<0 || adress[1]<0 || adress[0]>11 || adress[1]>5)
+			{
+				console.log(adress)
+				debugger
+				return {}
+			}
+			return cargoArea[adress[0]][adress[1]]
+		}
+		absent()
+		{
+			if (this.box.length<2)
+			{
+				// dla nie sparowanych
+				if (!this.getBox().type && !this.getBox().pairing)
+				{
+					return true
+				}
+				return false
+			}
+			else
+			{
+				// dla sparowanych
+				let box = this.getBox()
+				if (!box.pairing && !box.type)
+				{
+					box = this.getBox(this.box[1])
+					if (!box.pairing && !box.type)
+					{
+						return true
+					}
+				}
+				return false
+			}
+		}
+		present()
+		{
+			if (this.box.length<2)
+			{
+				// dla nie sparowanych
+				if (this.getBox().type && !this.getBox().pairing)
+				{
+					return true
+				}
+				return false
+			}
+			else
+			{
+				// dla sparowanych
+				if (this.getBox().type)
+				{
+					const box = this.getBox(this.box[1])
+					if (box.pairing && !box.type)
+					{
+						return true
+					}
+				}
+				return false
+			}
+		}
+		add(type)
+		{
+			if (typesOfPackaging[type].pairing==="pairing" && this.box.length<2)
+			{
+				return console.log("te opakowania muszą być sparowane")
+			}
+			else if (!typesOfPackaging[type].pairing==="noPairing" && this.box.length>1)
+			{
+				return console.log("te opakowania nie mogą być sparowane")
+			}
+			if (type>0)
+			{
+				if (this.box[1])
+				{
+					const box = this.getBox(this.box[1])
+					box.value = 0
+					box.type = 0
+					box.pairing = 1
+				}
+				if (true)
+				{
+					const box = this.getBox()
+					if (this.box.length>1)
+					{
+						box.pairing = 1
+					}
+					box.type = type
+					box.value = typesOfPackaging[marked.tool].default
+					setValue(box.value)
+				}
+			}
+			else
+			{
+				this.delete()
+			}
+			this.refresh()
+			this.deActive()
+			createTime = new Date()
+			localStorage.setItem("createTime",data.time.code(createTime))
+			calc.cargoArea()
+			localStorage.setItem("cargoArea",data.cargoArea.code())
+		}
+		delete()
+		{
+			if (this.box[1])
+			{
+				const box = this.getBox(this.box[1])
+				box.pairing = 0
+				box.value = 0
+				box.type = 0
+			}
+			if (true)
+			{
+				const box = this.getBox()
+				box.pairing = 0
+				box.value = 0
+				box.type = 0
+			}
+			setValue(0)
+		}
+		refresh()
+		{
+			if (this.box.length<2)
+			{
+				const box = this.getBox()
+				if (!box.pairing)
+				{
+					this.div.innerHTML = box.value||""
+					if (typesOfPackaging[box.type].color == "white")
+					{
+						this.div.style.background = "transparent"
+					}
+					else
+					{
+						this.div.style.background = typesOfPackaging[box.type].color
+					}
+				}
+				else
+				{
+					this.div.innerHTML = ""
+					this.div.style.background = "transparent"
+				}
+			}
+			else
+			{
+				const box1 = this.getBox()
+				const box2 = this.getBox(this.box[1])
+				if (box1.pairing && box2.pairing)
+				{
+					this.div.innerHTML = box1.value||""
+					if (typesOfPackaging[box1.type].color == "white")
+					{
+						this.div.style.background = "transparent"
+					}
+					else
+					{
+						this.div.style.background = typesOfPackaging[box1.type].color
+					}
+				}
+				else
+				{
+					this.div.innerHTML = ""
+					this.div.style.background = "transparent"
+				}
+			}
+			this.deActive()
+			//funkcja deaktywacji wyłączy mruganie ale nie wyłączy pola z wartością
+		}
+	}
+	const papers =
+	{
+		newIdPaper: 0,
+		list:[],
+		add: function(dataPaper)
+		{
+			const paper = new Paper(dataPaper)
+			papers.list.push(paper)
+		},
+		find: function(id)
+		{
+			for (const paper of papers.list)
+			{
+				if (paper.id == id)
+				{
+					return paper
+				}
+			}
+			console.log("błąd")
+			debugger
+			return {}
+		},
+		edit: function(id,nr,type)
+		{
+			const paper = papers.find(id)
+			const trs = paper.div.getElementsByTagName("tr")
+			for (const tr of trs)
+			{
+				if (tr.classList.contains(type))
+				{
+					tr.classList.add("marked")
+				}
+				else
+				{
+					tr.classList.remove("marked")
+				}
+			}
+			paper.div.getElementsByClassName(type)[0].classList.add("marked")
+			setValue(paper.value[nr][0])
+			marked.place = ["paper",id,nr]
+		},
+		editOff(id)
+		{
+			const paper = papers.find(id)
+			const trs = paper.div.getElementsByTagName("tr")
+			for (const tr of trs)
+			{
+				tr.classList.remove("marked")
+			}
+			setValue(0)
+			marked.place = ["",0,0]
+		},
+		mark: function(id, nr)
+		{
+			const paper = papers.find(id)
+			paper.mark(nr)
+		},
+		nameChange: function(id)
+		{
+			const paper = papers.find(id)
+			document.getElementById("window").getElementsByTagName("span")[0].innerHTML = "Wprowadź nazwę sklepu<br>(lub zostaw puste)"
+			const content = document.getElementById("window").getElementsByTagName("div")[0]
+			content.innerHTML = ""
+			const input = document.createElement("input")
+			input.type = "text"
+			input.placeholder = "nazwa sklepu"
+			input.setAttribute("maxlength", "17")
+			content.appendChild(input)
+			const button = document.createElement("button")
+			button.innerHTML = "Zapisz"
+			button.onclick = function()
+			{
+				document.getElementById("window").classList.add("hidden")
+				document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+				if (input.value.length === 0)
+				{
+					paper.nameChange("")
+				}
+				if (input.value.length>4)
+				{
+					input.value = input.value.toLowerCase()
+					let name = ""
+					for (let i=0 ; i<input.value.length ; i++)
+					{
+						if (/[aąbcćdeęfghijklłmnńoóprsśtuwvxyzżź0123456789]/i.test(input.value[i]))
+						{
+							name += input.value[i]
+						}
+					}
+					input.value = name
+					name = ""
+					for (let i=0 ; i<input.value.length ; i++)
+					{
+						if (!Number(input.value[i]) && input.value[i]!=" " && input.value[i]!="#")
+						{
+							name+=input.value[i]
+							if (name.length>2)
+							{
+								break
+							}
+						}
+					}
+					if (name.length > 2)
+					{
+						for (let i=input.value.length-1 ; i>=0 ; i--)
+						{
+							if (!Number(input.value[i]) && input.value[i]!="0" && input.value[i]!=" " && input.value[i]!="#")
+							{
+								name+=input.value[i]
+								break
+							}
+						}
+						let number = ""
+						for (let i=input.value.length-3 ; i<input.value.length ; i++)
+						{
+							if (Number(input.value[i]) || input.value[i]==="0")
+							{
+								number+=input.value[i]
+							}
+						}
+						name += (Number(number)||1)
+						if (name.length>3)
+						{
+							paper.nameChange(name)
+						}
+					}
+				}
+				content.innerHTML = ""
+			}
+			content.appendChild(button)
+			document.getElementById("window").classList.remove("hidden")
+		},
+		calc: function()
+		{
+		},
+		refresh: function()
+		{
+			document.getElementById("papers").innerHTML = ""
+			for (const paper of papers.list)
+			{
+				paper.refresh()
+				document.getElementById("papers").appendChild(paper.div)
+			}
+		},
+	}
+	class Paper
+	{
+		constructor(dataPaper)
+		{
+			this.nr = papers.list.length
+			this.id = papers.newIdPaper
+			papers.newIdPaper ++
+			this.name = dataPaper.name || ""
+			this.value = dataPaper.value || [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+			this.div = document.createElement("div")
+			this.div.classList.add("paper")
+			const title = document.createElement("span")
+			title.classList.add("title")
+			title.onclick = new Function(`papers.nameChange(${this.id})`)
+			this.div.appendChild(title)
+			const nameRow = document.createElement("div")
+			nameRow.classList = "additionalData"
+			nameRow.onclick = new Function(`papers.nameChange(${this.id})`)
+			for (let i=0 ; i<2 ; i++)
+			{
+				const span = document.createElement("span")
+				if (i)
+				{
+					span.innerHTML = this.nameText()
+					this.nameSpan = span
+				}
+				else
+				{
+					span.innerHTML = "Sklep:"
+				}
+				nameRow.appendChild(span)
+			}
+			this.div.appendChild(nameRow)
+			const hourRow = document.createElement("div")
+			hourRow.classList = "additionalData"
+			for (let i=0 ; i<2 ; i++)
+			{
+				const span = document.createElement("span")
+				if (i)
+				{
+					span.innerHTML = `??:??`
+					this.hourSpan = span
+				}
+				else
+				{
+					span.innerHTML = "Godzina:"
+				}
+				hourRow.appendChild(span)
+			}
+			this.div.appendChild(hourRow)
+			if (dataPaper.hour)
+			{
+				this.setHour(dataPaper.hour)
+			}
+			else
+			{
+				this.setHour()
+			}
+			const list = document.createElement("table")
+			let total = 0
+			if (true)
+			{
+				const thead = document.createElement("thead")
+				const trThread = document.createElement("tr")
+				for (let key=0 ; key<3 ; key++)
+				{
+					const th = document.createElement("th")
+					th.innerHTML = ["Opis artykułu","ilość",""][key]
+					trThread.appendChild(th)
+				}
+				thead.appendChild(trThread)
+				list.appendChild(thead)
+				const tbody = document.createElement("tbody")
+				let valueNr = 0
+				for (let key=0 ; key<typesOfPackaging.length ; key++)
+				{
+					if (typesOfPackaging[key].visible)
+					{
+						const tr = document.createElement("tr")
+						tr.classList.add(typesOfPackaging[key].name)
+						for (let i=0 ; i<3 ; i++)
+						{
+							const td = document.createElement("td")
+							if (i === 0)
+							{
+								td.innerHTML = typesOfPackaging[key].namePaper
+								td.onclick = new Function(`papers.edit(${this.id},${valueNr},"${typesOfPackaging[key].name}")`)
+							}
+							else if (i === 1)
+							{
+								td.innerHTML = this.value[valueNr][0]
+								total += Number(this.value[valueNr][0])
+								td.onclick = new Function(`papers.edit(${this.id},${valueNr},"${typesOfPackaging[key].name}")`)
+							}
+							else if (i === 2)
+							{
+								td.innerHTML = ["","ok","?","!"][this.value[valueNr][1]]
+								td.style.color = ["transparent","#397500","#0061b1","#cf0700"][this.value[valueNr][1]]
+								td.onclick = new Function(`papers.mark(${this.id},${valueNr},"${typesOfPackaging[key].name}")`)
+							}
+							tr.appendChild(td)
+						}
+						tbody.appendChild(tr)
+						valueNr++
+					}
+					list.appendChild(tbody)
+				}
+			}
+			this.div.appendChild(list)
+			const totalDiv = document.createElement("table")
+			totalDiv.onclick = new Function(`papers.editOff(${this.id})`)
+			if (true)
+			{
+				const tbody = document.createElement("tbody")
+				const tr = document.createElement("tr")
+				for (let i=0 ; i<3 ; i++)
+				{
+					const td = document.createElement("td")
+					if (i === 0)
+					{
+						td.innerHTML = "razem"
+					}
+					else if (i === 1)
+					{
+						td.innerHTML = total
+						this.total = td
+					}
+					else if (i === 2)
+					{
+						td.innerHTML = ""
+					}
+					tr.appendChild(td)
+				}
+				tbody.appendChild(tr)
+				totalDiv.appendChild(tbody)
+			}
+			this.div.appendChild(totalDiv)
+			const options = document.createElement("div")
+			options.classList.add("options")
+			for (let i=0 ; i<4 ; i++)
+			{
+				const button = document.createElement("div")
+				options.appendChild(button)
+			}
+			this.div.appendChild(options)
+			document.getElementById("papers").appendChild(this.div)
+		}
+		setValue(nr,value)
+		{
+			if (!(nr>=0 && nr<8)){return console.log("błąd")}
+			if (!(value>=0 && value<100)){return console.log("błąd")}
+			this.value[nr][0] = value
+			this.refresh(nr)
+			this.setHour()
+			createTime = new Date()
+			localStorage.setItem("createTime",data.time.code(createTime))
+			calc.papers()
+			localStorage.setItem("papers",data.paper.code())
+		}
+		mark(nr)
+		{
+			if (!(nr>=0 && nr<8)){return console.log("błąd")}
+			this.value[nr][1]++
+			if (this.value[nr][1] > 3)
+			{
+				this.value[nr][1] = 0
+			}
+			this.refresh()
+			localStorage.setItem("papers",data.paper.code())
+		}
+		refresh(nrValue)
+		{
+			let total = 0
+			let valueNr = 0
+			for (let key=0 ; key<typesOfPackaging.length ; key++)
+			{
+				if (typesOfPackaging[key].visible)
+				{
+					const tr = this.div.getElementsByClassName(typesOfPackaging[key].name)[0]
+					total += this.value[valueNr][0]
+					for (let i=0 ; i<3 ; i++)
+					{
+						const td = tr.children[i]
+						if (i === 1)
+						{
+							td.innerHTML = this.value[valueNr][0]
+							if (nrValue === valueNr)
+							{
+								td.classList.add("flash")
+								setTimeout(()=>{td.classList.remove("flash")},100)
+							}
+						}
+						else if (i === 2)
+						{
+							td.innerHTML = ["","ok","?","!"][this.value[valueNr][1]]
+							td.style.color = ["transparent","#397500","#0061b1","#cf0700"][this.value[valueNr][1]]
+						}
+					}
+					valueNr++
+				}
+			}
+			this.total.innerHTML = total
+		}
+		nameChange(name)
+		{
+			this.name = name || ""
+			this.nameSpan.innerHTML = this.nameText()
+			localStorage.setItem("papers",data.paper.code())
+		}
+		nameText()
+		{
+			if (!this.name)
+			{
+				return `Nr ${this.nr+1}.`
+			}
+			else
+			{
+				let textName = ""
+				for (let i=0 ; i<this.name.length ; i++)
+				{
+					if (i<3 || i>4)
+					{
+						textName += this.name[i]
+					}
+					else if (i === 3)
+					{
+						textName += "-"+this.name[i]
+					}
+					else if (i === 4)
+					{
+						textName += " "+this.name[i]
+					}
+				}
+				return `Nr ${this.nr+1}: ${textName}`
+			}
+		}
+		setHour(hour)
+		{
+			const date = new Date()
+			this.hour = hour || [date.getHours(),date.getMinutes()]
+			if (this.hour[0]>11 && this.hour[0]<18)
+			{
+				//kodowanie nie pozwala na ten przedział godzin
+				if (this.hour[0]>15)
+				{
+					this.hour[0] = 18
+					this.hour[1] = 0
+				}
+				else
+				{
+					this.hour[0] = 11
+					this.hour[1] = 59
+				}
+			}
+			this.hour[1] = Math.floor(this.hour[1]/5)*5
+			this.hourSpan.innerHTML = `${addZero(this.hour[0])}:${addZero(this.hour[1])}`
+			function addZero(n)
+			{
+				n = `${n}`
+				if (n.length<2)
+				{
+					return `0${n}`
+				}
+				return n
+			}
+		}
+	}
+</script>
+<body onload="load()">
+	<main>
+		<section class="section_1">
+			<div id="tools"></div>
+			<div id="cargoArea"></div>
+			<div class="summary"></div>
+		</section>
+		<section class="section_2 hidden">
+			<div id="papers"></div>
+			<div class="paper">
+				<div id="addPaper"></div>
+			</div>
+			<div class="summary"></div>
+		</section>
+		<section id="valuesBox">
+			<div></div>
+			<div></div>
+		</section>
+	</main>
+	<nav>
+		<div id="navButtons">
+			<button class="marked" data-type="1">Paka</button>
+			<button data-type="2">Papiery</button>
+		</div>
+		<div id="hamburger" data-action="close" data-path="main">
+			<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+				<polygon fill="white" points="0,0 0,20 100,20 100,0"/>
+				<polygon fill="white" points="0,40 0,60 100,60 100,40"/>
+				<polygon fill="white" points="0,80 0,100 100,100 100,80"/>
+			</svg>
+		</div>
+	</nav>
+	<div id="window" class="hidden">
+		<span></span>
+		<div></div>
+	</div>
+	<div id="menu" class="hidden" data-open="0">
+		<section id="main">
+			<div>
+				<button data-action="summary" data-path="summary">Podsumowanie</button>
+			</div>
+			<div>
+				<button data-action="save">Zapisz</button>
+			</div>
+			<div>
+				<button data-path="clear">Wyczyść</button>
+			</div>
+			<div class="separator"></div>
+			<div>
+				<button data-action="close">Zamknij</button>
+			</div>
+		</section>
+		<section id="summary" class="hidden">
+			<div>
+				<button data-action="close">Zamknij</button>
+			</div>
+			<div>
+				<button data-path="main">Cofnij</button>
+			</div>
+			<div class="separator"></div>
+			<div class="content"></div>
+		</section>
+		<section id="clear">
+			<div>
+				<button data-action="close">Zamknij</button>
+			</div>
+			<div>
+				<button data-path="main">Cofnij</button>
+			</div>
+			<div class="separator"></div>
+			<div class="separator"></div>
+			<div>
+				<button data-action="clearCargoArea" data-path="main">Wyczyść pakę</button>
+			</div>
+			<div>
+				<button data-action="clearPapers" data-path="main">Wyczyść papiery</button>
+			</div>
+			<div>
+				<button data-action="clearAll" data-path="main">wyczyść wszystko</button>
+			</div>
+		</section>
+	</div>
+</body>
+</html>
