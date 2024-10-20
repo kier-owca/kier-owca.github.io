@@ -350,28 +350,31 @@
 		left: 50%;
 		margin-left: -23vh;
 		top: 20vh;
-		height: 30vh;
+		min-height: 30vh;
 		background: #464646;
 		border: solid 0.4vh #8c8c8c;
 		box-shadow: 0 0 7vh 3vh black;
 	}
 	#window span
 	{
-		position: absolute;
-		left: 0;
-		top: 1.5vh;
+		position: relative;
+		display: inline-block;
+		margin-top: 2vh;
+		margin-bottom: 3vh;
 		width: 100%;
+		min-height: 7vh;
 		text-align: center;
 		font-weight: 500;
 		letter-spacing: 0.02rem;
+		font-size: 1.4rem;
 	}
 	#window div
 	{
-		position: absolute;
-		left: 0;
-		top: 55%;
-		height: 45%;
+		position: relative;
+		min-height: 7vh;
 		width: 100%;
+		margin-top: 2vh;
+		margin-bottom: 2vh;
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
@@ -384,6 +387,7 @@
 		padding-left: 0.7vh;
 		padding-right: 0.7vh;
 		min-width: 11vh;
+		font-size: 1.4rem;
 	}
 	#window input
 	{
@@ -453,9 +457,47 @@
 		text-align: center;
 		font-size: 0.8rem;
 	}
+	#menu h1
+	{
+		width: 92%;
+		margin: 4%;
+		margin-bottom: 3vh;
+		margin-top: 3vh;
+		padding-top: 0.7vh;
+		padding-bottom: 0.7vh;
+		background: #393939;
+		border-bottom: solid 0.4vh #939393;
+		text-align: center;
+		font-size: 1.5rem;
+		color: white;
+	}
+	#menu h2
+	{
+		display: inline-block;
+		margin-top: 1.5vh;
+		margin-left: 1vh;
+		padding-top: 0.2vh;
+		padding-bottom: 0.2vh;
+		padding-left: 1vh;
+		padding-right: 4vh;
+		border-left: solid 0.4vh #939393;
+		background: #393939;
+		color: white;
+		font-weight: 100;
+	}
+	#menu h3
+	{
+		display: block;
+		margin-top: 0.5vh;
+		margin-bottom: 1.5vh;
+		margin-left: 1vh;
+		font-weight: 100;
+		font-size: 0.9rem;
+	}
 </style>
 <script type="text/javascript">
 	const carLength = 8
+	const saveObject = {}
 	const typesOfPackaging =
 	[
 		{
@@ -1167,7 +1209,6 @@
 				{
 					const packagingOfCargoArea = calc.cargoArea()
 					const packagingOfPapers = calc.papers()
-					console.log(packagingOfCargoArea,packagingOfPapers)
 					const content = document.getElementById("summary").getElementsByClassName("content")[0]
 					content.innerHTML = ""
 					const width = [30,25,25,16]
@@ -1230,6 +1271,77 @@
 						content.appendChild(div)
 					}
 				},
+				mistakes: function()
+				{
+					const mistakes = searchMistakes()
+					if (mistakes.length>0)
+					{
+						const content = document.getElementById("mistakes").getElementsByClassName("content")[0]
+						content.innerHTML = ""
+						const width = [80,16]
+						if (true)
+						{
+							const div = document.createElement("div")
+							for (let i=0 ; i<2 ; i++)
+							{
+								const span = document.createElement("span")
+								span.innerHTML = ["treść","ryzyko"][i]
+								span.style.width = `${width[i]}%`
+								div.appendChild(span)
+							}
+							content.appendChild(div)
+						}
+						let time = 700
+						for (const mistake of mistakes)
+						{
+							const div = document.createElement("div")
+							div.style.opacity = 0
+							div.style.marginTop = "0.2vh"
+							div.style.marginBottom = "0.2vh"
+							for (let i=0 ; i<2 ; i++)
+							{
+								const span = document.createElement("span")
+								if (i === 0)
+								{
+									span.innerHTML = mistake.text
+								}
+								else if (i === 1)
+								{
+									span.innerHTML = "!"
+									span.style.background = `hsl(${Math.max(0,55-((mistake.weight||0)*5))},100%,${27+(mistake.weight||0)}%)`
+								}
+								span.style.width = `${width[i]}%`
+								div.appendChild(span)
+							}
+							content.appendChild(div)
+							setTimeout(()=>{div.style.opacity = 1},time)
+							time += 500
+						}
+					}
+					{
+						this.close()
+						const content = document.getElementById("window").getElementsByTagName("div")[0]
+						content.innerHTML = ""
+						document.getElementById("window").getElementsByTagName("span")[0].innerHTML = "Program nie znalazł błędów wprowadzonych danych. Jeżeli znajdziesz błąd opisz go autorowi oprogramowania. Pozwoli to dodać odpowiedni algorytm wyszukujący tego błędu."
+						const button = document.createElement("button")
+						button.innerHTML = "rozumiem"
+						button.onclick = function()
+						{
+							document.getElementById("window").classList.add("hidden")
+							document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+							content.innerHTML = ""
+						}
+						content.appendChild(button)
+						document.getElementById("window").classList.remove("hidden")
+					}
+					function searchMistakes()
+					{
+						return []
+						const packagingOfCargoArea = calc.cargoArea()
+						const packagingOfPapers = calc.papers()
+						return [{text:"tu będą wyświetlać się możliwe błędy. ten komunikat jest testem wyświetlania błędów",weight:1},{text:"test 2",weight:5},{text:"test 3",weight:11}]
+					}
+				},
 				clearCargoArea: function()
 				{
 					const c = createCargoArea()
@@ -1281,8 +1393,9 @@
 									document.getElementById("window").classList.add("hidden")
 									document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
 									content.innerHTML = ""
-									const raport = [Math.max(sum[0],sum[1]),Number(sum[0]==sum[1]),`${data.time.code(createTime)}!${data.cargoArea.code()}!${data.paper.code()}`]
-									console.log(raport)
+									saveObject.harmony = Number(sum[0]==sum[1])
+									saveObject.value = Math.max(sum[0],sum[1])
+									setings()
 								}
 							}
 							else
@@ -1299,6 +1412,8 @@
 					}
 					else
 					{
+						document.getElementById("menu").classList.add("hidden")
+						document.getElementById("menu").dataset.open = 0
 						document.getElementById("window").getElementsByTagName("span")[0].innerHTML = "Nie można zapisać raportu bez utworzenia danych."
 						const button = document.createElement("button")
 						button.innerHTML = "rozumiem"
@@ -1311,6 +1426,18 @@
 						content.appendChild(button)
 					}
 					document.getElementById("window").classList.remove("hidden")
+				},
+				setingsRegistration: function()
+				{
+					setings("registration","default")
+				},
+				setingsName: function()
+				{
+					setings("name","default")
+				},
+				setingsFirm: function()
+				{
+					setings("firm","default")
 				},
 			}
 			document.getElementById("hamburger").onclick = changeMenu
@@ -2273,7 +2400,134 @@
 			}
 		}
 	}
-</script>
+	function setings(nameData,type)
+	{
+		if (Number(nameData) || !nameData)
+		{
+			nameData = ["registration","name","firm"][Number(nameData)||0]
+		}
+		document.getElementById("menu").classList.add("hidden")
+		document.getElementById("menu").dataset.open = 0
+		const text =
+		{
+			default:
+			{
+				registration: "Podaj numer rejestracyjny samochodu z którego najczęściej oddajesz pojemniki.<br>Będzie on automatycznie przypisywany do raportu.<br>(PNT 12345)",
+				name: "Podaj imię i pierwszą literę nazwiska po spacji.<br>Te dane zostaną przypisane do zapisanych raportów.<br>Jeżeli masz zastrzeżenia podaj fikcyjne dane<br>(np Adam W)",
+				firm: "Podaj nazwę przewoźnika",
+			},
+			raport:
+			{
+				registration: "Rejestracja<br>(PNT 12345)",
+				name: "Imię i pierwsza litera nazwiska po spacji<br>(np Adam W)",
+				firm: "przewoźnik",
+			}
+		}
+		document.getElementById("window").getElementsByTagName("span")[0].innerHTML = text[type||"raport"][nameData]
+		const content = document.getElementById("window").getElementsByTagName("div")[0]
+		content.innerHTML = ""
+		const input = document.createElement("input")
+		input.type = "text"
+		input.value = localStorage.getItem(nameData)||""
+		input.setAttribute("maxlength", "17")
+		content.appendChild(input)
+		const button = document.createElement("button")
+		button.innerHTML = "ok"
+		if (type == "default")
+		{
+			button.onclick = function()
+			{
+				localStorage.setItem(nameData,(input.value||""))
+				document.getElementById("window").classList.add("hidden")
+			}
+		}
+		else
+		{
+			button.onclick = function()
+			{
+				saveObject[nameData] = input.value
+				if (nameData == "registration")
+				{
+					setings("name")
+				}
+				else if (nameData == "name")
+				{
+					setings("firm")
+				}
+				else
+				{
+					document.getElementById("window").classList.add("hidden")
+					saveRaport()
+				}
+			}
+		}
+		content.appendChild(button)
+		document.getElementById("window").classList.remove("hidden")
+	}
+	function saveRaport()
+	{
+		const raport = {}
+		//
+		raport.code = data.time.code(createTime)
+		raport.code += localStorage.getItem("userKey") || oryginalKeyUserGenerator()
+		raport.code += `${data.cargoArea.code()}!${data.paper.code()}`
+		//
+		raport.time = data.time.code(createTime)
+		raport.harmony = saveObject.harmony
+		raport.value = data.base62.code(Math.min(3840,saveObject.value),3843)
+		//
+		const content = document.getElementById("window").getElementsByTagName("div")[0]
+		content.innerHTML = ""
+		document.getElementById("window").getElementsByTagName("span")[0].innerHTML = "Kiedy skończę funkcję zapisywania pokażą dię tutaj dane do weryfikacji"
+		for (let i=0 ; i<2 ; i++)
+		{
+			const button = document.createElement("button")
+			button.innerHTML = ["rezygnuję","Zapisz"][i]
+			if (i)
+			{
+				button.onclick = function()
+				{
+					document.getElementById("window").classList.add("hidden")
+					document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+					clear()
+					content.innerHTML = ""
+				}
+			}
+			else
+			{
+				button.onclick = function()
+				{
+					document.getElementById("window").classList.add("hidden")
+					document.getElementById("window").getElementsByTagName("span")[0].innerHTML = ""
+					content.innerHTML = ""
+				}
+			}
+			content.appendChild(button)
+		}
+		document.getElementById("window").classList.remove("hidden")
+		function clear()
+		{
+			const c = createCargoArea()
+			for (let i=0 ; i<c.length ; i++)
+			{
+				cargoArea[i] = c[i]
+			}
+			localStorage.setItem("cargoArea",data.cargoArea.code())
+			refreshCargoArea()
+			//
+			papers.list = []
+			localStorage.setItem("papers",data.paper.code())
+			papers.refresh()
+		}
+		function oryginalKeyUserGenerator()
+		{
+			const keyNumber = Math.floor(Math.random()*14776335)
+			const userKey = data.base62.code(keyNumber,4)
+			localStorage.setItem("userKey",userKey)
+			return userKey
+		}
+	}
+</script>	
 <body onload="load()">
 	<main>
 		<section class="section_1">
@@ -2312,14 +2566,18 @@
 	</div>
 	<div id="menu" class="hidden" data-open="0">
 		<section id="main">
+			<h1>Menu główne</h1>
 			<div>
 				<button data-action="summary" data-path="summary">Podsumowanie</button>
 			</div>
 			<div>
-				<button data-action="save">Zapisz</button>
+				<button data-path="clear">Wyczyść</button>
 			</div>
 			<div>
-				<button data-path="clear">Wyczyść</button>
+				<button data-path="setings">Ustawienia</button>
+			</div>
+			<div>
+				<button data-path="instruction">Instrukcja</button>
 			</div>
 			<div class="separator"></div>
 			<div>
@@ -2327,6 +2585,7 @@
 			</div>
 		</section>
 		<section id="summary" class="hidden">
+			<h1>Podsumowanie</h1>
 			<div>
 				<button data-action="close">Zamknij</button>
 			</div>
@@ -2334,9 +2593,19 @@
 				<button data-path="main">Cofnij</button>
 			</div>
 			<div class="separator"></div>
+			<div class="separator"></div>
 			<div class="content"></div>
+			<div class="separator"></div>
+			<div class="separator"></div>
+			<div>
+				<button data-action="mistakes" data-path="mistakes">Szukaj błędów</button>
+			</div>
+			<div>
+				<button data-action="save">Zapisz</button>
+			</div>
 		</section>
 		<section id="clear">
+			<h1>Czyszczenie</h1>
 			<div>
 				<button data-action="close">Zamknij</button>
 			</div>
@@ -2354,6 +2623,103 @@
 			<div>
 				<button data-action="clearAll" data-path="main">wyczyść wszystko</button>
 			</div>
+		</section>
+		<section id="mistakes" class="hidden">
+			<h1>Błędy</h1>
+			<div>
+				<button data-action="close">Zamknij</button>
+			</div>
+			<div>
+				<button data-path="main">Cofnij</button>
+			</div>
+			<div class="separator"></div>
+			<div class="separator"></div>
+			<div class="content"></div>
+		</section>
+		<section id="setings">
+			<h1>Ustawienia</h1>
+			<div>
+				<button data-action="close">Zamknij</button>
+			</div>
+			<div>
+				<button data-path="main">Cofnij</button>
+			</div>
+			<div class="separator"></div>
+			<div class="separator"></div>
+			<div>
+				<button data-action="setingsRegistration" data-path="main">Rejestracja</button>
+			</div>
+			<div>
+				<button data-action="setingsName" data-path="main">imię</button>
+			</div>
+			<div>
+				<button data-action="setingsFirm" data-path="main">przewoźnik</button>
+			</div>
+		</section>
+		<section id="instruction">
+			<h1>Instrukcja</h1>
+			<div>
+				<button data-action="close">Zamknij</button>
+			</div>
+			<div>
+				<button data-path="main">Cofnij</button>
+			</div>
+			<div class="separator"></div>
+			<h2>Informacje ogólne</h2>
+			<h3>
+				Program został stworzony do ułatwienia liczenia opakowań zwrotnych, zapisywania notatek, udostępniania notatek.<br>
+				Program korzysta z <b>localStorage</b> (pamięć podręczna przeglądarki) do zapisywania notatek i stanu.<br>
+				Program <b>nie ma i nie potrzebuje serwera</b> do działania co oznacza że dane w nim utworzone nie wydostają się poza urządzenie.
+				Ma to swoje wady (brak możliwości zalogowania się na innym urządzeniu) i zalety (prywatność).<br>
+				Udostępnianie danych jest zrealizowane poprzez dołączanie kompresowanych (kodowanie w celu zmniejszenia pojemności) danych do linku.
+				Po uruchomieniu linka z dołączonymi danymi program je odczytuje i wyświetla. Nie potrzebuje do tego kontaktu z serwerem.
+			</h3>
+			<h2>Dane personalne</h2>
+			<h3>
+				Program wymaga podania danych takich jak: numer rejestracyjny pojazdu, imię i litera nazwiska, nazwa przewoźnika.<br>
+				Te dane nie są nigdzie wysyłane i dopóki nie udostępnisz linku z danymi nie opuszczą twojego urządzenia.<br>
+				Jeżeli masz obawy o bezpieczeństwo <b>możesz podać fałszywe dane lub ich nie podawać.</b><br>
+				Oprócz wyżej wymienionych danych program tworzy <b>unikalny klucz</b> przypisany do urządzenia.
+				Klucz ten jest zwykłym, losowym numerem. Jest on dołączany do danych a jego celem jest ułatwienie katologowania danych dla aplikacji zbiorczej.
+				Osoby korzystające z utworzonych (np. pracownicy biura) danych mogą dzięki temu powiązać klucz z kierowcą na swoim urządzeniu i dodawać kolejne raporty do listy raportów konkretnej osoby bez każdorazowego podawania danych. Dane o imieniu i nazwisku mogą zostać utworzone na urządzeniu tej osoby i przechowywane w localStorage (pamięć podręczna przeglądarki).
+				jedynie to może stanowić możliwość wycieku danych jeżeli komuś się uda dostać do pamięci podręcznej przeglądarki używanej przez osoby gromadzące dane.
+				Jeżeli to się stanie ktoś niepowołany mógłby dostać się do danych: wpisywane rejestracje w raportach, wpisywane imię i litera nazwiska, wpisywany przewoźnik, daty i godziny tworzenia raportów i godziny dodawanych dokumentów, ilość oddawanych opakowań i ułożenie ich na samochodzie.
+				Powyższe dane były by powiązane z konkretną osobą. Jeżeli z jakiegoś powodu obawiasz się kradzieży tych danych nie przesyłaj nikomu linku do raportów. 
+			</h3>
+			<h2>Jak korzystać</h2>
+			<h3>
+				Na górze strony znajdują się dwa przyciski. Przełączają one widok między paką a papierami.<br><br>
+				Po przełączeniu widoku na pakę zobaczysz obszar symbolizujący pakę oraz do góry narzędzia (małe kwadraciki z symbolami).
+				Jeżeli ich nie widzisz być może musisz przewinąć stronę do góry.
+				Kwadraciki oznaczają kolejno:<br>
+				- Nic: Możesz tym narzędziem wybrać słupek skrzynek i zmienić jego wysokość.<br>
+				- Palety: Dodaje słupek palet w wybranym miejscu.<br>
+				- Drób: Dodaje słupek pojemników na drób w wybranym miejscu.<br>
+				- Mięso: Dodaje słupek mięsa w wybranym miejscu.<br>
+				- Wędliny: Dodaje słupek wędlin w wybranym miejscu.<br>
+				- Pokrywy: Dodaje pokrywy i <b>jedną skrzynkę wędlin</b> w wybranym miejscu.<br>
+				- Usuwanie: Kasuje wybrane miejsce.<br>
+				Dodawane słupki mają przypisane domyślne wysokości/ilości (szt). Możesz to zmienić używając guziczków po prawej stronie (podobne do panelu sterowania windą).
+				Guziczki te mają słupek dziesiątek po lewej i jedności po prawej.
+				Po ustawieniu zbyt wysokiej wartości ustawi się wartość maksymalna dopuszczalna.<br><br>
+				Po przełączeniu widoku na papiery zobaczysz symbol dokumentu z zielonym plusem.<br>
+				Kliknięcie plusa spowoduje dodanie dokumentu.
+				Następnie wybierz wartość którą chcesz ustawić klikając na konkretną wartość na tym dokumencie i ustaw ją za pomocą guzików z prawej strony (tak jak w przypadku wysokości słupków).<br>
+				Kliknięcie po prawej stronie wartości na dokumencie spowoduje dodanie znacznika lub jego zmianę.
+				Znaczniki nie mają konkretnych zastosowań.<br>
+				Opcjonalnie można przypisać nazwę sklepu do dokumentu klikając na odpowiedni napis.<br>
+				Wszystkie wartości zliczane są automatycznie i widoczne u dołu strony odpowiednio dla paki i papierów.<br>
+				Wybierając <b>podsumowanie</b> w menu możesz automatycznie porównać ilości na pace i w papierach a wynik zobaczysz w formie tabelki.<br>
+				Poniżej podsumowania znajduje się guzik <b>zapisz</b>. po jego kliknięciu dostaniesz kilka pytań i dane zostaną zapisane jedynie do odczytu.
+				Dopiero wtedy można je udostępnić.<br><br>
+				Czyszczenie wprowadzonych danych:<br>
+				W przypadku pomyłki wybierz opcję wyczyść w menu. Dane automatycznie się czyszczą po zapisaniu.<br><br>
+				Ustawienia:<br>
+				Wybierając w menu ustawienia można przypisać domyślne dane do raportów. Dzięki temu zapisywanie danych ograniczy się do przeklikania pytań jeżeli dane się nie zmienią.<br><br>
+				Szukanie błędów:<br>
+				Opcja ta pozwala wyszukać automatycznie potencjalne błędy we wprowadzonych danych. znajdzie błędy takie jak dodanie słupka wysokości 17 a nie 7 skrzynek.
+				Potencjalne błędy zostaną wyświetlone w tabelce ale dane nie zostaną zmienione. To ty musisz zadecydować czy problem faktycznie wystąpił.
+			</h3>
 		</section>
 	</div>
 </body>
