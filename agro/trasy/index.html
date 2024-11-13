@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Przeglądarka Tras</title>
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		background: rgba(0,0,0,0);
+	}
+	body
+	{
+		background: black;
+		font-size: 2.5vh;
+		font-family: 'Courier New', monospace;
+	}
+	nav
+	{
+		position: fixed;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 7vh;
+		background: #1b1b1b;
+		border-bottom: solid 0.3vh white;
+	}
+	#nowTime
+	{
+		min-width: 39vh;
+		color: white;
+		font-size: 2.9vh;
+		font-weight: bold;
+		letter-spacing: 0.05vh;
+	}
+	#hamburger
+	{
+		width: 5vh;
+		height: 5vh;
+	}
+	.window
+	{
+		position: fixed;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		box-sizing: border-box;
+		left: 50%;
+		top:50%;
+		transform: translate(-50%, -50%);
+		width: 49vh;
+		min-height: 30vh;
+		max-height: 75vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		padding-top: 2vh;
+		padding-bottom: 2vh;
+		background: #1b1b1b;
+		border: solid 0.3vh white;
+		border: solid 0.25vh #616161;
+		box-shadow: 0 0 5vh 3vh black;
+		color: white;
+	}
+	.window.hidden
+	{
+		display: none;
+	}
+	.window h1
+	{
+		width: 32vh;
+		box-sizing: border-box;
+		padding: 0.7vh;
+		margin: 1.5vh;
+		text-align: center;
+		background: #2f2f2f;
+		border-bottom: solid 0.4vh #4d4d4d;
+		font-size: 1.5em;
+	}
+	.window h2
+	{
+		width: 95%;
+		box-sizing: border-box;
+		padding: 0.5vh;
+		margin: 1.5vh;
+		text-align: left;
+		font-weight: 100;
+		background: #2f2f2f;
+		border-left: solid 0.3vh #4d4d4d;
+		font-size: 1.1em;
+	}
+	.window button, .window .button
+	{
+		display: inline-block;
+		box-sizing: border-box;
+		width: 80%;
+		padding: 1.5vh;
+		margin: 1.5vh;
+		margin-left: 10%;
+		margin-right: 10%;
+		min-height: 5vh;
+		text-align: center;
+		font-weight: 700;
+		background: #2f2f2f;
+		border: solid 0.35vh #4d4d4d;
+		border-radius: 1vh;
+		font-size: 1.2em;
+		cursor: pointer;
+		transition: 0.3s;
+	}
+	#fileInput
+	{
+		display: none;
+		font-size: 1.2em;
+		padding: 10px;
+		height: 7vh;
+		width: auto; /* lub ustalona szerokość */
+		background-color: #f5f5f5;
+		color: #333;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+	main
+	{
+		position: relative;
+		width: 49vh;
+		left: 50%;
+		margin-left: -24.5vh;
+		margin-top: 15vh;
+		margin-bottom: 20vh;
+	}
+	main h1
+	{
+		box-sizing: border-box;
+		width: 100%;
+		background: #1b1b1b;
+		border: solid 0.4vh white;
+		border-left: none;
+		border-right: none;
+		margin-top: 1vh;
+		margin-bottom: 2vh;
+		padding: 0.7vh;
+		text-align: left;
+		font-size: 2.7vh;
+		color: white;
+	}
+	main ul
+	{
+		width: 100%;
+		box-sizing: border-box;
+		background: #111111;
+		border: solid 0.3vh #1b1b1b;
+		border-left: none;
+		border-right: none;
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+	}
+	main ul.marked
+	{
+		border-color: gold;
+	}
+	main li
+	{
+		position: relative;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		align-content: center;
+		width: 96%;
+		left: 2%;
+		padding-top: 0.5vh;
+		padding-bottom: 0.5vh;
+		color: white;
+	}
+	li .nr
+	{
+		min-width: 7vh;
+		color: #7f7f7f;
+		text-align: left;
+	}
+	li .nr::before
+	{
+		content: "#";
+	}
+	li .difficulty
+	{
+		width: 2.5vh;
+		height: 2.5vh;
+		border-radius: 50%;
+		color: black;
+		font-size: 1.5vh;
+		font-weight: bold;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+	}
+	li .firm
+	{
+		min-width: 24vh;
+		text-align: left;
+		letter-spacing: 0.05vh;
+		color: #e3e3e3;
+	}
+	li .hour
+	{
+		min-width: 9vh;
+		font-weight: bold;
+		color: white;
+		letter-spacing: 0.05vh;
+		text-align: right;
+	}
+	li .stopsText
+	{
+		width: 100%;
+		color: #7f7f7f;
+		text-align: left;
+		font-size: 2vh;
+	}
+	li .stopsText span
+	{
+		color: white;
+	}
+	li .weight
+	{
+		min-width: 20vh;
+		color: #7f7f7f;
+		font-weight: bold;
+		font-size: 2vh;
+		text-align: center;
+	}
+	li .time
+	{
+		min-width: 12vh;
+		color: #7f7f7f;
+		text-align: left;
+		font-weight: bold;
+		font-size: 2vh;
+	}
+	li .gate
+	{
+		min-width: 10vh;
+		color: #b11100;
+		text-align: right;
+		font-weight: bold;
+		font-size: 2vh;
+	}
+	#route canvas
+	{
+		width: 100%;
+		margin-top: 3vh;
+	}
+	.close
+	{
+		position: absolute;
+		z-index: 2;
+		top: 1.5vh;
+		right: 1.5vh;
+		width: 4.5vh;
+		height: 4.5vh;
+		background: #b11100;
+		border: solid 0.4vh #1b1b1b;
+		box-shadow: 0 0 0vh 0.3vh #b11100;
+		border-radius: 0.4vh;
+		text-align: center;
+		align-content: center;
+	}
+	.close::before
+	{
+		content: "X";
+		font-size: 3.5vh;
+		font-weight: bold;
+		color: #1b1b1b;
+	}
+	#firm
+	{
+		position: relative;
+		width: 100%;
+		left: 3vh;
+	}
+</style>
+<script>
+	const data = []
+	const availableGates = [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0]
+	const load =
+	{
+		start: function()
+		{
+			document.getElementById('fileInput').addEventListener('change', load.handleFile);
+			refreshNowDay()
+			refreshNowHour()
+			function refreshNowDay()
+			{
+				const nowDay = document.getElementById("nowDay")
+				nowDay.innerHTML = dateText()
+				setTimeout(refreshNowDay,120000)
+			}
+			function refreshNowHour()
+			{
+				const nowHour = document.getElementById("nowHour")
+				nowHour.dataset.separator = Math.abs((nowHour.dataset.separator||0)-1)
+				const date = new Date()
+				nowHour.innerHTML = `${addZero(date.getHours())}<span style="opacity:${Number(nowHour.dataset.separator)||0.3};">:</span>${addZero(date.getMinutes())}`
+				const routes = document.getElementsByTagName("main")[0].getElementsByTagName("ul")
+				let marked = 1
+				for (const rout of routes)
+				{
+					if (marked)
+					{
+						const space = timeSpace(rout.dataset.time||"03:30",`${addZero(date.getHours())}:${addZero(date.getMinutes())}`)
+						if (space < 120)
+						{
+							marked = 0
+							if (space < 45)
+							{
+								rout.classList.add("marked")
+							}
+						}
+					}
+					rout.classList.remove("marked")
+				}
+				setTimeout(refreshNowHour,1100)
+			}
+			const buttons = document.getElementsByClassName("close")
+			for (const button of buttons)
+			{
+				button.onclick = function(event)
+				{
+					const divWindow = event.currentTarget.offsetParent
+					divWindow.classList.add("hidden")
+				}
+			}
+		},
+		handleFile: function()
+		{
+			const files = event.target.files;
+			for (const file of files)
+			{
+				const reader = new FileReader();
+				if (!file || !file.name){continue}
+				else
+				{
+					const fileName = file.name
+					if (file.name.toLowerCase().endsWith('.csv'))
+					{
+						reader.onload = (file)=>{addList(load.readFile(file,','),fileName)};
+					}
+					else if (file.name.toLowerCase().endsWith('.tsv'))
+					{
+						reader.onload = (file)=>{addList(load.readFile(file,'\t'),fileName)};
+					}
+					reader.readAsText(file);
+				}
+			}
+		},
+		readFile: function(file,separator)
+		{
+			if (!file){debugger;return}//zabezpieczenie
+			const text = file.target.result;
+			const lines = text.split(/\r\n|\n/);
+			const result = lines.map(line => line.split(separator||","));
+			const giveBack = []
+			//usuwanie pustych linijek
+			for (const row of (result||[]))
+			{
+				let push = 0
+				for (const cell of (row||[]))
+				{
+					if (cell)
+					{
+						push = 1
+						break
+					}
+				}
+				if (push)
+				{
+					giveBack.push(row)
+				}
+			}
+			return load.readItinerary(giveBack)
+		},
+		readItinerary: function(file)
+		{
+			if (!Array.isArray(file)){debugger;return}
+			const scheme = {}
+			for (let i=0 ; i<(file[0]||[]).length ; i++)
+			{
+				const cell = file[0][i]
+				//analizowanie nagłówków kolumn
+				if (/^(lp|nr)\.?$/i.test(cell))
+				{
+					if (scheme.nr){debugger}
+					scheme.nr = i+1
+				}
+				else if (/przewoźnik/i.test(cell))
+				{
+					if (scheme.firm){debugger}
+					scheme.firm = i+1
+				}
+				else if (/(data|godzina|załadune?ku?)/i.test(cell))
+				{
+					if (scheme.date){debugger}
+					scheme.date = i+1
+				}
+				else if (/(lista|przystanki?(ów)?|sklepy|trasa)/i.test(cell))
+				{
+					if (scheme.stops){debugger}
+					scheme.stops = i+1
+				}
+			}
+			if (!(scheme.date && scheme.stops)){debugger;return}
+			const gates = []
+			for (let i=0 ; i<availableGates.length ; i++)
+			{
+				if (availableGates[i])
+				{
+					gates.push(i)
+				}
+			}
+			const listOfRoutes = {list:[]}
+			for (let i=1 ; i<file.length ; i++)
+			{
+				if (Array.isArray(file[i]))
+				{
+					listOfRoutes.list.push(createRoute(file[i],i))
+				}
+			}
+			listOfRoutes.start = 0
+			let end = 0
+			listOfRoutes.totalTotalWeight = 0
+			for (let i=0 ; i<(listOfRoutes.list||[]).length ; i++)
+			{
+				if (listOfRoutes.list[i].date)
+				{
+					if (!listOfRoutes.start || listOfRoutes.list[i].date < listOfRoutes.start)
+					{
+						listOfRoutes.start = listOfRoutes.list[i].date
+					}
+					if (!end || listOfRoutes.list[i].date > end)
+					{
+						end = listOfRoutes.list[i].date
+					}
+				}
+				listOfRoutes.totalTotalWeight += Number(listOfRoutes.list[i].totalWeight)||0
+			}
+			listOfRoutes.next = Math.max(0,end - listOfRoutes.start)
+			listOfRoutes.totalTotalWeight = Math.round(listOfRoutes.totalTotalWeight)
+			return listOfRoutes
+			function createRoute(row,rowIndex)
+			{
+				const route = {}
+				if (scheme.nr)
+				{
+					route.nr = Number(row[scheme.nr-1]) || rowIndex
+				}
+				else
+				{
+					route.nr = rowIndex
+				}
+				route.gate = gates[(route.nr-1)%gates.length]
+				if (scheme.firm)
+				{
+					route.firm = row[scheme.firm-1] || "NIEZNANY"
+				}
+				else
+				{
+					route.firm = "NIEZNANY"
+				}
+				route.date = new Date(row[scheme.date-1])
+				route.hour = "14:04"
+				if (Number(route.date))
+				{
+					route.hour = `${addZero(route.date.getHours())}:${addZero(route.date.getMinutes())}`
+				}
+				route.date = Math.floor((Number(route.date)||0)/(1000*60*60))
+				const stops = row[scheme.stops-1].match(/\[\d{2}:\d{2}\][^\[\]-]+(?:\[[^-]+?\])?\[[^-]*?\/[\d\.,]+(?:kg)?\](?:-)?/g)
+				route.stops = []
+				route.totalWeight = 0
+				route.totalPallets = 0
+				route.totalSpace = 0
+				for (let i=0 ; i<stops.length ; i++)
+				{
+					const match = stops[i]
+					const stop = {}
+					stop.hour = ((match.match(/\[(?<hour>\d{2}:\d{2})\]/)||{}).groups||{}).hour||"14:04"
+					stop.name = ((match.match(/(?:^|\])\s*(?<name>[^\[\]]+?)\s*(?=\[|$)/i)||{}).groups||{}).name||"NIEZNANY"
+					stop.type = ((match.match(/\[(?<type>[^ ][^ ]?[^ ]?)\]/i)||{}).groups||{}).type||"X"
+					stop.pallets = Number(((match.match(/\[(?:[^\[\]]+:)?(?<pallets>\d+(?:[\.,]\d+)?)\/\d+(?:[\.,]\d+)?\]/i)||{}).groups||{}).pallets)||1
+					stop.pallets = Math.round(stop.pallets*2)
+					stop.weight = Number(((match.match(/\[(?:[^\[\]]+:)?\d+(?:[\.,]\d+)?\/(?<weight>\d+(?:[\.,]\d+)?)\]/i)||{}).groups||{}).weight)||404
+					route.stops.push(stop)
+				}
+				for (let i=0 ; i<route.stops.length ; i++)
+				{
+					if (i === 0)
+					{
+						route.stops[0].space = timeSpace(route.hour,route.stops[0].hour)
+						route.totalSpace += route.stops[0].space * 2
+					}
+					else
+					{
+						route.stops[i].space = timeSpace(route.stops[i-1].hour,route.stops[i].hour)
+						route.totalSpace += route.stops[i].space
+						//route.stops[i].space = Math.max(1,route.stops[i].space-10)
+					}
+					route.totalWeight += route.stops[i].weight
+					route.stops[i].weight = (Math.round(route.stops[i].weight/10)/10)
+					route.totalPallets += route.stops[i].pallets
+				}
+				route.totalWeight = Math.round(route.totalWeight/100)/10
+				route.totalSpace = Math.round(route.totalSpace)
+				route.space = Math.round(timeSpace(route.stops[0].hour,route.stops[route.stops.length-1].hour))
+				route.difficulty = calcDifficulty(route.space,route.totalSpace,route.totalWeight,route.totalPallets,route.stops.length)
+				return route
+			}
+		}
+	}
+	function dateText(dateValue)
+	{
+		dateValue *= (1000*60*60)
+		dateValue = new Date(dateValue||Date.now())
+		return `${["Nd","Pn","Wt","Śr","Cz","Pt","Sb","WTF"][dateValue.getDay()]} ${addZero(dateValue.getDate())}.${addZero(dateValue.getMonth()+1)}.${`${dateValue.getFullYear()}`.slice(2,4)}r`
+	}
+	function addList(list,fileName)
+	{
+		if (list)
+		{
+			console.log(list)
+			for (let a=0 ; a<((list||{}).list||[]).length ; a++)
+			{
+				data[Math.round(list.list[a].difficulty)] = (data[Math.round(list.list[a].difficulty)]||0)+1
+			}
+			create.itinerary(list)
+			document.getElementById("inputWindow").classList.add("hidden")
+		}
+		else
+		{
+			console.error(`nie udało się wczytać pliku o nazwie: ${fileName}`)
+		}
+	}
+	function addZero(value)
+	{
+		value = `${value}`
+		for (let i=0 ; i<2 ; i++)
+		{
+			if (value.length<2)
+			{
+				value = `0${value}`
+			}
+			else
+			{
+				break
+			}
+		}
+		return value
+	}
+	function timeSpace(time,time2)
+	{
+		if (!Array.isArray(time))
+		{
+			time = [time,time2]
+		}
+		for (let i=0 ; i<2 ; i++)
+		{
+			hour = time[i].split(':').map(Number);
+			time[i] = (hour[0]*60) + hour[1]
+		}
+		let space = time[1] - time[0]
+		if (space < 0)
+		{
+			space += 24*60
+		}
+		return space
+	}
+	function calcDifficulty(space,totalSpace,weight,pallets,stops)
+	{
+		let difficulty = 3
+		difficulty += space/30
+		difficulty += totalSpace/30
+		difficulty += weight/5
+		difficulty += pallets/2
+		difficulty += stops
+		return Math.round(difficulty*10)/10
+	}
+	const create =
+	{
+		itinerary: function(data)
+		{
+			const main = document.getElementsByTagName("main")[0]
+			main.innerHTML = ""
+			const h1 = create.element("h1")
+			h1.innerHTML = `${dateText(data.start)} - ${dateText(data.start+data.next)}<br><span style="color:gold;">${data.totalTotalWeight} t.</span>`
+			main.appendChild(h1)
+			for (const route of data.list)
+			{
+				const ul = create.element("ul")
+				ul.dataset.route = JSON.stringify(route)
+				ul.dataset.time = route.hour || "18:00"
+				ul.onclick = function(event)
+				{
+					const data = JSON.parse(event.currentTarget.dataset.route)
+					create.route(data)
+				}
+				const li = []
+				for (let i=0 ; i<3 ; i++)
+				{
+					li[i] = create.element("li")
+					ul.appendChild(li[i])
+				}
+				const difficulty = create.element("div","difficulty")
+				li[0].appendChild(difficulty)
+				if (route.difficulty < 20)
+				{
+					difficulty.style.background = "#aaff80"
+				}
+				else if (route.difficulty > 70)
+				{
+					difficulty.style.background = "#800000"
+				}
+				else
+				{
+					const c = Math.floor(route.difficulty)-20
+					difficulty.style.background = `hsl(${101-(c*2)},100%,${75-c}%)`//20-70 //h:140-0
+				}
+				difficulty.innerHTML = Math.round(Number(route.difficulty)||0)
+				const nr = create.element("div","nr")
+				li[0].appendChild(nr)
+				nr.innerHTML = route.nr || "?"
+				const firm = create.element("div","firm")
+				li[0].appendChild(firm)
+				firm.innerHTML = route.firm || "???"
+				const hour = create.element("div","hour")
+				li[0].appendChild(hour)
+				hour.innerHTML = route.hour || "XX:XX"
+				const stopsText = create.element("div","stopsText")
+				li[1].appendChild(stopsText)
+				if (route.stops.length === 1)
+				{
+					stopsText.innerHTML = `<span>${create.nameCompression(route.stops[0].name,24)}</span>`
+				}
+				else if (route.stops.length === 2)
+				{
+					stopsText.innerHTML = `<span>${create.nameCompression(route.stops[0].name,14)}</span> > <span>${create.nameCompression(route.stops[1].name,14)}</span>`
+				}
+				else if (route.stops.length > 2)
+				{
+					let maxWeightStop = route.stops[1]
+					for (let i=2 ; i<route.stops.length-1 ; i++)
+					{
+						if (route.stops[i].weight > maxWeightStop.weight)
+						{
+							maxWeightStop = route.stops[i]
+						}
+					}
+					stopsText.innerHTML = `${route.stops.length}: <span>${create.nameCompression(route.stops[0].name,12)}</span> > <span>${create.nameCompression(maxWeightStop.name)}</span> > <span>${create.nameCompression(route.stops[route.stops.length-1].name)}</span>`
+				}
+				const time = create.element("div","time")
+				li[2].appendChild(time)
+				time.innerHTML = `${Math.round(route.totalSpace/60)}H (${Math.floor(route.space/60)}H ${addZero(Math.floor((route.space%60)))})`
+				const weight = create.element("div","weight")
+				li[2].appendChild(weight)
+				weight.innerHTML = `${route.totalWeight} t. / ${route.totalPallets} pal.`
+				const gate = create.element("div","gate")
+				li[2].appendChild(gate)
+				gate.innerHTML = `R ${route.gate||"?"}`
+				main.appendChild(ul)
+			}
+		},
+		element: function(type,classList,id)
+		{
+			const element = document.createElement(type || "div")
+			if (classList)
+			{
+				if (!Array.isArray(classList))
+				{
+					classList = [classList]
+				}
+				for (const c of classList)
+				{
+					element.classList.add(c)
+				}
+			}
+			if (id)
+			{
+				element.id = id
+			}
+			return element
+		},
+		nameCompression: function(name, targetLength)
+		{
+			if (!name || typeof name !== "string") { return "ERROR"; }
+			name = name.toUpperCase();
+			targetLength = targetLength || 7;
+			if (targetLength >= name.length)
+			{
+				return name
+			}
+			let parts = [];
+			let number = "";
+			let skip = false;
+
+			for (let i = 0; i < name.length; i++)
+			{
+				if (name[i] === ")")
+				{
+					skip = false;
+					continue;
+				}
+				if (skip)
+				{
+					continue;
+				}
+				if (Number(name[i]) || name[i] === "0")
+				{
+					number += name[i];
+				}
+				else if (name[i] === "(")
+				{
+					skip = true;
+					continue;
+				}
+				else
+				{
+					if (name[i] === "R" && name[i + 1] === "Z")
+					{
+						parts.push(`${name[i]}${name[i + 1]}`);
+						i++;
+					}
+					else if (name[i] === "C" && name[i + 1] === "H")
+					{
+						parts.push(`${name[i]}${name[i + 1]}`);
+						i++;
+					}
+					else if ((name[i] === "S" || name[i] === "C") && name[i + 1] === "Z")
+					{
+						parts.push(`${name[i]}${name[i + 1]}`);
+						i++;
+					}
+					else
+					{
+						parts.push(`${name[i]}`);
+					}
+				}
+			}
+
+			let cutOff = parts.length;
+			for (let i = parts.length - 1; i > 3; i--)
+			{
+				if (parts[i] === " ")
+				{
+					cutOff = i;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			parts = parts.slice(0, cutOff);
+			number = Number(number);
+			if (number === 1) { number = 0; }
+
+			let result = "";
+			for (let i = 0; i < parts.length; i++)
+			{
+				result += parts[i];
+				if (i < parts.length - 4 && parts[i + 1] !== " " && (result.length > targetLength / 3 || `${result}${number || ""}`.length >= (targetLength - 2)))
+				{
+					if (/[aąeęiyou]/i.test(parts[i]))
+					{
+						if (parts[i + 1] !== " ")
+						{
+						    result += (parts[i + 1] || "");
+						}
+						else if (parts[i + 2] !== " ")
+						{
+						    result += `${(parts[i + 1] || "")} ${(parts[i + 2] || "")}`;
+						}
+						result += ".";
+						break;
+					}
+				}
+			}
+
+			return `${result}${number || ""}`;
+		},
+		route: function(data)
+		{
+			document.getElementById("firm").innerHTML = data.firm||"nieznany przewoźnik"
+			let TopPosition = 100;
+			const spacePosition = 40
+			const route = document.getElementById("route");
+			const canvas = route.getElementsByTagName("canvas")[0];
+			canvas.width = 500;
+			canvas.height = TopPosition + (data.stops.length * spacePosition) + 20;
+			const ctx = canvas.getContext('2d');
+			// clear
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = "#1b1b1b"
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			// nr
+			ctx.fillStyle = "#b1b1b1"
+			ctx.font = '22px "Courier New", monospace';
+			ctx.fillText(`#${data.nr}`, 10, 30);
+			// weight
+			ctx.fillText(`${data.totalWeight} t. / ${data.totalPallets} pal. (${Math.round(Number(data.difficulty)||0)}pkt)`, 10, 60);
+			//date
+			ctx.fillStyle = "white"
+			ctx.fillText(`${dateText(data.date)||""}`, 55, 30);
+			//hour
+			ctx.font = 'bold 25px "Courier New", monospace';
+			ctx.fillText(`${data.hour}`, 400, 30);
+			//gate
+			ctx.fillStyle = "#b11100"
+			ctx.font = 'bold 25px "Courier New", monospace';
+			ctx.fillText(`R ${data.gate||0}`, 400, 60);
+			//stops
+			for (let i=0 ; i<data.stops.length ; i++)
+			{
+				const stop = data.stops[i]
+				ctx.fillStyle = "#4d4d4d"
+				ctx.fillRect(5, TopPosition, 440, 2);
+				ctx.font = 'bold 18px "Courier New", monospace';
+				ctx.fillText(`+${Math.min(999,stop.space)}`, 447, TopPosition+6);
+				ctx.fillRect(5, TopPosition+spacePosition, 440, 2);
+				ctx.fillStyle = "white"
+				ctx.font = '20px "Courier New", monospace';
+				ctx.fillText(`${i+1}.`, 10, TopPosition+27);
+				if (stop.type && stop.type!=="X")
+				{
+					ctx.fillText(`[${stop.type}]`, 55, TopPosition+27);
+				}
+				else
+				{
+					ctx.fillText(`[ ]`, 55, TopPosition+27);
+				}
+				ctx.fillText(`${create.nameCompression(stop.name,12)}`, 100, TopPosition+27);
+				ctx.fillStyle = "#393939"
+				if (stop.pallets === 1)
+				{
+					ctx.fillRect(317, TopPosition+8, 27, 27);
+				}
+				else if (stop.pallets === 2)
+				{
+					ctx.fillRect(301, TopPosition+8, 27, 27);
+					ctx.fillRect(333, TopPosition+8, 27, 27);
+				}
+				else
+				{
+					for (let j=0 ; j<Math.min(7,stop.pallets) ; j++)
+					{
+						ctx.fillRect(349-(j*32), TopPosition+8, 27, 27);
+					}
+				}
+				ctx.fillStyle = "white"
+				ctx.fillText(`${Math.floor((stop.weight||0.1)*100)}kg`, 300, TopPosition+27);
+				ctx.fillStyle = "gold"
+				ctx.font = 'bold 20px "Courier New", monospace';
+				ctx.fillText(`${stop.hour}`, 400, TopPosition+27);
+				TopPosition += spacePosition
+			}
+			route.classList.remove("hidden")
+		}
+	}
+</script>
+</head>
+<body onload="load.start()">
+	<main></main>
+	<div class="window" id="inputWindow">
+		<h1>Wczytywanie</h1>
+		<h2>Wczytaj plik z rozszerzeniem CSV lub TSV</h2>
+		<input type="file" id="fileInput" accept=".csv, .tsv" multiple>
+		<label for="fileInput" class="button">Wybierz plik</label>
+	</div>
+	<nav>
+		<div id="nowTime">
+			<span id="nowHour" style="color: gold;"></span>
+			<span id="nowDay"></span>
+		</div>
+		<svg id="hamburger" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+			<polygon fill="white" points="0,0 0,20 100,20 100,0"></polygon>
+			<polygon fill="white" points="0,40 0,60 100,60 100,40"></polygon>
+			<polygon fill="white" points="0,80 0,100 100,100 100,80"></polygon>
+		</svg>
+	</nav>
+	<div id="route" class="window hidden">
+		<div class="close"></div>
+		<span id="firm"></span>
+		<canvas></canvas>
+	</div>
+</body>
+</html>
