@@ -29,7 +29,7 @@
 		left: 0;
 		width: 100%;
 		height: 7vh;
-		background: #1b1b1b;
+		background: #2f2f2f;
 		border-bottom: solid 0.3vh white;
 	}
 	#nowTime
@@ -75,10 +75,12 @@
 	}
 	.window h1
 	{
-		width: 32vh;
+		width: 90%;
 		box-sizing: border-box;
 		padding: 0.7vh;
 		margin: 1.5vh;
+		margin-left: 5%;
+		margin-right: 5%;
 		text-align: center;
 		background: #2f2f2f;
 		border-bottom: solid 0.4vh #4d4d4d;
@@ -90,9 +92,11 @@
 		box-sizing: border-box;
 		padding: 0.5vh;
 		margin: 1.5vh;
+		margin-left: 2.5%;
+		margin-right: 2.5%;
 		text-align: left;
 		font-weight: 100;
-		background: #2f2f2f;
+		background: #252525;
 		border-left: solid 0.3vh #4d4d4d;
 		font-size: 1.1em;
 	}
@@ -100,11 +104,11 @@
 	{
 		display: inline-block;
 		box-sizing: border-box;
-		width: 80%;
+		width: 86%;
 		padding: 1.5vh;
 		margin: 1.5vh;
-		margin-left: 10%;
-		margin-right: 10%;
+		margin-left: 7%;
+		margin-right: 7%;
 		min-height: 5vh;
 		text-align: center;
 		font-weight: 700;
@@ -113,7 +117,16 @@
 		border-radius: 1vh;
 		font-size: 1.2em;
 		cursor: pointer;
+		color: white;
 		transition: 0.3s;
+	}
+	.window section
+	{
+		width: 100%;
+	}
+	.window section.hidden
+	{
+		display: none;
 	}
 	#fileInput
 	{
@@ -141,12 +154,12 @@
 	{
 		box-sizing: border-box;
 		width: 100%;
-		background: #1b1b1b;
+		background: #2f2f2f;
 		border: solid 0.4vh white;
 		border-left: none;
 		border-right: none;
 		margin-top: 1vh;
-		margin-bottom: 2vh;
+		margin-bottom: 2.5vh;
 		padding: 0.7vh;
 		text-align: left;
 		font-size: 2.7vh;
@@ -156,12 +169,13 @@
 	{
 		width: 100%;
 		box-sizing: border-box;
-		background: #111111;
-		border: solid 0.3vh #1b1b1b;
+		background: #1b1b1b;
+		border: solid 0.4vh #393939;
 		border-left: none;
 		border-right: none;
-		margin-top: 1vh;
-		margin-bottom: 1vh;
+		margin-top: 1.7vh;
+		margin-bottom: 1.7vh;
+		transition: 0.5s;
 	}
 	main ul.marked
 	{
@@ -290,12 +304,24 @@
 	}
 </style>
 <script>
-	const data = []
-	const availableGates = [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0]
+	const setings =
+	{
+		fontFamily: "Arial, Helvetica, sans-serif"//localStorage.getItem("agroTrasy-setings: fontFamily") || "'Courier New', monospace"
+	}
+	const data =
+	{
+		itinerary: JSON.parse(localStorage.getItem("agroTrasy-data:itinerary"))||[],
+		markedItinerary: Number(localStorage.getItem("agroTrasy-data:markedItinerary")),
+		availableGates: [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+	}
 	const load =
 	{
 		start: function()
 		{
+			if ((setings||{}).fontFamily)
+			{
+				document.body.style.fontFamily = setings.fontFamily
+			}
 			document.getElementById('fileInput').addEventListener('change', load.handleFile);
 			refreshNowDay()
 			refreshNowHour()
@@ -312,24 +338,25 @@
 				const date = new Date()
 				nowHour.innerHTML = `${addZero(date.getHours())}<span style="opacity:${Number(nowHour.dataset.separator)||0.3};">:</span>${addZero(date.getMinutes())}`
 				const routes = document.getElementsByTagName("main")[0].getElementsByTagName("ul")
-				let marked = 1
 				for (const rout of routes)
 				{
-					if (marked)
+					const space = timeSpace(`${addZero(date.getHours())}:${addZero(date.getMinutes())}`,rout.dataset.time||"03:30")
+					if (space < 31)
 					{
-						const space = timeSpace(rout.dataset.time||"03:30",`${addZero(date.getHours())}:${addZero(date.getMinutes())}`)
-						if (space < 120)
-						{
-							marked = 0
-							if (space < 45)
-							{
-								rout.classList.add("marked")
-							}
-						}
+						rout.classList.add("marked")
+						continue
 					}
-					rout.classList.remove("marked")
+					else if (space > 1435)
+					{
+						rout.classList.add("marked")
+						continue
+					}
+					else
+					{
+						rout.classList.remove("marked")
+					}
 				}
-				setTimeout(refreshNowHour,1100)
+				setTimeout(refreshNowHour,1200)
 			}
 			const buttons = document.getElementsByClassName("close")
 			for (const button of buttons)
@@ -339,6 +366,16 @@
 					const divWindow = event.currentTarget.offsetParent
 					divWindow.classList.add("hidden")
 				}
+			}
+			load.loadMenu()
+			const list = (data.itinerary||[])[data.markedItinerary]
+			if (!list || (Date.now()/(1000*60*60)) - list.start > 18)
+			{
+				document.getElementById("inputWindow").classList.remove("hidden")
+			}
+			else if (list)
+			{
+				create.itinerary(list)
 			}
 		},
 		handleFile: function()
@@ -420,9 +457,9 @@
 			}
 			if (!(scheme.date && scheme.stops)){debugger;return}
 			const gates = []
-			for (let i=0 ; i<availableGates.length ; i++)
+			for (let i=0 ; i<data.availableGates.length ; i++)
 			{
-				if (availableGates[i])
+				if (data.availableGates[i])
 				{
 					gates.push(i)
 				}
@@ -523,7 +560,98 @@
 				route.difficulty = calcDifficulty(route.space,route.totalSpace,route.totalWeight,route.totalPallets,route.stops.length)
 				return route
 			}
+		},
+		loadMenu: function()
+		{
+			document.getElementById("hamburger").onclick = changeMenu
+			const buttons = document.getElementById("menu").getElementsByTagName("button")
+			for (let button of buttons)
+			{
+				button.onclick = changeMenu
+			}
+			function changeMenu(event)
+			{
+				if (!event){console.log("funkcja uruchamiana tylko z event")}
+				const sections = document.getElementById("menu").getElementsByTagName("section")
+				const action = event.currentTarget.dataset.action
+				const path = event.currentTarget.dataset.path
+				if (action)
+				{
+					menuActions[action](event.currentTarget.dataset.other)
+				}
+				if (path === "main")
+				{
+					const menu = document.getElementById("menu")
+					if (Number(menu.dataset.open))
+					{
+						menu.classList.add("hidden")
+						menu.dataset.open = 0
+					}
+					else
+					{
+						document.getElementById("inputWindow").classList.add("hidden")
+						document.getElementById("route").classList.add("hidden")
+						menu.classList.remove("hidden")
+						menu.dataset.open = 1
+						for (const section of sections)
+						{
+							if (section.id == "main")
+							{
+								section.classList.remove("hidden")
+							}
+							else
+							{
+								section.classList.add("hidden")
+							}
+						}
+					}
+				}
+				else if (path)
+				{
+					for (const section of sections)
+					{
+						if (section.id == path)
+						{
+							section.classList.remove("hidden")
+						}
+						else
+						{
+							section.classList.add("hidden")
+						}
+					}
+				}
+			}
 		}
+	}
+	const menuActions=
+	{
+		loadFile: function()
+		{
+			menu.classList.add("hidden")
+			menu.dataset.open = 0
+			document.getElementById("inputWindow").classList.remove("hidden")
+		},
+		history: function()
+		{
+			const section = document.getElementById("history")
+			section.innerHTML = ""
+			const h1 = document.createElement("h1")
+			h1.innerHTML = "Wcześniejsze"
+			section.appendChild(h1)
+			for (let i=data.itinerary.length-1 ; i>=0 ; i--)
+			{
+				const button = document.createElement("button")
+				button.innerHTML = dateText((data.itinerary[i]||{}).start)
+				button.onclick = function()
+				{
+					menu.classList.add("hidden")
+					menu.dataset.open = 0
+					data.markedItinerary = i
+					create.itinerary(data.itinerary[data.markedItinerary])
+				}
+				section.appendChild(button)
+			}
+		},
 	}
 	function dateText(dateValue)
 	{
@@ -533,20 +661,33 @@
 	}
 	function addList(list,fileName)
 	{
-		if (list)
+		if (list && typeof list === "object")
 		{
-			console.log(list)
-			for (let a=0 ; a<((list||{}).list||[]).length ; a++)
+			let add = 1
+			for (let i=0 ; i<(data.itinerary||[]).length ; i++)
 			{
-				data[Math.round(list.list[a].difficulty)] = (data[Math.round(list.list[a].difficulty)]||0)+1
+				if (data.itinerary[i].start === list.start)
+				{
+					data.markedItinerary = i
+					add = 0
+					break
+				}
 			}
-			create.itinerary(list)
-			document.getElementById("inputWindow").classList.add("hidden")
+			if (add)
+			{
+				data.markedItinerary = data.itinerary.length
+				data.itinerary[data.markedItinerary] = list
+				data.itinerary = data.itinerary.slice(0,15)
+				localStorage.setItem("agroTrasy-data:itinerary",JSON.stringify(data.itinerary))
+			}
+			localStorage.setItem("agroTrasy-data:markedItinerary",Number(data.markedItinerary)||0)
+			create.itinerary(data.itinerary[data.markedItinerary])
 		}
 		else
 		{
 			console.error(`nie udało się wczytać pliku o nazwie: ${fileName}`)
 		}
+		document.getElementById("inputWindow").classList.add("hidden")
 	}
 	function addZero(value)
 	{
@@ -810,7 +951,7 @@
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			// nr
 			ctx.fillStyle = "#b1b1b1"
-			ctx.font = '22px "Courier New", monospace';
+			ctx.font = `22px ${setings.fontFamily||'"Courier New", monospace'}`;
 			ctx.fillText(`#${data.nr}`, 10, 30);
 			// weight
 			ctx.fillText(`${data.totalWeight} t. / ${data.totalPallets} pal. (${Math.round(Number(data.difficulty)||0)}pkt)`, 10, 60);
@@ -818,11 +959,10 @@
 			ctx.fillStyle = "white"
 			ctx.fillText(`${dateText(data.date)||""}`, 55, 30);
 			//hour
-			ctx.font = 'bold 25px "Courier New", monospace';
+			ctx.font = `bold 25px ${setings.fontFamily||'"Courier New", monospace'}`;
 			ctx.fillText(`${data.hour}`, 400, 30);
 			//gate
 			ctx.fillStyle = "#b11100"
-			ctx.font = 'bold 25px "Courier New", monospace';
 			ctx.fillText(`R ${data.gate||0}`, 400, 60);
 			//stops
 			for (let i=0 ; i<data.stops.length ; i++)
@@ -830,11 +970,11 @@
 				const stop = data.stops[i]
 				ctx.fillStyle = "#4d4d4d"
 				ctx.fillRect(5, TopPosition, 440, 2);
-				ctx.font = 'bold 18px "Courier New", monospace';
+				ctx.font = `bold 18px ${setings.fontFamily||'"Courier New", monospace'}`;
 				ctx.fillText(`+${Math.min(999,stop.space)}`, 447, TopPosition+6);
 				ctx.fillRect(5, TopPosition+spacePosition, 440, 2);
 				ctx.fillStyle = "white"
-				ctx.font = '20px "Courier New", monospace';
+				ctx.font = `20px ${setings.fontFamily||'"Courier New", monospace'}`;
 				ctx.fillText(`${i+1}.`, 10, TopPosition+27);
 				if (stop.type && stop.type!=="X")
 				{
@@ -865,7 +1005,7 @@
 				ctx.fillStyle = "white"
 				ctx.fillText(`${Math.floor((stop.weight||0.1)*100)}kg`, 300, TopPosition+27);
 				ctx.fillStyle = "gold"
-				ctx.font = 'bold 20px "Courier New", monospace';
+				ctx.font = `20px ${setings.fontFamily||'"Courier New", monospace'}`;
 				ctx.fillText(`${stop.hour}`, 400, TopPosition+27);
 				TopPosition += spacePosition
 			}
@@ -876,7 +1016,22 @@
 </head>
 <body onload="load.start()">
 	<main></main>
-	<div class="window" id="inputWindow">
+	<div id="route" class="window hidden">
+		<div class="close"></div>
+		<span id="firm"></span>
+		<canvas></canvas>
+	</div>
+	<div id="menu" class="window hidden" data-open="0">
+		<section id="main">
+			<h1>Menu główne</h1>
+			<button data-action="loadFile">Wczytaj nową rozpiskę</button>
+			<button data-path="history" data-action="history">Zobacz wcześniejsze</button>
+		</section>
+		<section id="history" class="hidden">
+		</section>
+	</div>
+	<div class="window hidden" id="inputWindow">
+		<div class="close"></div>
 		<h1>Wczytywanie</h1>
 		<h2>Wczytaj plik z rozszerzeniem CSV lub TSV</h2>
 		<input type="file" id="fileInput" accept=".csv, .tsv" multiple>
@@ -887,16 +1042,11 @@
 			<span id="nowHour" style="color: gold;"></span>
 			<span id="nowDay"></span>
 		</div>
-		<svg id="hamburger" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+		<svg id="hamburger" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" data-path="main">
 			<polygon fill="white" points="0,0 0,20 100,20 100,0"></polygon>
 			<polygon fill="white" points="0,40 0,60 100,60 100,40"></polygon>
 			<polygon fill="white" points="0,80 0,100 100,100 100,80"></polygon>
 		</svg>
 	</nav>
-	<div id="route" class="window hidden">
-		<div class="close"></div>
-		<span id="firm"></span>
-		<canvas></canvas>
-	</div>
 </body>
 </html>
