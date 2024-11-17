@@ -178,12 +178,25 @@
 		border: solid 0.4vh white;
 		border-left: none;
 		border-right: none;
-		margin-top: 1vh;
+		margin-top: 2.5vh;
 		margin-bottom: 2.5vh;
 		padding: 0.7vh;
 		text-align: left;
 		font-size: 2.7vh;
 		color: white;
+	}
+	main h3
+	{
+		box-sizing: border-box;
+		width: 100%;
+		background: #1b1b1b;
+		border: none;
+		margin-top: 0.5vh;
+		margin-bottom: 0.5vh;
+		padding: 0.5vh;
+		text-align: left;
+		font-size: 2.7vh;
+		color: #4d4d4d;
 	}
 	main ul
 	{
@@ -200,7 +213,7 @@
 	main ul.markedTime
 	{
 		background: #252525;
-		box-shadow: 0 0 0 0.1vh white;
+		box-shadow: 0 0 0 0.1vh #b1b1b1;
 	}
 	main ul.markedFirm
 	{
@@ -304,6 +317,10 @@
 		width: 100%;
 		margin-top: 3vh;
 	}
+	#route canvas.hidden
+	{
+		display: none;
+	}
 	#route .buttons
 	{
 		position: relative;
@@ -322,6 +339,24 @@
 		border-radius: 50%;
 		background: #252525;
 		float: right;
+		transition: 0.5s;
+	}
+	#route .buttons svg:hover
+	{
+		background: #2f4d00;
+	}
+	#routeText
+	{
+		width: 100%;
+		margin-top: 3vh;
+		margin-bottom: 2vh;
+		font-family: "Courier New", monospace;
+		font-size: 2.2vh;
+		padding: 1.5vh;
+	}
+	#routeText.hidden
+	{
+		display: none;
 	}
 	.close
 	{
@@ -362,6 +397,7 @@
 		itinerary: JSON.parse(localStorage.getItem("agroTrasy-data:itinerary"))||[],
 		markedItinerary: Number(localStorage.getItem("agroTrasy-data:markedItinerary")),
 		availableGates: [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+		myRoutes: JSON.parse(localStorage.getItem("agroTrasy-data:myRoutes"))||[],
 	}
 	const load =
 	{
@@ -728,6 +764,109 @@
 				content.appendChild(button)
 			}
 		},
+		myRoutes: function()
+		{
+			menu.classList.add("hidden")
+			menu.dataset.open = 0
+			const main = document.getElementsByTagName("main")[0]
+			main.innerHTML = ""
+			for (const month of (data.myRoutes||[]))
+			{
+				const h1 = create.element("h1")
+				main.appendChild(h1)
+				let points = 0
+				for (let day of (month.days||[]))
+				{
+					if ((day||[])[0])
+					{
+						if (day[0].date)
+						{
+							const h3 = create.element("h3")
+							h3.innerHTML = dateText(day[0].date)
+							main.appendChild(h3)
+						}
+						for (let route of day)
+						{
+							points += route.difficulty
+							const ul = create.element("ul")
+							ul.dataset.firm = route.firm||"X"
+							ul.dataset.route = JSON.stringify(route)
+							ul.dataset.time = route.hour || "18:00"
+							ul.onclick = function(event)
+							{
+								const line = JSON.parse(event.currentTarget.dataset.route)
+								create.route(line,line.date,"myRoutes")
+							}
+							const li = []
+							for (let i=0 ; i<3 ; i++)
+							{
+								li[i] = create.element("li")
+								ul.appendChild(li[i])
+							}
+							const difficulty = create.element("div","difficulty")
+							li[0].appendChild(difficulty)
+							if (route.difficulty < 55)
+							{
+								difficulty.style.background = "#aeff3d"
+							}
+							else if (route.difficulty > 75)
+							{
+								difficulty.style.background = "#c20000"
+							}
+							else
+							{
+								// zakres od 55 do 75
+								const c = Math.floor(route.difficulty)-55
+								difficulty.style.background = `hsl(${82-(c*4)},100%,${60-(c)}%)`
+							}
+							difficulty.innerHTML = Math.round(Number(route.difficulty)||0)
+							const nr = create.element("div","nr")
+							li[0].appendChild(nr)
+							nr.innerHTML = route.nr || "?"
+							const firm = create.element("div","firm")
+							li[0].appendChild(firm)
+							firm.innerHTML = route.firm || "???"
+							const hour = create.element("div","hour")
+							li[0].appendChild(hour)
+							hour.innerHTML = route.hour || "XX:XX"
+							const stopsText = create.element("div","stopsText")
+							li[1].appendChild(stopsText)
+							if (route.stops.length === 1)
+							{
+								stopsText.innerHTML = `<span>${create.nameCompression(route.stops[0].name,24)}</span>`
+							}
+							else if (route.stops.length === 2)
+							{
+								stopsText.innerHTML = `<span>${create.nameCompression(route.stops[0].name,14)}</span> > <span>${create.nameCompression(route.stops[1].name,14)}</span>`
+							}
+							else if (route.stops.length > 2)
+							{
+								let maxWeightStop = route.stops[1]
+								for (let i=2 ; i<route.stops.length-1 ; i++)
+								{
+									if (route.stops[i].weight > maxWeightStop.weight)
+									{
+										maxWeightStop = route.stops[i]
+									}
+								}
+								stopsText.innerHTML = `${route.stops.length}: <span>${create.nameCompression(route.stops[0].name,12)}</span> > <span>${create.nameCompression(maxWeightStop.name)}</span> > <span>${create.nameCompression(route.stops[route.stops.length-1].name)}</span>`
+							}
+							const time = create.element("div","time")
+							li[2].appendChild(time)
+							time.innerHTML = `${Math.round(route.totalSpace/60)}H (${Math.floor(route.space/60)}H ${addZero(Math.floor((route.space%60)))})`
+							const weight = create.element("div","weight")
+							li[2].appendChild(weight)
+							weight.innerHTML = `${route.totalWeight} t. / ${route.totalPallets} pal.`
+							const gate = create.element("div","gate")
+							li[2].appendChild(gate)
+							gate.innerHTML = `R ${route.gate||"?"}`
+							main.appendChild(ul)
+						}
+					}
+				}
+				h1.innerHTML = `${["Gryczeń","Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","październik","Listopad","Grudzień","WTFyczeń"][month.month]} ${month.year}r. (${Math.round(points)}pkt)`
+			}
+		}
 	}
 	function dateText(dateValue)
 	{
@@ -752,8 +891,8 @@
 			}
 			if (add)
 			{
-				data.markedItinerary = data.itinerary.length
-				data.itinerary[data.markedItinerary] = list
+				data.markedItinerary = 0
+				data.itinerary.unshift(list)
 				data.itinerary = data.itinerary.slice(0,15)
 				localStorage.setItem("agroTrasy-data:itinerary",JSON.stringify(data.itinerary))
 			}
@@ -822,14 +961,14 @@
     }
 	const create =
 	{
-		itinerary: function(data)
+		itinerary: function(line)
 		{
 			const main = document.getElementsByTagName("main")[0]
 			main.innerHTML = ""
 			const h1 = create.element("h1")
-			h1.innerHTML = `${dateText(data.start)} - ${dateText(data.start+data.next)}<br><span style="color:gold;">${data.totalTotalWeight} t.</span>`
+			h1.innerHTML = `${dateText(line.start)} - ${dateText(line.start+line.next)}<br><span style="color:gold;">${line.totalTotalWeight} t.</span>`
 			main.appendChild(h1)
-			for (const route of data.list)
+			for (const route of line.list)
 			{
 				const ul = create.element("ul")
 				ul.dataset.firm = route.firm||"X"
@@ -837,8 +976,8 @@
 				ul.dataset.time = route.hour || "18:00"
 				ul.onclick = function(event)
 				{
-					const data = JSON.parse(event.currentTarget.dataset.route)
-					create.route(data)
+					const line = JSON.parse(event.currentTarget.dataset.route)
+					create.route(line,line.start)
 				}
 				const li = []
 				for (let i=0 ; i<3 ; i++)
@@ -1040,15 +1179,19 @@
 
 			return `${result}${number || ""}`;
 		},
-		route: function(data)
+		route: function(line,dateLine,myRoutes)
 		{
-			document.getElementById("firm").innerHTML = data.firm||"nieznany przewoźnik"
+			document.getElementById("firm").innerHTML = line.firm||"nieznany przewoźnik"
 			let TopPosition = 100;
 			const spacePosition = 40
 			const route = document.getElementById("route");
 			const canvas = route.getElementsByTagName("canvas")[0];
+			canvas.classList.remove("hidden")
+			const routeText = document.getElementById("routeText")
+			routeText.innerHTML = ""
+			routeText.classList.add("hidden")
 			canvas.width = 500;
-			canvas.height = TopPosition + (data.stops.length * spacePosition) + 20;
+			canvas.height = TopPosition + (line.stops.length * spacePosition) + 20;
 			const ctx = canvas.getContext('2d');
 			// clear
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1057,22 +1200,25 @@
 			// nr
 			ctx.fillStyle = "#b1b1b1"
 			ctx.font = `22px Arial, Helvetica, sans-serif`;
-			ctx.fillText(`#${data.nr}`, 10, 30);
+			ctx.fillText(`#${line.nr}`, 10, 30);
 			// weight
-			ctx.fillText(`${data.totalWeight} t. / ${data.totalPallets} pal. (${Math.round(Number(data.difficulty)||0)}pkt)`, 10, 60);
+			ctx.fillText(`${line.totalWeight} t. / ${line.totalPallets} pal. (${Math.round(Number(line.difficulty)||0)}pkt)`, 10, 60);
 			//date
 			ctx.fillStyle = "white"
-			ctx.fillText(`${dateText(data.date)||""}`, 55, 30);
+			ctx.fillText(`${dateText(line.date)||""}`, 55, 30);
 			//hour
 			ctx.font = `bold 25px Arial, Helvetica, sans-serif`;
-			ctx.fillText(`${data.hour}`, 400, 30);
+			ctx.fillText(`${line.hour}`, 400, 30);
 			//gate
 			ctx.fillStyle = "#b11100"
-			ctx.fillText(`R ${data.gate||0}`, 400, 60);
+			ctx.fillText(`R ${line.gate||0}`, 400, 60);
+			routeText.innerHTML += `Trasa nr ${line.nr}. ${dateText(line.date)||""}<br>`
+			routeText.innerHTML += `Godzina: ${line.hour} Rampa nr ${line.gate||0}<br>`
+			routeText.innerHTML += `${line.totalWeight} t. / ${line.totalPallets} pal. (${Math.round(Number(line.difficulty)||0)}pkt)<br><br>`
 			//stops
-			for (let i=0 ; i<data.stops.length ; i++)
+			for (let i=0 ; i<line.stops.length ; i++)
 			{
-				const stop = data.stops[i]
+				const stop = line.stops[i]
 				ctx.fillStyle = "#4d4d4d"
 				ctx.fillRect(5, TopPosition, 440, 2);
 				ctx.font = `bold 18px "Courier New", monospace`;
@@ -1115,11 +1261,69 @@
 				ctx.font = `20px Arial, Helvetica, sans-serif`;
 				ctx.fillText(`${stop.hour}`, 400, TopPosition+27);
 				TopPosition += spacePosition
+				routeText.innerHTML += `${i+1}. ${stop.hour} - ${create.nameCompression(stop.name,14)} [${{X:" "}[stop.type]||stop.type}]<br>&nbsp;${Math.floor((stop.weight||0.1)*100)}kg / ${stop.pallets||0} pal.<br>`
 			}
 			route.classList.remove("hidden")
 			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("download")[0].onclick = function()
 			{
-				downloadCanvas(canvas,`${(data.stops[0]||{}).name||"trasa bez nazwy"} ${dateText(data.date)||""}`)
+				downloadCanvas(canvas,`${(line.stops[0]||{}).name||"trasa bez nazwy"} ${dateText(line.date)||""}`)
+			}
+			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("copy")[0].onclick = function()
+			{
+				canvas.classList.add("hidden")
+				document.getElementById("routeText").classList.remove("hidden")
+				const routeText = document.getElementById("routeText")
+				const text = routeText.innerText || routeText.textContent
+				navigator.clipboard.writeText(text)
+			}
+			if (myRoutes)
+			{
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 0
+			}
+			else
+			{
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 1
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].onclick = function()
+				{
+					const date = new Date((dateLine||line.date)*(1000*60*60))
+					const month = date.getMonth()+1
+					const year = date.getUTCFullYear()
+					const day = date.getDate()
+					//
+					let thisMonth = 0
+					for (let i=0 ; i<(data.myRoutes||[]).length ; i++)
+					{
+						if ((data.myRoutes[i]||{}).year === year && (data.myRoutes[i]||{}).month === month)
+						{
+							thisMonth = data.myRoutes[i]
+						}
+					}
+					if (!thisMonth)
+					{
+						thisMonth = {year:year, month:month, days:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+						data.myRoutes.unshift(thisMonth)
+					}
+					if (!Array.isArray(thisMonth.days[day]))
+					{
+						thisMonth.days[day] = []
+					}
+					let add = 1
+					for (let i=0 ; i<thisMonth.days[day].length ; i++)
+					{
+						if (thisMonth.days[day][i].date === line.date)
+						{
+							thisMonth.days[day][i] = line
+							add = 0
+							break
+						}
+					}
+					if (add)
+					{
+						thisMonth.days[day].push(line)
+					}
+					data.myRoutes.slice(0,13)
+					localStorage.setItem("agroTrasy-data:myRoutes",JSON.stringify(data.myRoutes))
+				}
 			}
 		}
 	}
@@ -1146,9 +1350,16 @@
 		<div class="close"></div>
 		<span id="firm"></span>
 		<canvas></canvas>
+		<div id="routeText"></div>
 		<div class="buttons">
+			<svg class="add" viewBox="0 0 24 24">
+				<path d="M7 12L12 12M12 12L17 12M12 12V7M12 12L12 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
 			<svg class="download" viewBox="-5 -5 30 30">
-			  <path fill="white" d="M11 2a1 1 0 10-2 0v7.74L5.173 6.26a1 1 0 10-1.346 1.48l5.5 5a1 1 0 001.346 0l5.5-5a1 1 0 00-1.346-1.48L11 9.74V2zm-7.895 9.204A1 1 0 001.5 12v3.867a2.018 2.018 0 002.227 2.002c1.424-.147 3.96-.369 6.273-.369 2.386 0 5.248.236 6.795.383a2.013 2.013 0 002.205-2V12a1 1 0 10-2 0v3.884l-13.895-4.68zm0 0L2.5 11l.605.204zm0 0l13.892 4.683a.019.019 0 01-.007.005h-.006c-1.558-.148-4.499-.392-6.984-.392-2.416 0-5.034.23-6.478.38h-.009a.026.026 0 01-.013-.011V12a.998.998 0 00-.394-.796z"/>
+				<path fill="white" d="M11 2a1 1 0 10-2 0v7.74L5.173 6.26a1 1 0 10-1.346 1.48l5.5 5a1 1 0 001.346 0l5.5-5a1 1 0 00-1.346-1.48L11 9.74V2zm-7.895 9.204A1 1 0 001.5 12v3.867a2.018 2.018 0 002.227 2.002c1.424-.147 3.96-.369 6.273-.369 2.386 0 5.248.236 6.795.383a2.013 2.013 0 002.205-2V12a1 1 0 10-2 0v3.884l-13.895-4.68zm0 0L2.5 11l.605.204zm0 0l13.892 4.683a.019.019 0 01-.007.005h-.006c-1.558-.148-4.499-.392-6.984-.392-2.416 0-5.034.23-6.478.38h-.009a.026.026 0 01-.013-.011V12a.998.998 0 00-.394-.796z"/>
+			</svg>
+			<svg class="copy" viewBox="-5 -5 34 34">
+				<path fill="white" d="M17.093,1.293l-11.2,11.2a.99.99,0,0,0-.242.391l-1.6,4.8A1,1,0,0,0,5,19a1.014,1.014,0,0,0,.316-.051l4.8-1.6a1.006,1.006,0,0,0,.391-.242l11.2-11.2a1,1,0,0,0,0-1.414l-3.2-3.2A1,1,0,0,0,17.093,1.293ZM9.26,15.526l-2.679.893.893-2.679L17.8,3.414,19.586,5.2ZM3,21H20a1,1,0,0,1,0,2H3a1,1,0,0,1,0-2Z"></path>
 			</svg>
 		</div>
 	</div>
@@ -1162,8 +1373,9 @@
 			<button data-path="menu">Zamknij</button>
 		</section>
 		<section id="history" class="hidden">
-			<h1>Wcześniejsze</h1>
+			<h1>zapisane</h1>
 			<button data-path="main">Cofnij</button>
+			<button data-action="myRoutes">Moje trasy</button>
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
