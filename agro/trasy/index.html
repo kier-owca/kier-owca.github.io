@@ -59,7 +59,7 @@
 		transform: translate(-50%, -50%);
 		width: 49vh;
 		min-height: 30vh;
-		max-height: 75vh;
+		max-height: 74vh;
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding-top: 2vh;
@@ -351,7 +351,7 @@
 		margin-top: 3vh;
 		margin-bottom: 2vh;
 		font-family: "Courier New", monospace;
-		font-size: 2vh;
+		font-size: 1.7vh;
 		padding: 1.5vh;
 	}
 	#routeText.hidden
@@ -1346,6 +1346,17 @@
 </head>
 <body onload="load.start()">
 	<main></main>
+	<nav>
+		<div id="nowTime">
+			<span id="nowHour" style="color: gold;"></span>
+			<span id="nowDay"></span>
+		</div>
+		<svg id="hamburger" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" data-path="menu">
+			<polygon fill="white" points="0,0 0,20 100,20 100,0"></polygon>
+			<polygon fill="white" points="0,40 0,60 100,60 100,40"></polygon>
+			<polygon fill="white" points="0,80 0,100 100,100 100,80"></polygon>
+		</svg>
+	</nav>
 	<div id="route" class="window hidden">
 		<div class="close"></div>
 		<span id="firm"></span>
@@ -1393,16 +1404,5 @@
 		<input type="file" id="fileInput" accept=".csv, .tsv" multiple>
 		<label for="fileInput" class="button">Wybierz plik</label>
 	</div>
-	<nav>
-		<div id="nowTime">
-			<span id="nowHour" style="color: gold;"></span>
-			<span id="nowDay"></span>
-		</div>
-		<svg id="hamburger" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" data-path="menu">
-			<polygon fill="white" points="0,0 0,20 100,20 100,0"></polygon>
-			<polygon fill="white" points="0,40 0,60 100,60 100,40"></polygon>
-			<polygon fill="white" points="0,80 0,100 100,100 100,80"></polygon>
-		</svg>
-	</nav>
 </body>
 </html>
