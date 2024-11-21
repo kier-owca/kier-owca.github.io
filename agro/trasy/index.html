@@ -98,7 +98,7 @@
 		font-weight: 100;
 		background: #252525;
 		border-left: solid 0.3vh #4d4d4d;
-		font-size: 1.1em;
+		font-size: 0.9em;
 	}
 	.window button, .window .button
 	{
@@ -403,9 +403,26 @@
 	{
 		start: function()
 		{
-			document.getElementById('fileInput').addEventListener('change', load.handleFile);
 			refreshNowDay()
 			refreshNowHour()
+			const urlParams = new URLSearchParams(window.location.search);
+			if (urlParams.has('route'))
+			{
+				const routeParam = urlParams.get('route');
+				try
+				{
+					const route = JSON.parse(routeParam);
+					create.route(route)
+					document.getElementById("route").getElementsByClassName("close")[0].remove()
+					document.getElementById("hamburger").remove()
+					return
+				}
+				catch
+				{
+					//
+				}
+			}
+			document.getElementById('fileInput').addEventListener('change', load.handleFile);
 			function refreshNowDay()
 			{
 				const nowDay = document.getElementById("nowDay")
@@ -721,7 +738,7 @@
 		{
 			const content = document.getElementById("history").getElementsByClassName("content")[0]
 			content.innerHTML = ""
-			for (let i=data.itinerary.length-1 ; i>=0 ; i--)
+			for (let i=0 ; i<(data.itinerary||[]).length ; i++)
 			{
 				const button = document.createElement("button")
 				button.innerHTML = dateText((data.itinerary[i]||{}).start)
@@ -772,10 +789,12 @@
 			main.innerHTML = ""
 			for (const month of (data.myRoutes||[]))
 			{
+				if (!Array.isArray(month.days)){continue}
+				if (month.days.length<1){continue}
 				const h1 = create.element("h1")
 				main.appendChild(h1)
-				let points = 0
-				for (let day of (month.days||[]))
+				let points = [0,0]
+				for (let day of month.days)
 				{
 					if ((day||[])[0])
 					{
@@ -787,7 +806,8 @@
 						}
 						for (let route of day)
 						{
-							points += route.difficulty
+							points[0] += route.difficulty
+							points[1] ++
 							const ul = create.element("ul")
 							ul.dataset.firm = route.firm||"X"
 							ul.dataset.route = JSON.stringify(route)
@@ -864,9 +884,151 @@
 						}
 					}
 				}
-				h1.innerHTML = `${["Gryczeń","Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","październik","Listopad","Grudzień","WTFyczeń"][month.month]} ${month.year}r. (${Math.round(points)}pkt)`
+				if (points[1]>0)
+				{
+					h1.innerHTML = `${["Gryczeń","Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","październik","Listopad","Grudzień","WTFyczeń"][month.month]} ${month.year}r. (${Math.round(points[0])}pkt / ${points[1]} = ${Math.round(points[0]/(points[1]||1))}pkt)`
+				}
+				else
+				{
+					h1.remove()
+				}
 			}
-		}
+		},
+		routesNow: function()
+		{
+			menu.classList.add("hidden")
+			menu.dataset.open = 0
+			for (let i=0 ; i<data.itinerary.length ; i++)
+			{
+				if (data.itinerary[i])
+				{
+					data.markedItinerary = i
+					create.itinerary(data.itinerary[data.markedItinerary])
+					return
+				}
+			}
+		},
+		shareAll: function()
+		{
+			const content = document.getElementById("shareAll").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const line = data.itinerary[data.markedItinerary]
+			const h2 = document.createElement("h2")
+			if (line && typeof line==="object")
+			{
+				h2.innerHTML = `Trasy z dnia ${dateText(line.start)} - ${dateText(line.start+line.next)}<br><br>`
+				for (let route of line.list)
+				{
+					h2.innerHTML += `${route.nr}: ${(route.stops[0]||{}).name||"???"} ${route.firm} ${route.hour}<br>`
+					h2.innerHTML += `${window.location.pathname}?route=${JSON.stringify(route)}<br><br>`
+				}
+			}
+			content.appendChild(h2)
+			setTimeout(()=>{navigator.clipboard.writeText(h2.innerText || h2.textContent)},2)
+		},
+		ends: function()
+		{
+			const content = document.getElementById("ends").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const line = JSON.parse(JSON.stringify(data.itinerary[data.markedItinerary]))
+			if (!Array.isArray(line.list)){return}
+			for (let route of line.list)
+			{
+				route.endDate = new Date(route.date*(60*60*1000))
+				route.endDate.setHours(Number(route.hour.slice(0,2)))
+				route.endDate.setMinutes(Number(route.hour.slice(3,5)) + route.totalSpace)
+				const targetDate = new Date(route.date*(60*60*1000))
+				targetDate.setHours(18,0,0,0)
+				route.end = Math.max(Math.round((route.endDate - targetDate)/(1000*60)))
+				if (route.end < 0)
+				{
+					route.end += (60*24)
+				}
+				if (route.end > 6*60)
+				{
+					const h = route.end - (6*60)
+					route.endName = `${addZero(Math.floor(h/60))}:${addZero(h%60)}`
+				}
+				else
+				{
+					const h = route.end + (18*60)
+					route.endName = `${addZero(Math.floor(h/60))}:${addZero(h%60)}`
+				}
+			}
+			const ends = []
+			for (let i=0 ; i<line.list.length ; i++)
+			{
+				const min = [0,24*60]
+				for (let j=0 ; j<line.list.length ; j++)
+				{
+					if (!line.list[j].flag)
+					{
+						if (line.list[j].end < min[1])
+						{
+							min[1] = line.list[j].end
+							min[0] = j
+						}
+					}
+				}
+				ends.push(line.list[min[0]])
+				line.list[min[0]].flag = true
+			}
+			if (true)
+			{
+				const h2 = document.createElement("h2")
+				h2.innerHTML = "Kolejność przyjazdu:<br>"
+				for (let i=0 ; i<ends.length ; i++)
+				{
+					h2.innerHTML += `${i+1}. ${ends[i].firm} -  ${create.nameCompression((ends[i].stops[0]||{}).name||"???",5)} (${ends[i].endName})<br>`
+				}
+				content.appendChild(h2)
+			}
+			const hours = []
+			for (let i=0 ; i<ends.length ; i++)
+			{
+				const index = Math.floor(ends[i].end/10)
+				for (let j=index-6 ; j<index+7 ; j++)
+				{
+					if (j>0)
+					{
+						if (!hours[j])
+						{
+							hours[j] = 0
+						}
+						hours[j] += [0.45, 0.35, 0.30, 0.20, 0.10, 0.05, 0.05, 0.2, 0][Math.abs(index-j)]
+					}
+				}
+			}
+			if (true)
+			{
+				const h2 = document.createElement("h2")
+				h2.innerHTML = "Szansa na kolejkę:<br>"
+				for (let i=0 ; i<hours.length ; i++)
+				{
+					let procent = 0
+					if (hours[i]>1)
+					{
+						procent = 1 / (1 + Math.exp(-0.7 * ((hours[i]||0) - 1)));
+					}
+					else
+					{
+						procent = 1 / (1 + Math.exp(-5 * ((hours[i]||0) - 1)));
+					}
+					console.log(procent)
+					if (i<36)
+					{
+						h2.innerHTML += `${addZero(Math.floor(((i+(18*6))*10)/60))}:${addZero(((i+(18*6))*10)%60)} &nbsp ${addZero(Math.floor(procent*100))}% ${"!".repeat(Math.floor(40*procent))}<br>`
+					}
+					else
+					{
+						h2.innerHTML += `${addZero(Math.floor(((i-36)*10)/60))}:${addZero(((i-36)*10)%60)} &nbsp ${addZero(Math.floor(procent*100))}% ${"!".repeat(Math.floor(40*procent))}<br>`
+					}
+				}
+				content.appendChild(h2)
+			}
+			console.log(ends)
+			console.log(hours)
+		},
 	}
 	function dateText(dateValue)
 	{
@@ -947,7 +1109,7 @@
 		difficulty += weight*2
 		difficulty += pallets/2
 		difficulty += stops/2
-		difficulty += doors/2
+		difficulty += doors/3
 		difficulty += keys
 		return Math.round(difficulty*10)/10
 	}
@@ -974,10 +1136,12 @@
 				ul.dataset.firm = route.firm||"X"
 				ul.dataset.route = JSON.stringify(route)
 				ul.dataset.time = route.hour || "18:00"
+				ul.dataset.start = line.start
 				ul.onclick = function(event)
 				{
 					const line = JSON.parse(event.currentTarget.dataset.route)
-					create.route(line,line.start)
+					const dateLine = Number(event.currentTarget.dataset.start)
+					create.route(line,dateLine)
 				}
 				const li = []
 				for (let i=0 ; i<3 ; i++)
@@ -987,19 +1151,11 @@
 				}
 				const difficulty = create.element("div","difficulty")
 				li[0].appendChild(difficulty)
-				if (route.difficulty < 55)
-				{
-					difficulty.style.background = "#aeff3d"
-				}
-				else if (route.difficulty > 75)
-				{
-					difficulty.style.background = "#c20000"
-				}
-				else
+				if (true)
 				{
 					// zakres od 55 do 75
-					const c = Math.floor(route.difficulty)-55
-					difficulty.style.background = `hsl(${82-(c*4)},100%,${60-(c)}%)`
+					const c = Math.min(30,Math.max(0,Math.floor(route.difficulty)-45))
+					difficulty.style.background = `hsl(${90-(c*3)},100%,${65-(c)}%)`
 				}
 				difficulty.innerHTML = Math.round(Number(route.difficulty)||0)
 				const nr = create.element("div","nr")
@@ -1276,15 +1432,58 @@
 				const text = routeText.innerText || routeText.textContent
 				navigator.clipboard.writeText(text)
 			}
+			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("share")[0].onclick = function()
+			{
+				window.open(`${window.location.pathname}?route=${JSON.stringify(line)}`, '_blank');
+			}
 			if (myRoutes)
 			{
 				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 0
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("delete")[0].style.opacity = 1
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("delete")[0].onclick = function(event)
+				{
+					event.currentTarget.parentElement.parentElement.classList.add("hidden")
+					const date = new Date((dateLine||line.date)*(1000*60*60))
+					const month = date.getMonth()+1
+					const year = date.getUTCFullYear()
+					const day = date.getDate()
+					//
+					let thisMonth = 0
+					for (let i=0 ; i<(data.myRoutes||[]).length ; i++)
+					{
+						if ((data.myRoutes[i]||{}).year === year && (data.myRoutes[i]||{}).month === month)
+						{
+							thisMonth = data.myRoutes[i]
+						}
+					}
+					if (!thisMonth)
+					{
+						return
+					}
+					if (!Array.isArray(thisMonth.days[day]))
+					{
+						return
+					}
+					for (let i=0 ; i<thisMonth.days[day].length ; i++)
+					{
+						const copyDay =  []
+						if (thisMonth.days[day][i].date != line.date)
+						{
+							copyDay.push(thisMonth.days[day][i])
+						}
+						thisMonth.days[day] = copyDay
+					}
+					localStorage.setItem("agroTrasy-data:myRoutes",JSON.stringify(data.myRoutes))
+					menuActions.myRoutes()
+				}
 			}
 			else
 			{
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("delete")[0].style.opacity = 0
 				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 1
-				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].onclick = function()
+				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].onclick = function(event)
 				{
+					setTimeout(()=>{document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 0},1000)
 					const date = new Date((dateLine||line.date)*(1000*60*60))
 					const month = date.getMonth()+1
 					const year = date.getUTCFullYear()
@@ -1372,21 +1571,30 @@
 			<svg class="copy" viewBox="-5 -5 34 34">
 				<path fill="white" d="M17.093,1.293l-11.2,11.2a.99.99,0,0,0-.242.391l-1.6,4.8A1,1,0,0,0,5,19a1.014,1.014,0,0,0,.316-.051l4.8-1.6a1.006,1.006,0,0,0,.391-.242l11.2-11.2a1,1,0,0,0,0-1.414l-3.2-3.2A1,1,0,0,0,17.093,1.293ZM9.26,15.526l-2.679.893.893-2.679L17.8,3.414,19.586,5.2ZM3,21H20a1,1,0,0,1,0,2H3a1,1,0,0,1,0-2Z"></path>
 			</svg>
+			<svg class="share" viewBox="-10 -10 52 52">
+				<path fill="white" d="M0 25.472q0 2.368 1.664 4.032t4.032 1.664h18.944q2.336 0 4-1.664t1.664-4.032v-8.192l-3.776 3.168v5.024q0 0.8-0.544 1.344t-1.344 0.576h-18.944q-0.8 0-1.344-0.576t-0.544-1.344v-18.944q0-0.768 0.544-1.344t1.344-0.544h9.472v-3.776h-9.472q-2.368 0-4.032 1.664t-1.664 4v18.944zM5.696 19.808q0 2.752 1.088 5.28 0.512-2.944 2.24-5.344t4.288-3.872 5.632-1.664v5.6l11.36-9.472-11.36-9.472v5.664q-2.688 0-5.152 1.056t-4.224 2.848-2.848 4.224-1.024 5.152zM32 22.080v0 0 0z"></path>
+			</svg>
+			<svg class="delete" viewBox="-3 -3 30 30">
+				<path d="M10 11V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				<path d="M14 11V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				<path d="M4 7H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				<path d="M6 7H12H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V7Z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				<path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
 		</div>
 	</div>
 	<div id="menu" class="window hidden" data-open="0">
 		<section id="main">
 			<h1>Menu główne</h1>
-			<button data-action="loadFile">Wczytaj nową rozpiskę</button>
-			<button data-path="history" data-action="history">Zobacz wcześniejsze</button>
-			<button data-path="markedFirm" data-action="markedFirm">Zaznacz Przewoźnika</button>
+			<button data-action="routesNow">Pokaż ostatnią</button>
+			<button data-action="myRoutes">Moje trasy</button>
+			<button data-path="other">inne</button>
 			<span class="separator"></span>
 			<button data-path="menu">Zamknij</button>
 		</section>
 		<section id="history" class="hidden">
-			<h1>zapisane</h1>
+			<h1>Wcześniejsze</h1>
 			<button data-path="main">Cofnij</button>
-			<button data-action="myRoutes">Moje trasy</button>
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
@@ -1395,6 +1603,74 @@
 			<button data-path="main">Cofnij</button>
 			<span class="separator"></span>
 			<div class="content"></div>
+		</section>
+		<section id="shareAll" class="hidden">
+			<h1>Udostępnianie</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
+		<section id="ends" class="hidden">
+			<h1>Zakończenia tras</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
+		<section id="other" class="hidden">
+			<h1>Inne</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<button data-action="loadFile">Wczytaj nową rozpiskę</button>
+			<button data-path="history" data-action="history">Zobacz wcześniejsze</button>
+			<button data-path="markedFirm" data-action="markedFirm">Zaznacz Przewoźnika</button>
+			<button data-path="shareAll" data-action="shareAll">Udostępnij wszystkie</button>
+			<button data-path="ends" data-action="ends">Zakończenia tras</button>
+			<button data-path="info">Informacje</button>
+		</section>
+		<section id="info" class="hidden">
+			<h1>Informacje</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<h2>
+				Informacje ogólne:<br>
+				- Program umożliwia przeglądanie danych zapisanych w odpowiedniej formie w pliku CSV lub TSV.<br>
+				- Program zapamiętuje 15 list z trasami według kolejności a nie daty rozpiski.<br>
+				- Program pozwala zapisać pojedyńcze trasy klikając plus u dołu podglądu trasy. Przeglądanie zapisanych tras jest możliwe po wybraniu odpowiedniej opcji z menu.<br>
+				- Usuwanie zapisanych tras jest możliwe po ich wyświetleniu i kliknięciu symbolu kubła na śmieci.<br>
+				- Program pozwala zapisać trasę jako obrazek po kliknięciu symbolu pobierania na dole podglądu trasy.<br>
+				- Program pozwala wyświetlić trasę w formie tekstowej i automatycznie kopiuje tekst do schowka po kliknięciu symbolu ołówka na dole podglądu trasy.<br>
+				- Program pozwala udostępnić trasę klikająć ikonkę udostępnienia i wysyłając link otwartej strony.
+			</h2>
+			<h2>
+				Sposób liczenia punktów:<br>
+				- 3pkt za załadunek.<br>
+				- 1pkt za pół godziny łącznej pracy.<br>
+				- 1pkt za pół godziny pracy od pierwszego do ostatniego punktu.<br>
+				- 0,5pkt za tonę.<br>
+				- 0,5pkt za paletę.<br>
+				- 0,5pkt za sklep.<br>
+				- 0,3pkt za sklep bez wiaty lub 1pkt za sklep z kluczem.<br>
+			</h2>
+			<h2>
+				Sposób liczenia czasu:<br>
+				Czas trasy to zaokrąglony do pełnych godzin czas od pierwszego do ostatniego punktu plus czas od załadunku do pierwszego punktu liczony podwójnie.<br>
+				Czas podany w nawiasie to dokłądny czas od pierwszego do ostatniego punktu.
+			</h2>
+			<h2>
+				Sposób liczenia ramp:<br>
+				Rampy są przydzielane według nr trasy, nie kolejności ułożenia na liście.<br>
+				Pliki nie zawierają nr rampy. Trzeba mieć na uwadze że nie zawsze będą się one zgadzać.
+			</h2>
+			<h2>
+				Sposób przechowywania danych:<br>
+				Dane są przechowywane lokalnie w pamięci przeglądarki urządzenia (localStorage).<br>
+				Wyczyszczenie danych przeglądarki usunie wszystkie zapisane dane.<br>
+				Informacje wprowadzane do programu nie są przesyłane na serwer.<br>
+			</h2>
+			<h2>
+				Sposób udostępniania tras:<br>
+				Dane o trasie są zawarte w linku w formacie JSON. Program odczytuje te dane i wyświetla.
+			</h2>
 		</section>
 	</div>
 	<div class="window hidden" id="inputWindow">
