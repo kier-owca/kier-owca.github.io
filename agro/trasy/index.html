@@ -914,13 +914,14 @@
 			content.innerHTML = ""
 			const line = data.itinerary[data.markedItinerary]
 			const h2 = document.createElement("h2")
+			const cleanUrl = window.location.origin + window.location.pathname;
 			if (line && typeof line==="object")
 			{
 				h2.innerHTML = `Trasy z dnia ${dateText(line.start)} - ${dateText(line.start+line.next)}<br><br>`
 				for (let route of line.list)
 				{
 					h2.innerHTML += `${route.nr}: ${(route.stops[0]||{}).name||"???"} ${route.firm} ${route.hour}<br>`
-					h2.innerHTML += `${window.location.pathname}?route=${JSON.stringify(route)}<br><br>`
+					h2.innerHTML += `${cleanUrl}?route=${JSON.stringify(route)}<br><br>`
 				}
 			}
 			content.appendChild(h2)
@@ -1434,7 +1435,8 @@
 			}
 			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("share")[0].onclick = function()
 			{
-				window.open(`${window.location.pathname}?route=${JSON.stringify(line)}`, '_blank');
+				const cleanUrl = window.location.origin + window.location.pathname;
+				window.open(`${cleanUrl}?route=${JSON.stringify(line)}`, '_blank');
 			}
 			if (myRoutes)
 			{
