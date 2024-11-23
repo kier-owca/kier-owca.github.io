@@ -1578,12 +1578,12 @@
 			{
 				code += stop.hour.slice(0,2)+stop.hour.slice(3,5)+addZero(stop.pallets||0)+`000${Math.floor(stop.weight*10)}`.slice(-3)+`000${Math.floor(stop.space)}`.slice(-3)+(stop.type||"X")+stop.name+"!"
 			}
-			return `${window.location.origin}${window.location.pathname}?r=${code.replace(/ /g, "_")}`
+			return `${window.location.origin}${window.location.pathname}?r=${link.replaceOfPl(code.replace(/ /g, "_")).toLowerCase()}`
 		},
 		decode: function(code)
 		{
 			const line = {};
-			const parts = code.replace(/_/g, " ").split("!");
+			const parts = link.replaceOnPl(code.replace(/_/g, " ").toUpperCase()).split("!");
 			if (parts.length<3){return 0}
 
 			const lineData = parts[0];
@@ -1624,7 +1624,65 @@
 			}
 			line.totalWeight = Math.round(line.totalWeight)/10
 			return line;
-		}
+		},
+		plChar:
+		[
+			["Ą","A"],
+			["Ć","C"],
+			["Ę","E"],
+			["Ł","L"],
+			["Ń","N"],
+			["Ó","O"],
+			["Ś","S"],
+			["Ż","Z"],
+			["Ź","X"],
+		],
+		replaceOfPl(code)
+		{
+			let giveBack = ""
+			for (let i=0 ; i<code.length ; i++)
+			{
+				giveBack += searchChar(code[i])||code[i]
+			}
+			return giveBack
+			function searchChar(originalChar)
+			{
+				for (const char of link.plChar)
+				{
+					if (originalChar === char[0])
+					{
+						return `Q${char[1]}`
+					}
+				}
+			}
+		},
+		replaceOnPl(code)
+		{
+			let giveBack = ""
+			for (let i=0 ; i<code.length ; i++)
+			{
+				if (code[i] === "Q")
+				{
+					giveBack += searchChar(code[i+1])||""
+					i++
+				}
+				else
+				{
+					giveBack += code[i]
+				}
+			}
+			return giveBack
+			function searchChar(originalChar)
+			{
+				for (const char of link.plChar)
+				{
+					if (originalChar === char[1])
+					{
+						return `${char[0]}`
+					}
+				}
+			}
+		},
 	}
 </script>
 </head>
