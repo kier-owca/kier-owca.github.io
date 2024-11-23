@@ -1578,9 +1578,6 @@
 			{
 				code += stop.hour.slice(0,2)+stop.hour.slice(3,5)+addZero(stop.pallets||0)+`000${Math.floor(stop.weight*10)}`.slice(-3)+`000${Math.floor(stop.space)}`.slice(-3)+(stop.type||"X")+stop.name+"!"
 			}
-			console.log(line)
-			console.log(code)
-			console.log(link.decode(code))
 			return `${window.location.origin}${window.location.pathname}?r=${code.replace(/ /g, "_")}`
 		},
 		decode: function(code)
