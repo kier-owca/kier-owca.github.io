@@ -406,20 +406,16 @@
 			refreshNowDay()
 			refreshNowHour()
 			const urlParams = new URLSearchParams(window.location.search);
-			if (urlParams.has('route'))
+			if (urlParams.has('r'))
 			{
-				const routeParam = urlParams.get('route');
-				try
+				const routeParam = urlParams.get('r');
+				const route = link.decode(routeParam)
+				if (route)
 				{
-					const route = JSON.parse(routeParam);
 					create.route(route)
 					document.getElementById("route").getElementsByClassName("close")[0].remove()
 					document.getElementById("hamburger").remove()
 					return
-				}
-				catch
-				{
-					//
 				}
 			}
 			document.getElementById('fileInput').addEventListener('change', load.handleFile);
@@ -894,6 +890,36 @@
 				}
 			}
 		},
+		myRoute: function()
+		{
+			menu.classList.add("hidden")
+			menu.dataset.open = 0
+			const date = new Date()
+			const month = date.getMonth()+1
+			const year = date.getUTCFullYear()
+			const day = date.getDate()
+			//
+			let thisMonth = 0
+			for (let i=0 ; i<(data.myRoutes||[]).length ; i++)
+			{
+				if ((data.myRoutes[i]||{}).year === year && (data.myRoutes[i]||{}).month === month)
+				{
+					thisMonth = data.myRoutes[i]
+				}
+			}
+			if (!thisMonth)
+			{
+				return
+			}
+			if (!Array.isArray(thisMonth.days[day]))
+			{
+				return
+			}
+			if (thisMonth.days[day][0] && typeof thisMonth.days[day][0] === "object")
+			{
+				create.route(thisMonth.days[day][0],0,"myRoutes")
+			}
+		},
 		routesNow: function()
 		{
 			menu.classList.add("hidden")
@@ -914,14 +940,13 @@
 			content.innerHTML = ""
 			const line = data.itinerary[data.markedItinerary]
 			const h2 = document.createElement("h2")
-			const cleanUrl = window.location.origin + window.location.pathname;
 			if (line && typeof line==="object")
 			{
 				h2.innerHTML = `Trasy z dnia ${dateText(line.start)} - ${dateText(line.start+line.next)}<br><br>`
 				for (let route of line.list)
 				{
 					h2.innerHTML += `${route.nr}: ${(route.stops[0]||{}).name||"???"} ${route.firm} ${route.hour}<br>`
-					h2.innerHTML += `${cleanUrl}?route=${JSON.stringify(route)}<br><br>`
+					h2.innerHTML += `${link.create(route)}<br><br>`
 				}
 			}
 			content.appendChild(h2)
@@ -1436,7 +1461,7 @@
 			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("share")[0].onclick = function()
 			{
 				const cleanUrl = window.location.origin + window.location.pathname;
-				window.open(`${cleanUrl}?route=${JSON.stringify(line)}`, '_blank');
+				window.open(link.create(line), '_blank');
 			}
 			if (myRoutes)
 			{
@@ -1543,6 +1568,67 @@
 			console.log(`${i}: ${"!".repeat(difficulty[i]||0)}`)
 		}
 	}
+	const link =
+	{
+		create: function(line)
+		{
+			let code = addZero(line.nr||0)+line.hour.slice(0,2)+line.hour.slice(3,5)+addZero(line.gate||0)+(line.firm||"")+"!"
+			code += `000${Math.floor(line.space)}`.slice(-3)+`000${Math.floor(line.totalSpace)}`.slice(-3)+`000${Math.floor(line.difficulty*10)}`.slice(-3)+Math.floor(line.date)+"!"
+			for (const stop of line.stops)
+			{
+				code += stop.hour.slice(0,2)+stop.hour.slice(3,5)+addZero(stop.pallets||0)+`000${Math.floor(stop.weight*10)}`.slice(-3)+`000${Math.floor(stop.space)}`.slice(-3)+(stop.type||"X")+stop.name+"!"
+			}
+			console.log(line)
+			console.log(code)
+			console.log(link.decode(code))
+			return `${window.location.origin}${window.location.pathname}?r=${code.replace(/ /g, "_")}`
+		},
+		decode: function(code)
+		{
+			const line = {};
+			const parts = code.replace(/_/g, " ").split("!");
+			if (parts.length<3){return 0}
+
+			const lineData = parts[0];
+			line.nr = parseInt(lineData.slice(0, 2), 10);
+			if (!line.nr){return 0}
+			line.hour = `${lineData.slice(2, 4)}:${lineData.slice(4, 6)}`;
+			line.gate = parseInt(lineData.slice(6, 8), 10);
+			if (!line.gate){return 0}
+			line.firm = lineData.slice(8);
+			line.totalPallets = 0
+			line.totalWeight = 0
+
+			const spaceData = parts[1];
+			line.space = parseInt(spaceData.slice(0, 3), 10);
+			line.totalSpace = parseInt(spaceData.slice(3, 6), 10);
+			line.difficulty = parseInt(spaceData.slice(6, 9), 10) / 10;
+			line.date = parseInt(spaceData.slice(9), 10);
+
+			line.stops = [];
+			for (let i = 2; i < parts.length; i++)
+			{
+				const stopData = parts[i];
+				if (!stopData || typeof stopData != "string" || stopData.length < 13)
+				{
+					continue
+				}
+				const stop = {};
+				stop.hour = `${stopData.slice(0, 2)}:${stopData.slice(2, 4)}`;
+				stop.pallets = parseInt(stopData.slice(4, 6), 10);
+				stop.weight = parseInt(stopData.slice(6, 9), 10)/10;
+				stop.space = parseInt(stopData.slice(9, 12), 10);
+				stop.type = stopData.slice(12, 13);
+				stop.name = stopData.slice(13);
+				line.stops.push(stop);
+				//
+				line.totalPallets += stop.pallets
+				line.totalWeight += stop.weight
+			}
+			line.totalWeight = Math.round(line.totalWeight)/10
+			return line;
+		}
+	}
 </script>
 </head>
 <body onload="load.start()">
@@ -1589,6 +1675,7 @@
 		<section id="main">
 			<h1>Menu główne</h1>
 			<button data-action="routesNow">Pokaż ostatnią</button>
+			<button data-action="myRoute">Moja trasa</button>
 			<button data-action="myRoutes">Moje trasy</button>
 			<button data-path="other">inne</button>
 			<span class="separator"></span>
