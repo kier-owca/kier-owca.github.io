@@ -905,6 +905,7 @@
 				if ((data.myRoutes[i]||{}).year === year && (data.myRoutes[i]||{}).month === month)
 				{
 					thisMonth = data.myRoutes[i]
+					break
 				}
 			}
 			if (!thisMonth)
@@ -915,9 +916,10 @@
 			{
 				return
 			}
-			if (thisMonth.days[day][0] && typeof thisMonth.days[day][0] === "object")
+			const route = thisMonth.days[day][0] || thisMonth.days[day+1][0]
+			if (route && typeof route === "object")
 			{
-				create.route(thisMonth.days[day][0],0,"myRoutes")
+				create.route(route,0,"myRoutes")
 			}
 		},
 		routesNow: function()
@@ -1151,10 +1153,17 @@
 	{
 		itinerary: function(line)
 		{
-			const main = document.getElementsByTagName("main")[0]
-			main.innerHTML = ""
-			const h1 = create.element("h1")
-			h1.innerHTML = `${dateText(line.start)} - ${dateText(line.start+line.next)}<br><span style="color:gold;">${line.totalTotalWeight} t.</span>`
+			const main = document.getElementsByTagName("main")[0];
+			main.innerHTML = "";
+			const h1 = create.element("h1");
+			let totalPallets = 0;
+			let totalShops = 0;
+			for (const route of line.list)
+			{
+				totalPallets += route.totalPallets;
+				totalShops += route.stops.length;
+			}
+			h1.innerHTML = `${dateText(line.start)} - ${dateText(line.start+line.next)}<br><span style="color:gold;">${line.totalTotalWeight} t.</span> &nbsp; ${totalPallets} palet ${totalShops} sklepów`;
 			main.appendChild(h1)
 			for (const route of line.list)
 			{
@@ -1729,8 +1738,8 @@
 	<div id="menu" class="window hidden" data-open="0">
 		<section id="main">
 			<h1>Menu główne</h1>
-			<button data-action="routesNow">Pokaż ostatnią</button>
 			<button data-action="myRoute">Moja trasa</button>
+			<button data-action="routesNow">Ostatnia rozpiska</button>
 			<button data-action="myRoutes">Moje trasy</button>
 			<button data-path="other">inne</button>
 			<span class="separator"></span>
