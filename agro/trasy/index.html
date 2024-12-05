@@ -386,6 +386,10 @@
 		width: 100%;
 		left: 3vh;
 	}
+	.myRoutes
+	{
+		border-color: gold;
+	}
 </style>
 <script>
 	const setings =
@@ -790,8 +794,12 @@
 				const h1 = create.element("h1")
 				main.appendChild(h1)
 				let points = [0,0]
-				for (let day of month.days)
+				let weightMonth = 0
+				let stopsMonth = 0
+				let palletsMonth = 0
+				for (let nr = month.days.length-1 ; nr>=0 ; nr--)
 				{
+					const day = month.days[nr]
 					if ((day||[])[0])
 					{
 						if (day[0].date)
@@ -802,6 +810,9 @@
 						}
 						for (let route of day)
 						{
+							weightMonth += route.totalWeight
+							stopsMonth += route.stops.length
+							palletsMonth += route.totalPallets
 							points[0] += route.difficulty
 							points[1] ++
 							const ul = create.element("ul")
@@ -882,7 +893,7 @@
 				}
 				if (points[1]>0)
 				{
-					h1.innerHTML = `${["Gryczeń","Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","październik","Listopad","Grudzień","WTFyczeń"][month.month]} ${month.year}r. (${Math.round(points[0])}pkt / ${points[1]} = ${Math.round(points[0]/(points[1]||1))}pkt)`
+					h1.innerHTML = `${["Gryczeń","Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","październik","Listopad","Grudzień","WTFyczeń"][month.month]} ${month.year}r.<br>${Math.round(points[0])}pkt / ${points[1]} = ${Math.round(points[0]/(points[1]||1))}pkt<br>${weightMonth} t. / ${palletsMonth} pal. / ${stopsMonth} skl.`
 				}
 				else
 				{
@@ -916,7 +927,7 @@
 			{
 				return
 			}
-			const route = thisMonth.days[day][0] || thisMonth.days[day+1][0]
+			const route = thisMonth.days[day][0] || thisMonth.days[day+1][0] || thisMonth.days[Math.max(0,day-1)][0]
 			if (route && typeof route === "object")
 			{
 				create.route(route,0,"myRoutes")
@@ -1031,6 +1042,8 @@
 			{
 				const h2 = document.createElement("h2")
 				h2.innerHTML = "Szansa na kolejkę:<br>"
+				let c = 0
+				let bufor = ""
 				for (let i=0 ; i<hours.length ; i++)
 				{
 					let procent = 0
@@ -1042,7 +1055,6 @@
 					{
 						procent = 1 / (1 + Math.exp(-5 * ((hours[i]||0) - 1)));
 					}
-					console.log(procent)
 					if (i<36)
 					{
 						h2.innerHTML += `${addZero(Math.floor(((i+(18*6))*10)/60))}:${addZero(((i+(18*6))*10)%60)} &nbsp ${addZero(Math.floor(procent*100))}% ${"!".repeat(Math.floor(40*procent))}<br>`
@@ -1054,8 +1066,6 @@
 				}
 				content.appendChild(h2)
 			}
-			console.log(ends)
-			console.log(hours)
 		},
 	}
 	function dateText(dateValue)
@@ -1376,6 +1386,14 @@
 			let TopPosition = 100;
 			const spacePosition = 40
 			const route = document.getElementById("route");
+			if (myRoutes)
+			{
+				route.classList.add("myRoutes")
+			}
+			else
+			{
+				route.classList.remove("myRoutes")
+			}
 			const canvas = route.getElementsByTagName("canvas")[0];
 			canvas.classList.remove("hidden")
 			const routeText = document.getElementById("routeText")
@@ -1519,6 +1537,7 @@
 				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 1
 				document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].onclick = function(event)
 				{
+					document.getElementById("route").classList.add("myRoutes")
 					setTimeout(()=>{document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("add")[0].style.opacity = 0},1000)
 					const date = new Date((dateLine||line.date)*(1000*60*60))
 					const month = date.getMonth()+1
