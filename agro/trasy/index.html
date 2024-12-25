@@ -400,7 +400,7 @@
 	{
 		itinerary: JSON.parse(localStorage.getItem("agroTrasy-data:itinerary"))||[],
 		markedItinerary: Number(localStorage.getItem("agroTrasy-data:markedItinerary")),
-		availableGates: [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+		availableGates: JSON.parse(localStorage.getItem("agroTrasy-data:availableGates"))||[0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
 		myRoutes: JSON.parse(localStorage.getItem("agroTrasy-data:myRoutes"))||[],
 		myLastRoute: JSON.parse(localStorage.getItem("agroTrasy-data:myLastRoute"))||0,
 	}
@@ -1066,6 +1066,68 @@
 				content.appendChild(h2)
 			}
 		},
+		ramps: function()
+		{
+			const content = document.getElementById("ramps").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			for (let i=1 ; i<data.availableGates.length ; i++)
+			{
+				const button = document.createElement("button")
+				button.dataset.ramp = i
+				button.innerHTML = `rampa ${i} ${["nieaktywna","aktywna"][data.availableGates[i]]}`
+				button.style.borderColor = ["red","green"][data.availableGates[i]]
+				button.onclick = function(event)
+				{
+					const button = event.currentTarget
+					const i = Number(button.dataset.ramp)
+					data.availableGates[i] = Math.abs(data.availableGates[i]-1)
+					localStorage.setItem("agroTrasy-data:availableGates",JSON.stringify(data.availableGates))
+					button.innerHTML = `rampa ${i} ${["nieaktywna","aktywna"][data.availableGates[i]]}`
+					button.style.borderColor = ["red","green"][data.availableGates[i]]
+				}
+				content.appendChild(button)
+			}
+		},
+		newStops: function()
+		{
+			const content = document.getElementById("newStops").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			for (let i=0 ; i<data.itinerary.length-1 ; i++)
+			{
+				const h2 = document.createElement("h2")
+				h2.innerHTML = `${dateText(data.itinerary[i].start)}<br>`
+				content.appendChild(h2)
+				const stops = [[],[]]
+				for (let j=0 ; j<data.itinerary[i].list.length ; j++)
+				{
+					for (let k=0 ; k<data.itinerary[i].list[j].stops.length ; k++)
+					{
+						stops[0].push(data.itinerary[i].list[j].stops[k].name)
+					}
+				}
+				for (let j=0 ; j<data.itinerary[i+1].list.length ; j++)
+				{
+					for (let k=0 ; k<data.itinerary[i+1].list[j].stops.length ; k++)
+					{
+						stops[1].push(data.itinerary[i+1].list[j].stops[k].name)
+					}
+				}
+				for (let stop of stops[0])
+				{
+					for (let j=0 ; j<stops[1].length+1 ; j++)
+					{
+						if (j === stops[1].length)
+						{
+							h2.innerHTML += ` - ${stop}<br>`
+						}
+						else if (stop === stops[1][j])
+						{
+							break
+						}
+					}
+				}
+			}
+		},
 	}
 	function dateText(dateValue)
 	{
@@ -1399,7 +1461,7 @@
 			routeText.innerHTML = ""
 			routeText.classList.add("hidden")
 			canvas.width = 500;
-			canvas.height = TopPosition + (line.stops.length * spacePosition) + 20;
+			canvas.height = TopPosition + ((line.stops.length+1) * spacePosition) + 15;
 			const ctx = canvas.getContext('2d');
 			// clear
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1427,6 +1489,37 @@
 			for (let i=0 ; i<line.stops.length ; i++)
 			{
 				const stop = line.stops[i]
+				//środek 330 szerokość 22 margines 2
+				const uncertainty = Number(Math.abs((stop.weight/(stop.pallets||0.1))-2)>0.4)
+				const startPalets = (307)+((stop.pallets+uncertainty)*12)
+				ctx.font = `bold 27px "Courier New", monospace`;
+				for (let j=0 ; j<(stop.pallets+uncertainty) ; j++)
+				{
+					if ((stop.weight/(stop.pallets||0.1))-2 > 0 && j === 0)
+					{
+						ctx.fillStyle = "#252525"
+						ctx.fillRect(startPalets-(24*j), TopPosition+8, 20, 27);
+						ctx.fillStyle = "#4d4d4d"
+						ctx.fillText(`+`, (startPalets-(24*j))+2, TopPosition+27);
+					}
+					else if ((stop.weight/(stop.pallets||0.1))-2 < 0 && j === stop.pallets)
+					{
+						ctx.fillStyle = "#252525"
+						ctx.fillRect(startPalets-(24*j), TopPosition+8, 20, 27);
+						ctx.fillStyle = "#4d4d4d"
+						ctx.fillText(`-`, (startPalets-(24*j))+3, TopPosition+27);
+					}
+					else
+					{
+						ctx.fillStyle = "#434343"
+						const h = 11+(((j+i)%2)*3)+(Math.max(0,3-j))+Math.min(10,Math.round((Math.max(0,(stop.weight/(stop.pallets||0.1))-1.5))*10))
+						ctx.fillRect(startPalets-(24*j), TopPosition+8+(27-h), 20, h);
+					}
+				}
+				ctx.fillStyle = "white"
+				ctx.font = `bold 20px "Courier New", monospace`;
+				ctx.fillText(`${Math.floor((stop.weight||0.1)*100)}kg`, 300, TopPosition+27);
+				//
 				ctx.fillStyle = "#4d4d4d"
 				ctx.fillRect(5, TopPosition, 440, 2);
 				ctx.font = `bold 18px "Courier New", monospace`;
@@ -1445,32 +1538,18 @@
 				}
 				ctx.font = `20px Arial, Helvetica, sans-serif`;
 				ctx.fillText(`${create.nameCompression(stop.name,12)}`, 100, TopPosition+27);
-				ctx.fillStyle = "#393939"
-				if (stop.pallets === 1)
-				{
-					ctx.fillRect(317, TopPosition+8, 27, 27);
-				}
-				else if (stop.pallets === 2)
-				{
-					ctx.fillRect(301, TopPosition+8, 27, 27);
-					ctx.fillRect(333, TopPosition+8, 27, 27);
-				}
-				else
-				{
-					for (let j=0 ; j<Math.min(7,stop.pallets) ; j++)
-					{
-						ctx.fillRect(349-(j*32), TopPosition+8, 27, 27);
-					}
-				}
-				ctx.fillStyle = "white"
-				ctx.font = `bold 20px "Courier New", monospace`;
-				ctx.fillText(`${Math.floor((stop.weight||0.1)*100)}kg`, 300, TopPosition+27);
 				ctx.fillStyle = "gold"
 				ctx.font = `20px Arial, Helvetica, sans-serif`;
 				ctx.fillText(`${stop.hour}`, 400, TopPosition+27);
 				TopPosition += spacePosition
 				routeText.innerHTML += `${i+1}. ${stop.hour} - ${create.nameCompression(stop.name,14)} [${{X:" "}[stop.type]||stop.type}]<br>&nbsp;${Math.floor((stop.weight||0.1)*100)}kg / ${stop.pallets||0} pal.<br>`
 			}
+			const endDate = new Date(line.date*(60*60*1000))
+			endDate.setHours(Number(line.hour.slice(0,2)))
+			endDate.setMinutes(Number(line.hour.slice(3,5)) + line.totalSpace)
+			ctx.font = `20px Arial, Helvetica, sans-serif`;
+			ctx.fillStyle = "#434343"
+			ctx.fillText(`Szacowany koniec - ${addZero(endDate.getHours())}:${addZero(endDate.getMinutes())}`, 10, TopPosition+27);
 			route.classList.remove("hidden")
 			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("download")[0].onclick = function()
 			{
@@ -1580,21 +1659,6 @@
 					localStorage.setItem("agroTrasy-data:myLastRoute",JSON.stringify(data.myLastRoute))
 				}
 			}
-		}
-	}
-	function statisticDifficulty()
-	{
-		const difficulty = []
-		for (const itinerary of data.itinerary)
-		{
-			for (const route of itinerary.list)
-			{
-				difficulty[Math.round(route.difficulty)] = (difficulty[Math.round(route.difficulty)]||0)+1
-			}
-		}
-		for (let i=0 ; i<difficulty.length ; i++)
-		{
-			console.log(`${i}: ${"!".repeat(difficulty[i]||0)}`)
 		}
 	}
 	const link =
@@ -1713,6 +1777,43 @@
 			}
 		},
 	}
+	const statistic =
+	{
+		difficulty: function()
+		{
+			const difficulty = []
+			for (const itinerary of data.itinerary)
+			{
+				for (const route of itinerary.list)
+				{
+					difficulty[Math.round(route.difficulty)] = (difficulty[Math.round(route.difficulty)]||0)+1
+				}
+			}
+			for (let i=0 ; i<difficulty.length ; i++)
+			{
+				console.log(`${i}: ${"!".repeat(difficulty[i]||0)}`)
+			}
+		},
+		weight: function()
+		{
+			const weight = []
+			for (const itinerary of data.itinerary)
+			{
+				for (const route of itinerary.list)
+				{
+					for (const stop of route.stops)
+					{
+						const w = Math.round(((stop.weight*100)/stop.pallets)/10)
+						weight[w] = (weight[w]||0)+1
+					}
+				}
+			}
+			for (let i=0 ; i<weight.length ; i++)
+			{
+				console.log(`${i*10}kg: ${"!".repeat(weight[i]||0)}`)
+			}
+		},
+	}
 </script>
 </head>
 <body onload="load.start()">
@@ -1789,6 +1890,18 @@
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
+		<section id="ramps" class="hidden">
+			<h1>Zarządzanie rampami</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
+		<section id="newStops" class="hidden">
+			<h1>Nowe sklepy</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
 		<section id="other" class="hidden">
 			<h1>Inne</h1>
 			<button data-path="main">Cofnij</button>
@@ -1799,6 +1912,8 @@
 			<button data-path="shareAll" data-action="shareAll">Udostępnij wszystkie</button>
 			<button data-path="shareAll" data-action="shareFirm">Udostępnij przewoźnika</button>
 			<button data-path="ends" data-action="ends">Zakończenia tras</button>
+			<button data-path="ramps" data-action="ramps">Zarządzanie rampami</button>
+			<button data-path="newStops" data-action="newStops">Nowe sklepy</button>
 			<button data-path="info">Informacje</button>
 		</section>
 		<section id="info" class="hidden">
