@@ -1495,14 +1495,14 @@
 				ctx.font = `bold 27px "Courier New", monospace`;
 				for (let j=0 ; j<(stop.pallets+uncertainty) ; j++)
 				{
-					if ((stop.weight/(stop.pallets||0.1))-2 > 0 && j === 0)
+					if (uncertainty && (stop.weight/(stop.pallets||0.1))-2 > 0 && j === 0)
 					{
 						ctx.fillStyle = "#252525"
 						ctx.fillRect(startPalets-(24*j), TopPosition+8, 20, 27);
 						ctx.fillStyle = "#4d4d4d"
 						ctx.fillText(`+`, (startPalets-(24*j))+2, TopPosition+27);
 					}
-					else if ((stop.weight/(stop.pallets||0.1))-2 < 0 && j === stop.pallets)
+					else if (uncertainty && (stop.weight/(stop.pallets||0.1))-2 < 0 && j === stop.pallets)
 					{
 						ctx.fillStyle = "#252525"
 						ctx.fillRect(startPalets-(24*j), TopPosition+8, 20, 27);
