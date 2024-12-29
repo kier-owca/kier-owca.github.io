@@ -1020,6 +1020,13 @@
 					h2.innerHTML += `${i+1}. ${ends[i].firm} -  ${create.nameCompression((ends[i].stops[0]||{}).name||"???",5)} (${ends[i].endName})<br>`
 				}
 				content.appendChild(h2)
+				const button = document.createElement("button")
+				button.innerHTML = "kopiuj"
+				button.onclick = function()
+				{
+					navigator.clipboard.writeText(h2.innerText || h2.textContent)
+				}
+				content.appendChild(button)
 			}
 			const hours = []
 			for (let i=0 ; i<ends.length ; i++)
@@ -1092,11 +1099,11 @@
 		{
 			const content = document.getElementById("newStops").getElementsByClassName("content")[0]
 			content.innerHTML = ""
+			const h2 = document.createElement("h2")
+			content.appendChild(h2)
 			for (let i=0 ; i<data.itinerary.length-1 ; i++)
 			{
-				const h2 = document.createElement("h2")
-				h2.innerHTML = `${dateText(data.itinerary[i].start)}<br>`
-				content.appendChild(h2)
+				let text = ""
 				const stops = [[],[]]
 				for (let j=0 ; j<data.itinerary[i].list.length ; j++)
 				{
@@ -1118,7 +1125,7 @@
 					{
 						if (j === stops[1].length)
 						{
-							h2.innerHTML += ` - ${stop}<br>`
+							text += ` - ${stop}<br>`
 						}
 						else if (stop === stops[1][j])
 						{
@@ -1126,7 +1133,18 @@
 						}
 					}
 				}
+				if (text.length>1)
+				{
+					h2.innerHTML += `------- ${dateText(data.itinerary[i].start)} -------<br>${text}<br>`
+				}
 			}
+			const button = document.createElement("button")
+			button.innerHTML = "kopiuj"
+			button.onclick = function()
+			{
+				navigator.clipboard.writeText(h2.innerText || h2.textContent)
+			}
+			content.appendChild(button)
 		},
 	}
 	function dateText(dateValue)
@@ -1908,13 +1926,31 @@
 			<span class="separator"></span>
 			<button data-action="loadFile">Wczytaj nową rozpiskę</button>
 			<button data-path="history" data-action="history">Zobacz wcześniejsze</button>
-			<button data-path="markedFirm" data-action="markedFirm">Zaznacz Przewoźnika</button>
+			<button data-path="share">Udostępnianie</button>
+			<button data-path="statistics">Statystyki</button>
+			<button data-path="setings">Ustawienia</button>
+			<button data-path="info">Informacje</button>
+		</section>
+		<section id="share" class="hidden">
+			<h1>Udostępnianie</h1>
+			<button data-path="other">Cofnij</button>
+			<span class="separator"></span>
 			<button data-path="shareAll" data-action="shareAll">Udostępnij wszystkie</button>
 			<button data-path="shareAll" data-action="shareFirm">Udostępnij przewoźnika</button>
-			<button data-path="ends" data-action="ends">Zakończenia tras</button>
+		</section>
+		<section id="setings" class="hidden">
+			<h1>Ustawienia</h1>
+			<button data-path="other">Cofnij</button>
+			<span class="separator"></span>
+			<button data-path="markedFirm" data-action="markedFirm">Zaznacz Przewoźnika</button>
 			<button data-path="ramps" data-action="ramps">Zarządzanie rampami</button>
+		</section>
+		<section id="statistics" class="hidden">
+			<h1>Statystyki</h1>
+			<button data-path="other">Cofnij</button>
+			<span class="separator"></span>
+			<button data-path="ends" data-action="ends">Zakończenia tras</button>
 			<button data-path="newStops" data-action="newStops">Nowe sklepy</button>
-			<button data-path="info">Informacje</button>
 		</section>
 		<section id="info" class="hidden">
 			<h1>Informacje</h1>
