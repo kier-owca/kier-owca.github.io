@@ -1100,6 +1100,7 @@
 			const content = document.getElementById("newStops").getElementsByClassName("content")[0]
 			content.innerHTML = ""
 			const h2 = document.createElement("h2")
+			j2.innerHTML = "Nowe sklepy:<br><br>"
 			content.appendChild(h2)
 			for (let i=0 ; i<data.itinerary.length-1 ; i++)
 			{
@@ -1137,6 +1138,40 @@
 				{
 					h2.innerHTML += `------- ${dateText(data.itinerary[i].start)} -------<br>${text}<br>`
 				}
+			}
+			const button = document.createElement("button")
+			button.innerHTML = "kopiuj"
+			button.onclick = function()
+			{
+				navigator.clipboard.writeText(h2.innerText || h2.textContent)
+			}
+			content.appendChild(button)
+		},
+		chartWeight: function()
+		{
+			const content = document.getElementById("chart").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const h2 = document.createElement("h2")
+			h2.innerHTML = "Tonarz w czasie:<br><br>"
+			content.appendChild(h2)
+			let minWeight = 0
+			let maxWeight = 0
+			for (let i=0 ; i<data.itinerary.length ; i++)
+			{
+				if (minWeight < 1 || data.itinerary[i].totalTotalWeight < minWeight)
+				{
+					minWeight = data.itinerary[i].totalTotalWeight
+				}
+				if (data.itinerary[i].totalTotalWeight > maxWeight)
+				{
+					maxWeight = data.itinerary[i].totalTotalWeight
+				}
+			}
+			console.log(minWeight,maxWeight)
+			for (let i=0 ; i<data.itinerary.length ; i++)
+			{
+				const chart = Math.round((Math.max(0,data.itinerary[i].totalTotalWeight-minWeight)/(maxWeight-minWeight))*42)
+				h2.innerHTML += `${dateText(data.itinerary[i].start)}: ${data.itinerary[i].totalTotalWeight}t.<br>${"!".repeat(chart+2)}<br><br>`
 			}
 			const button = document.createElement("button")
 			button.innerHTML = "kopiuj"
@@ -1920,6 +1955,12 @@
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
+		<section id="chart" class="hidden">
+			<h1>Wykresy</h1>
+			<button data-path="statistics">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
 		<section id="other" class="hidden">
 			<h1>Inne</h1>
 			<button data-path="main">Cofnij</button>
@@ -1951,6 +1992,7 @@
 			<span class="separator"></span>
 			<button data-path="ends" data-action="ends">Zakończenia tras</button>
 			<button data-path="newStops" data-action="newStops">Nowe sklepy</button>
+			<button data-path="chart" data-action="chartWeight">Wykres tonarzu</button>
 		</section>
 		<section id="info" class="hidden">
 			<h1>Informacje</h1>
