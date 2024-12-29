@@ -392,6 +392,10 @@
 	}
 </style>
 <script>
+	async function sleep(ms)
+	{
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
 	const setings =
 	{
 		markedFirm: localStorage.getItem("agroTrasy-setings:markedFirm")||"X",
@@ -1100,7 +1104,7 @@
 			const content = document.getElementById("newStops").getElementsByClassName("content")[0]
 			content.innerHTML = ""
 			const h2 = document.createElement("h2")
-			j2.innerHTML = "Nowe sklepy:<br><br>"
+			h2.innerHTML = "Nowe sklepy:<br><br>"
 			content.appendChild(h2)
 			for (let i=0 ; i<data.itinerary.length-1 ; i++)
 			{
@@ -1180,6 +1184,43 @@
 				navigator.clipboard.writeText(h2.innerText || h2.textContent)
 			}
 			content.appendChild(button)
+		},
+		downloadAll: async function()
+		{
+			menu.classList.add("hidden")
+			menu.dataset.open = 0
+			//
+			const line = data.itinerary[data.markedItinerary]
+			if (line && typeof line==="object")
+			{
+				for (let route of line.list)
+				{
+					const canvas = create.route(route,line.start)
+					await sleep(200)
+					downloadCanvas(canvas,`${(route.stops[0]||{}).name||"trasa bez nazwy"} ${dateText(route.date)||""}`)
+				}
+			}
+			document.getElementById("route").classList.add("hidden")
+		},
+		downloadFirm: async function()
+		{
+			menu.classList.add("hidden")
+			menu.dataset.open = 0
+			//
+			const line = data.itinerary[data.markedItinerary]
+			if (line && typeof line==="object")
+			{
+				for (let route of line.list)
+				{
+					if (setings.markedFirm === route.firm)
+					{
+						const canvas = create.route(route,line.start)
+						await sleep(200)
+						downloadCanvas(canvas,`${(route.stops[0]||{}).name||"trasa bez nazwy"} ${dateText(route.date)||""}`)
+					}
+				}
+			}
+			document.getElementById("route").classList.add("hidden")
 		},
 	}
 	function dateText(dateValue)
@@ -1543,35 +1584,26 @@
 			{
 				const stop = line.stops[i]
 				//środek 330 szerokość 22 margines 2
-				const uncertainty = Number(Math.abs((stop.weight/(stop.pallets||0.1))-2)>0.4)
-				const startPalets = (307)+((stop.pallets+uncertainty)*12)
+				const startPalets = (307)+((stop.pallets)*12)
 				ctx.font = `bold 27px "Courier New", monospace`;
-				for (let j=0 ; j<(stop.pallets+uncertainty) ; j++)
+				for (let j=0 ; j<stop.pallets ; j++)
 				{
-					if (uncertainty && (stop.weight/(stop.pallets||0.1))-2 > 0 && j === 0)
-					{
-						ctx.fillStyle = "#252525"
-						ctx.fillRect(startPalets-(24*j), TopPosition+8, 20, 27);
-						ctx.fillStyle = "#4d4d4d"
-						ctx.fillText(`+`, (startPalets-(24*j))+2, TopPosition+27);
-					}
-					else if (uncertainty && (stop.weight/(stop.pallets||0.1))-2 < 0 && j === stop.pallets)
-					{
-						ctx.fillStyle = "#252525"
-						ctx.fillRect(startPalets-(24*j), TopPosition+8, 20, 27);
-						ctx.fillStyle = "#4d4d4d"
-						ctx.fillText(`-`, (startPalets-(24*j))+3, TopPosition+27);
-					}
-					else
-					{
-						ctx.fillStyle = "#434343"
-						const h = 11+(((j+i)%2)*3)+(Math.max(0,3-j))+Math.min(10,Math.round((Math.max(0,(stop.weight/(stop.pallets||0.1))-1.5))*10))
-						ctx.fillRect(startPalets-(24*j), TopPosition+8+(27-h), 20, h);
-					}
+					ctx.fillStyle = "#434343"
+					const h = 11+(((j+i)%2)*3)+(Math.max(0,3-j))+Math.min(10,Math.round((Math.max(0,(stop.weight/(stop.pallets||0.1))-1.5))*10))
+					ctx.fillRect(startPalets-(24*j), TopPosition+8+(27-h), 20, h);
 				}
 				ctx.fillStyle = "white"
 				ctx.font = `bold 20px "Courier New", monospace`;
-				ctx.fillText(`${Math.floor((stop.weight||0.1)*100)}kg`, 300, TopPosition+27);
+				let up = ""
+				if ((stop.weight/(stop.pallets||0.1))-2 > 0.3)
+				{
+					up = "+"
+				}
+				else if (stop.pallets>1 && (stop.weight/(stop.pallets||0.1))-2 < -0.3)
+				{
+					up = "-"
+				}
+				ctx.fillText(`${Math.floor((stop.weight||0.1)*100)}kg/${stop.pallets}${up}`, 285, TopPosition+27);
 				//
 				ctx.fillStyle = "#4d4d4d"
 				ctx.fillRect(5, TopPosition, 440, 2);
@@ -1712,6 +1744,7 @@
 					localStorage.setItem("agroTrasy-data:myLastRoute",JSON.stringify(data.myLastRoute))
 				}
 			}
+			return canvas
 		}
 	}
 	const link =
@@ -1863,7 +1896,7 @@
 			}
 			for (let i=0 ; i<weight.length ; i++)
 			{
-				console.log(`${i*10}kg: ${"!".repeat(weight[i]||0)}`)
+				console.log(`${i*10}kg: ${"!".repeat((weight[i]||0)/4)}`)
 			}
 		},
 	}
@@ -1978,6 +2011,8 @@
 			<span class="separator"></span>
 			<button data-path="shareAll" data-action="shareAll">Udostępnij wszystkie</button>
 			<button data-path="shareAll" data-action="shareFirm">Udostępnij przewoźnika</button>
+			<button data-action="downloadAll">Pobierz wszystkie</button>
+			<button data-action="downloadFirm">Pobierz przewoźnika</button>
 		</section>
 		<section id="setings" class="hidden">
 			<h1>Ustawienia</h1>
