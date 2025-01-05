@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Zaśmiecacz</title>
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		background: rgba(0,0,0,0);
+	}
+	body
+	{
+		background: black;
+	}
+	input
+	{
+		display: block;
+		box-sizing: border-box;
+		position: relative;
+		width: 40vh;
+		left: 50%;
+		margin-top: 2vh;
+		margin-bottom: 2vh;
+		margin-left: -20vh;
+		padding: 0.5vh;
+		background: #4d4d4d;
+		border: solid 0.3vh red;
+		color: white;
+	}
+	button
+	{
+		display: block;
+		box-sizing: border-box;
+		position: relative;
+		width: 40vh;
+		left: 50%;
+		margin-top: 2vh;
+		margin-bottom: 2vh;
+		margin-left: -20vh;
+		padding: 1vh;
+		background: #4d4d4d;
+		border: solid 0.3vh red;
+		color: white;
+		border-radius: 1vh;
+	}
+</style>
+<script>
+	async function sleep(ms)
+	{
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	async function create()
+	{
+		const MB = 1048576
+		const package = MB*25
+		const value = Math.min(32768,Number(document.getElementsByName("value")[0].value)||0)*MB
+		if (!value){return alert("nie podano wartości lub użyto przecinka zamiast kropki")}
+		if (prompt(`jeżeli chcesz rozpocząć zaśmiecanie ${Math.ceil((value/MB)*10)/10}MB śmieci wpisz zasmiecam dużymi literami`) != "ZASMIECAM"){return alert("wpisano błędne hasło")}
+		const loop = Math.ceil(value/package)
+		const loopValue = Math.floor(value/loop)
+		for (let i=0 ; i<loop ; i++)
+		{
+			let s = ""
+			for (let j=0 ; j<Math.ceil(package/1000) ; j++)
+			{
+				for (let k=0 ; k<1000 ; k++)
+				{
+					s += randomChar()
+				}
+				if (s.length >= loopValue)
+				{
+					break
+				}
+				if (j%50 === 0)
+				{
+					console.log(`${Math.floor((s.length/loopValue)*1000)/10}%`)
+				}
+				await sleep(10)
+			}
+			console.log("---save---")
+			saveStringAsFile(s, `garbage_${Math.floor(Math.random()*10000)}${randomChar()}`)
+			await sleep(500)
+		}
+	}
+	function randomChar()
+	{
+		return "QWERTYUIOPASDFGHJKLZXCVBNM1234567890"[Math.floor(Math.random()*36)]
+	}
+	function saveStringAsFile(content, fileName)
+	{
+	    // Tworzenie obiektu Blob z zawartością tekstową
+	    const blob = new Blob([content], { type: 'text/plain' });
+	    
+	    // Tworzenie tymczasowego URL dla obiektu Blob
+	    const url = URL.createObjectURL(blob);
+	    
+	    // Tworzenie elementu <a>, aby umożliwić pobranie pliku
+	    const a = document.createElement('a');
+	    a.href = url;
+	    a.download = fileName || 'plik.txt'; // Domyślna nazwa pliku, jeśli brak nazwy
+	    
+	    // Programowe kliknięcie w link <a>, aby rozpocząć pobieranie
+	    document.body.appendChild(a); // Dodanie <a> do DOM (dla kompatybilności)
+	    a.click();
+	    
+	    // Usunięcie elementu <a> i zwolnienie pamięci URL
+	    document.body.removeChild(a);
+	    URL.revokeObjectURL(url);
+	}
+</script>
+</head>
+<body>
+	<input type="text" name="value" placeholder="wpisz ilość MB">
+	<button onclick="create()">start zaśmiecania</button>
+</body>
+</html> 
