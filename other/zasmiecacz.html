@@ -16,34 +16,76 @@
 	}
 	input
 	{
-		display: block;
-		box-sizing: border-box;
-		position: relative;
-		width: 40vh;
-		left: 50%;
-		margin-top: 2vh;
-		margin-bottom: 2vh;
-		margin-left: -20vh;
 		padding: 0.5vh;
-		background: #4d4d4d;
-		border: solid 0.3vh red;
-		color: white;
+		font-size: 2.5vh;
 	}
 	button
+	{
+		padding: 1vh;
+		font-size: 3vh;
+		border-radius: 1vh;
+	}
+	section
+	{
+		padding: 1vh;
+	}
+	.element
 	{
 		display: block;
 		box-sizing: border-box;
 		position: relative;
-		width: 40vh;
-		left: 50%;
 		margin-top: 2vh;
 		margin-bottom: 2vh;
+		width: 40vh;
+		left: 50%;
 		margin-left: -20vh;
-		padding: 1vh;
+		padding: 0.3vh;
 		background: #4d4d4d;
-		border: solid 0.3vh red;
 		color: white;
-		border-radius: 1vh;
+		border: solid 0.3vh yellow;
+	}
+	.active
+	{
+		border-color: green;
+	}
+	.deActive
+	{
+		border-color: red;
+	}
+	.load
+	{
+		position: relative;
+		box-sizing: border-box;
+		width: 96%;
+		margin: 0.5vh;
+		margin-left: 2%;
+		margin-right: 2%;
+		padding: 0.5vh;
+		border: solid 0.4vh white;
+	}
+	.load div
+	{
+		width: 50%;
+		height: 2vh;
+		background: yellow;
+	}
+	.load div.active
+	{
+		background: green;
+	}
+	.load div.deActive
+	{
+		background: red;
+	}
+	.load span
+	{
+		position: absolute;
+		width: 10vh;
+		left: 50%;
+		margin-left: -5vh;
+		height: 2vh;
+		font-size: 2vh;
+		text-align: center;
 	}
 </style>
 <script>
@@ -54,18 +96,38 @@
 	async function create()
 	{
 		const MB = 1048576
-		const package = MB*25
+		const package = MB*10
 		const value = Math.min(32768,Number(document.getElementsByName("value")[0].value)||0)*MB
 		if (!value){return alert("nie podano wartości lub użyto przecinka zamiast kropki")}
 		if (prompt(`jeżeli chcesz rozpocząć zaśmiecanie ${Math.ceil((value/MB)*10)/10}MB śmieci wpisz zasmiecam dużymi literami`) != "ZASMIECAM"){return alert("wpisano błędne hasło")}
+		const content = document.getElementById("content")
+		content.innerHTML = ""
+		content.classList.add("deActive")
+		content.classList.remove("active")
+		const loads = []
 		const loop = Math.ceil(value/package)
+		for (let i=0 ; i<loop ; i++)
+		{
+			const load = document.createElement("div")
+			load.className = "load"
+			const span = document.createElement("span")
+			span.innerHTML = "0%"
+			const div = document.createElement("div")
+			div.className = "deActive"
+			div.style.width = 0
+			load.appendChild(span)
+			load.appendChild(div)
+			content.appendChild(load)
+			loads[i] = {span,div}
+		}
 		const loopValue = Math.floor(value/loop)
 		for (let i=0 ; i<loop ; i++)
 		{
 			let s = ""
-			for (let j=0 ; j<Math.ceil(package/1000) ; j++)
+			const c = 5000
+			for (let j=0 ; j<Math.ceil(package/c) ; j++)
 			{
-				for (let k=0 ; k<1000 ; k++)
+				for (let k=0 ; k<c ; k++)
 				{
 					s += randomChar()
 				}
@@ -73,16 +135,22 @@
 				{
 					break
 				}
-				if (j%50 === 0)
+				if (j%100 === 0)
 				{
-					console.log(`${Math.floor((s.length/loopValue)*1000)/10}%`)
+					loads[i].span.innerHTML = `${Math.floor((s.length/loopValue)*1000)/10}%`
+					loads[i].div.style.width = `${Math.floor((s.length/loopValue)*1000)/10}%`
 				}
-				await sleep(10)
+				await sleep(2)
 			}
 			console.log("---save---")
 			saveStringAsFile(s, `garbage_${Math.floor(Math.random()*10000)}${randomChar()}`)
+			loads[i].span.innerHTML = `100%`
+			loads[i].div.style.width = `100%`
+			loads[i].div.className = "active"
 			await sleep(500)
 		}
+		content.classList.add("active")
+		content.classList.remove("deActive")
 	}
 	function randomChar()
 	{
@@ -112,7 +180,8 @@
 </script>
 </head>
 <body>
-	<input type="text" name="value" placeholder="wpisz ilość MB">
-	<button onclick="create()">start zaśmiecania</button>
+	<input type="text" name="value" placeholder="wpisz ilość MB" class="element deActive">
+	<button class="element deActive" onclick="create()">start zaśmiecania</button>
+	<section class="element deActive" id="content"></section>
 </body>
 </html> 
