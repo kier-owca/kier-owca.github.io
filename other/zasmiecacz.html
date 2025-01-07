@@ -89,14 +89,33 @@
 	}
 </style>
 <script>
+	const template = ["A"]
+	const minLengthTemplate = 5000
+	const maxLengthTemplate = 10000
+	let activeButton = true
+	async function createTemplate()
+	{
+		for (let i=0 ; i<5000 ; i++)
+		{
+			let s = ""
+			const losLength = Math.floor(Math.random()*(maxLengthTemplate-minLengthTemplate))+minLengthTemplate
+			for (let j=0 ; j<losLength ; j++)
+			{
+				s += randomChar()
+			}
+			template.push(s)
+			await sleep(1)
+		}
+	}
 	async function sleep(ms)
 	{
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 	async function create()
 	{
+		if (!activeButton){return}
 		const MB = 1048576
-		const package = MB*10
+		const package = MB*15
 		const value = Math.min(32768,Number(document.getElementsByName("value")[0].value)||0)*MB
 		if (!value){return alert("nie podano wartości lub użyto przecinka zamiast kropki")}
 		if (prompt(`jeżeli chcesz rozpocząć zaśmiecanie ${Math.ceil((value/MB)*10)/10}MB śmieci wpisz zasmiecam dużymi literami`) != "ZASMIECAM"){return alert("wpisano błędne hasło")}
@@ -120,16 +139,20 @@
 			content.appendChild(load)
 			loads[i] = {span,div}
 		}
+		activeButton = false
 		const loopValue = Math.floor(value/loop)
 		for (let i=0 ; i<loop ; i++)
 		{
 			let s = ""
-			const c = 5000
-			for (let j=0 ; j<Math.ceil(package/c) ; j++)
+			for (let j=0 ; j<Math.ceil(package/minLengthTemplate) ; j++)
 			{
-				for (let k=0 ; k<c ; k++)
+				for (let k=0 ; k<5 ; k++)
 				{
-					s += randomChar()
+					for (let l=0 ; l<10 ; l++)
+					{
+						s += randomChar()
+					}
+					s += template[Math.floor(Math.random()*template.length)]
 				}
 				if (s.length >= loopValue)
 				{
@@ -140,7 +163,7 @@
 					loads[i].span.innerHTML = `${Math.floor((s.length/loopValue)*1000)/10}%`
 					loads[i].div.style.width = `${Math.floor((s.length/loopValue)*1000)/10}%`
 				}
-				await sleep(2)
+				await sleep(1)
 			}
 			console.log("---save---")
 			saveStringAsFile(s, `garbage_${Math.floor(Math.random()*10000)}${randomChar()}`)
@@ -151,6 +174,7 @@
 		}
 		content.classList.add("active")
 		content.classList.remove("deActive")
+		activeButton = true
 	}
 	function randomChar()
 	{
@@ -179,7 +203,7 @@
 	}
 </script>
 </head>
-<body>
+<body onload="createTemplate()">
 	<input type="text" name="value" placeholder="wpisz ilość MB" class="element deActive">
 	<button class="element deActive" onclick="create()">start zaśmiecania</button>
 	<section class="element deActive" id="content"></section>
