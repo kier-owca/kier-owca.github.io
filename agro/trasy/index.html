@@ -972,6 +972,7 @@
 		{
 			const content = document.getElementById("ends").getElementsByClassName("content")[0]
 			content.innerHTML = ""
+			if (!data.itinerary[data.markedItinerary]){return}
 			const line = JSON.parse(JSON.stringify(data.itinerary[data.markedItinerary]))
 			if (!Array.isArray(line.list)){return}
 			for (let route of line.list)
@@ -1156,7 +1157,7 @@
 			const content = document.getElementById("chart").getElementsByClassName("content")[0]
 			content.innerHTML = ""
 			const h2 = document.createElement("h2")
-			h2.innerHTML = "Tonarz w czasie:<br><br>"
+			h2.innerHTML = "Tonaż w czasie:<br><br>"
 			content.appendChild(h2)
 			let minWeight = 0
 			let maxWeight = 0
@@ -1171,7 +1172,6 @@
 					maxWeight = data.itinerary[i].totalTotalWeight
 				}
 			}
-			console.log(minWeight,maxWeight)
 			for (let i=0 ; i<data.itinerary.length ; i++)
 			{
 				const chart = Math.round((Math.max(0,data.itinerary[i].totalTotalWeight-minWeight)/(maxWeight-minWeight))*42)
@@ -1221,6 +1221,44 @@
 				}
 			}
 			document.getElementById("route").classList.add("hidden")
+		},
+		findDouble: function()
+		{
+			const content = document.getElementById("double").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const h2 = document.createElement("h2")
+			h2.innerHTML = "Możliwe duble:<br><br>"
+			content.appendChild(h2)
+			const line = JSON.parse(JSON.stringify(data.itinerary[data.markedItinerary]))
+			if (!Array.isArray(line.list)){return}
+			for (let i=0 ; i<line.list.length ; i++)
+			{
+				for (let j=i+1 ; j<line.list.length ; j++)
+				{
+					const r = [line.list[i],line.list[j]]
+					if (r[0].firm === r[1].firm)
+					{
+						if (r[0].totalSpace + r[1].totalSpace < (15.2*60))
+						{
+							const space = timeSpace(r[0].stops[r[0].stops.length-1].hour,r[1].hour)
+							const maxSpace = timeSpace(r[0].hour,r[0].stops[0].hour)+(1.5*60)
+							if (space>20 && space<maxSpace)
+							{
+								h2.innerHTML+= `<br>${r[0].firm}:<br>`
+								h2.innerHTML+= ` - ${r[0].hour} ${r[0].stops[0].name}<br>`
+								h2.innerHTML+= ` - ${r[1].hour} ${r[1].stops[0].name}<br>`
+							}
+						}
+					}
+				}
+			}
+			const button = document.createElement("button")
+			button.innerHTML = "kopiuj"
+			button.onclick = function()
+			{
+				navigator.clipboard.writeText(h2.innerText || h2.textContent)
+			}
+			content.appendChild(button)
 		},
 	}
 	function dateText(dateValue)
@@ -1634,7 +1672,7 @@
 			endDate.setMinutes(Number(line.hour.slice(3,5)) + line.totalSpace)
 			ctx.font = `20px Arial, Helvetica, sans-serif`;
 			ctx.fillStyle = "#434343"
-			ctx.fillText(`Szacowany koniec - ${addZero(endDate.getHours())}:${addZero(endDate.getMinutes())}`, 10, TopPosition+27);
+			ctx.fillText(`Szacowany koniec - ${addZero(endDate.getHours())}:${addZero(endDate.getMinutes())} - ${Math.round(line.totalSpace/60)}H (${Math.floor(line.space/60)}H ${addZero(Math.floor((line.space%60)))})`, 10, TopPosition+27);
 			route.classList.remove("hidden")
 			document.getElementById("route").getElementsByClassName("buttons")[0].getElementsByClassName("download")[0].onclick = function()
 			{
@@ -1994,6 +2032,12 @@
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
+		<section id="double" class="hidden">
+			<h1>Możliwe duble</h1>
+			<button data-path="statistics">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
 		<section id="other" class="hidden">
 			<h1>Inne</h1>
 			<button data-path="main">Cofnij</button>
@@ -2027,7 +2071,8 @@
 			<span class="separator"></span>
 			<button data-path="ends" data-action="ends">Zakończenia tras</button>
 			<button data-path="newStops" data-action="newStops">Nowe sklepy</button>
-			<button data-path="chart" data-action="chartWeight">Wykres tonarzu</button>
+			<button data-path="chart" data-action="chartWeight">Wykres tonażu</button>
+			<button data-path="double" data-action="findDouble">Możliwe duble</button>
 		</section>
 		<section id="info" class="hidden">
 			<h1>Informacje</h1>
