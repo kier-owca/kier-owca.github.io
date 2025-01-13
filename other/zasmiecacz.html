@@ -90,12 +90,12 @@
 </style>
 <script>
 	const template = ["A"]
-	const minLengthTemplate = 5000
-	const maxLengthTemplate = 10000
+	const minLengthTemplate = 1000
+	const maxLengthTemplate = 2000
 	let activeButton = true
 	async function createTemplate()
 	{
-		for (let i=0 ; i<5000 ; i++)
+		for (let i=0 ; i<1000 ; i++)
 		{
 			let s = ""
 			const losLength = Math.floor(Math.random()*(maxLengthTemplate-minLengthTemplate))+minLengthTemplate
@@ -115,7 +115,7 @@
 	{
 		if (!activeButton){return}
 		const MB = 1048576
-		const package = MB*15
+		const package = MB*10
 		const value = Math.min(32768,Number(document.getElementsByName("value")[0].value)||0)*MB
 		if (!value){return alert("nie podano wartości lub użyto przecinka zamiast kropki")}
 		if (prompt(`jeżeli chcesz rozpocząć zaśmiecanie ${Math.ceil((value/MB)*10)/10}MB śmieci wpisz zasmiecam dużymi literami`) != "ZASMIECAM"){return alert("wpisano błędne hasło")}
