@@ -1238,11 +1238,12 @@
 					const r = [line.list[i],line.list[j]]
 					if (r[0].firm === r[1].firm)
 					{
-						if (r[0].totalSpace + r[1].totalSpace < (15.2*60))
+						if (r[0].totalSpace + r[1].totalSpace < (15.5*60))
 						{
 							const space = timeSpace(r[0].stops[r[0].stops.length-1].hour,r[1].hour)
 							const maxSpace = timeSpace(r[0].hour,r[0].stops[0].hour)+(1.5*60)
-							if (space>20 && space<maxSpace)
+							const minSpace = Math.max(20,timeSpace(r[0].hour,r[0].stops[0].hour)/2)
+							if (space>minSpace && space<maxSpace)
 							{
 								h2.innerHTML+= `<br>${r[0].firm}:<br>`
 								h2.innerHTML+= ` - ${r[0].hour} ${r[0].stops[0].name}<br>`
@@ -1251,6 +1252,49 @@
 						}
 					}
 				}
+			}
+			const button = document.createElement("button")
+			button.innerHTML = "kopiuj"
+			button.onclick = function()
+			{
+				navigator.clipboard.writeText(h2.innerText || h2.textContent)
+			}
+			content.appendChild(button)
+		},
+		itineraryText: function()
+		{
+			const content = document.getElementById("itineraryText").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const h2 = document.createElement("h2")
+			content.appendChild(h2)
+			const line = JSON.parse(JSON.stringify(data.itinerary[data.markedItinerary]))
+			if (!Array.isArray(line.list)){return}
+			h2.innerHTML = `${dateText(line.start)} ${line.totalTotalWeight}t.<br><br>`
+			for (route of line.list)
+			{
+				h2.innerHTML += `${route.hour||"?"} - #${route.nr||"?"} ${route.firm||"?"}<br>`
+				if (route.stops.length === 1)
+				{
+					h2.innerHTML += `${create.nameCompression(route.stops[0].name,24)}<br>`
+				}
+				else if (route.stops.length === 2)
+				{
+					h2.innerHTML += `${create.nameCompression(route.stops[0].name,14)} > ${create.nameCompression(route.stops[1].name,14)}<br>`
+				}
+				else if (route.stops.length > 2)
+				{
+					let maxWeightStop = route.stops[1]
+					for (let i=2 ; i<route.stops.length-1 ; i++)
+					{
+						if (route.stops[i].weight > maxWeightStop.weight)
+						{
+							maxWeightStop = route.stops[i]
+						}
+					}
+					h2.innerHTML += `${route.stops.length}: ${create.nameCompression(route.stops[0].name,12)} > ${create.nameCompression(maxWeightStop.name)} > ${create.nameCompression(route.stops[route.stops.length-1].name)}<br>`
+				}
+				h2.innerHTML += `${Math.round(route.totalSpace/60)}H (${Math.floor(route.space/60)}H ${addZero(Math.floor((route.space%60)))}) ${route.totalWeight} t/${route.totalPallets}pal. R${route.gate||"?"}<br>`
+				h2.innerHTML += "<br>"
 			}
 			const button = document.createElement("button")
 			button.innerHTML = "kopiuj"
@@ -1337,8 +1381,16 @@
 		let difficulty = 3
 		difficulty += space/15
 		difficulty += totalSpace/25
+		if (totalSpace > (9.5*60))
+		{
+			difficulty += 1
+		}
 		difficulty += weight
 		difficulty += pallets/4
+		if (pallets > 24)
+		{
+			difficulty += (pallets-24)/5
+		}
 		difficulty += stops/4
 		difficulty += doors/5
 		difficulty += keys/4
@@ -2008,9 +2060,15 @@
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
+		<section id="itineraryText" class="hidden">
+			<h1>Udostępnianie</h1>
+			<button data-path="main">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
 		<section id="ends" class="hidden">
 			<h1>Zakończenia tras</h1>
-			<button data-path="main">Cofnij</button>
+			<button data-path="statistics">Cofnij</button>
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
@@ -2022,7 +2080,7 @@
 		</section>
 		<section id="newStops" class="hidden">
 			<h1>Nowe sklepy</h1>
-			<button data-path="main">Cofnij</button>
+			<button data-path="statistics">Cofnij</button>
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
@@ -2053,6 +2111,7 @@
 			<h1>Udostępnianie</h1>
 			<button data-path="other">Cofnij</button>
 			<span class="separator"></span>
+			<button data-path="itineraryText" data-action="itineraryText">Tekst tras</button>
 			<button data-path="shareAll" data-action="shareAll">Udostępnij wszystkie</button>
 			<button data-path="shareAll" data-action="shareFirm">Udostępnij przewoźnika</button>
 			<button data-action="downloadAll">Pobierz wszystkie</button>
@@ -2097,6 +2156,8 @@
 				- 0,25pkt za paletę.<br>
 				- 0,25pkt za sklep.<br>
 				- 0,2pkt za sklep bez wiaty lub 0.25pkt za sklep z kluczem.<br>
+				- 0,2pkt za każdą paletę więcej niż 24.<br>
+				- 1pkt jeżeli łączny czas trasy przewyższa 9 i pół godziny.<br>
 			</h2>
 			<h2>
 				Sposób liczenia czasu:<br>
