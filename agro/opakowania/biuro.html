@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver/dist/FileSaver.min.js"></script>
+<title>Biuro opakowań</title>
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		background: rgba(0,0,0,0);
+	}
+	body
+	{
+		background: black;
+		font-family: Arial, Helvetica, sans-serif;
+		color: white;
+		font-size: 2.5vh;
+	}
+	#hamburger
+	{
+		position: fixed;
+		top: 3vh;
+		right: 3vh;
+		width: 7vh;
+		height: 7vh;
+		border: none;
+	}
+	#raports
+	{
+		position: fixed;
+		height: 90vh;
+		top: 5vh;
+		width: 70vh;
+		left: 50%;
+		margin-left: -96vh;
+		border: solid 0.2vh white;
+		border-left: none;
+		border-right: none;
+	}
+	#raports div
+	{
+		position: relative;
+		width: 100%;
+	}
+	#raports button
+	{
+		position: absolute;
+		box-sizing: border-box;
+		right: 2.5vh;
+		bottom: 3vh;
+		height: 5vh;
+		width: 5vh;
+		background: #0789e3;
+		border: solid 0.3vh #004d89;
+		font-size: 2.7vh;
+		font-weight: bold;
+		color: #004d89;
+		border-radius: 0.7vh;
+	}
+	#raports canvas
+	{
+		width: 100%;
+		margin-top: 0.5vh;
+		margin-bottom: 0.5vh;
+	}
+	main
+	{
+		position: absolute;
+		min-height: 90vh;
+		margin-top: 5vh;
+		width: 50vh;
+		left: 50%;
+		margin-left: -25vh;
+		background: #111111;
+	}
+	#addPaper
+	{
+		position: relative;
+		box-sizing: border-box;
+		margin: 1vh;
+		width: 48vh;
+		height: 7vh;
+		background: #4db100;
+		border: solid 0.4vh #1b4d00;
+		border-radius: 1vh;
+		font-size: 5vh;
+		color: #1b4d00;
+		font-weight: 700;
+	}
+	#evidence
+	{
+		position: fixed;
+		height: 50vh;
+		margin-top: 25vh;
+		width: 70vh;
+		left: 50%;
+		margin-left: 26vh;
+		background: #75afaa;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-content: center;
+	}
+	#dateInfo
+	{
+		color: black;
+		font-size: 0.9em;
+	}
+	#editInfo
+	{
+		color: black;
+		font-size: 0.8em;
+	}
+	#error
+	{
+		flex-direction: column;
+		flex-wrap: nowrap;
+		justify-content: space-around;
+		align-items: center;
+		top: 25vh;
+		height: 30vh;
+		padding-top: 3vh;
+		background: #6b0700;
+		border-color: #9d0700;
+	}
+	table
+	{
+		border: 0.3vh solid black;
+		border-collapse: collapse;
+		color: #464646;
+		background: rgba(256,256,256,0.2);
+		margin-top: 0.5vh;
+		margin-bottom: 0.5vh;
+	}
+	td, th
+	{
+		position: relative;
+		box-sizing: border-box;
+		border: 0.2vh solid black;
+		padding: 0.5vh;
+		width: 15vh;
+	}
+	.hidden-row
+	{
+		visibility: collapse;
+	}
+	table span
+	{
+		position: absolute;
+		left: 0.3vh;
+		top: 0.3vh;
+		font-size: 0.5em;
+	}
+	table input
+	{
+		display: block;
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		padding: 0;
+		margin: 0;
+		border: none;
+		outline: none;
+		font-size: inherit;
+		color: black;
+		background: rgba(0,0,0,0);
+	}
+	td:focus-within
+	{
+		background: rgba(256,256,256,0.7);
+	}
+	.paper
+	{
+		position: relative;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-content: center;
+		margin: 1vh;
+		margin-top: 3vh;
+		margin-bottom: 3vh;
+		width: 48vh;
+		height: 67vh;
+		background: #b3b3b3;
+		color: black;
+		clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 9% 0%, 0% 7%);
+		border-right: solid 0.3vh #616161;
+		border-bottom: solid 0.3vh #616161;
+	}
+	.paper button
+	{
+		position: absolute;
+		box-sizing: border-box;
+		right: 1vh;
+		top: 1vh;
+		width: 4vh;
+		height: 4vh;
+		background: #b11b00;
+		border: solid 0.3vh #4d0700;
+		color: #4d0700;
+		font-weight: bold;
+		font-size: 2.7vh;
+		border-radius: 0.7vh;
+	}
+	.paper button::after
+	{
+		content: "X";
+	}
+	.paper table
+	{
+		margin: 2vh;
+	}
+	.paper td, .paper th
+	{
+		font-size: 1.4vh;
+		padding: 0.7vh;
+		border: 0.3vh solid black;
+	}
+	.paperName
+	{
+		position: relative;
+		margin-left: 2vh;
+		margin-top: 7vh;
+		margin-bottom: 7vh;
+		width: 44vh;
+		height: 4vh;
+		background: #939393;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+	}
+	.window
+	{
+		position: fixed;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		align-items: center;
+		align-content: center;
+		padding: 1vh;
+		top: 10vh;
+		height: 78vh;
+		width: 50vh;
+		left: 50%;
+		margin-left: -25vh;
+		background: #252525;
+		border: solid 0.3vh #2f2f2f;
+		box-shadow: 0 0 5vh 4vh black;
+		text-align: center;
+	}
+	.window.hidden
+	{
+		display: none;
+	}
+	.window h1
+	{
+		width: 80%;
+		padding: 0.5vh;
+		background: #393939;
+		border-bottom: solid 0.3vh #4d4d4d;
+		margin-bottom: 1vh;
+	}
+	.window button
+	{
+		width: 70%;
+		padding: 0.7vh;
+		background: #393939;
+		border: solid 0.3vh #4d4d4d;
+		border-radius: 1vh;
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+		color: #c5c5c5;
+		font-size: 1.1em;
+	}
+	.window button:hover
+	{
+		color: white;
+	}
+	.window input
+	{
+		width: 70%;
+		padding: 0.7vh;
+		background: #393939;
+		border: solid 0.3vh #4d4d4d;
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+		color: #c5c5c5;
+		font-size: 1.1em;
+	}
+	.window .separator
+	{
+		width: 90%;
+		height: 2vh;
+		opacity: 0;
+	}
+	.bold
+	{
+		text-align: center;
+		font-weight: 700;
+		letter-spacing: 0.1vh;
+		color: black;
+	}
+	.scrollable
+	{
+		overflow-y: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	.scrollable::-webkit-scrollbar
+	{
+		display: none;
+	}
+</style>
+<script>
+	const data = {}
+	const events = {enter:0,saveNow:0}
+	const system =
+	{
+		dataDefault:
+		{
+			now: {car:"",driver:"",firm:"",hour:"",values:{chicken:0,meat:0,smoke:0,lid:0,pallet:0},edit:false,papers:[]},
+			raports: {select:0,list:[0]},//element 0 listy musi być pusty
+			raport: {date:0,list:[]},
+		},
+		load: function()
+		{
+			system.read("now",system.dataDefault.now);
+			system.read("raports",system.dataDefault.raports);
+			data.raports.select = 0 // zawsze wymusza wybór przy starcie
+			system.menu.load();
+			document.getElementById("addPaper").onclick = addPaper;
+			document.addEventListener('keydown', system.keyReaction);
+			document.querySelectorAll("#evidence input").forEach(input =>
+			{
+				input.addEventListener("change", changeInput);
+			});
+			const erorrWindow = document.getElementById("error")
+	    	erorrWindow.querySelector("button").onclick = function()
+	    	{
+				document.getElementById("error").classList.add("hidden")
+	    	}
+			//
+			const selectRaportDiv = document.getElementById("selectRaport");
+			if (true)
+			{
+				const input = document.createElement("input");
+				input.type = "date";
+				input.name = "newRaportDate";
+				selectRaportDiv.appendChild(input);
+				const button = document.createElement("button");
+				button.onclick = ()=>{system.newRaport()};
+				button.innerHTML = "Nowy Raport";
+				selectRaportDiv.appendChild(button);
+				const separator = document.createElement("div");
+				separator.classList.add("separator");
+				selectRaportDiv.appendChild(separator);
+			}
+			for (let i=1 ; i<data.raports.list.length ; i++)
+			{
+				const raport = data.raports.list[i];
+				if (!raport){continue}
+				const button = document.createElement("button");
+				button.onclick = ()=>{system.loadRaport(i)};
+				button.innerHTML = system.dateText(Number(new Date(raport.date)));
+				selectRaportDiv.appendChild(button);
+			}
+		},
+		loadRaport(nr)
+		{
+			const selectRaport = data.raports.list[Math.max(0,Number(nr)||0)]
+			if (selectRaport)
+			{
+				data.raports.select = nr
+				system.view.refresh.paperBox()
+				system.view.refresh.evidence()
+				system.view.refresh.raports()
+			}
+			const selectRaportDiv = document.getElementById("selectRaport");
+			selectRaportDiv.classList.add("hidden")
+		},
+		newRaport()
+		{
+			const input = document.querySelector(`[name="newRaportDate"]`);
+			if (input.value)
+			{
+				for (let i=1 ; i<data.raports.list.length ; i++)
+				{
+					if (data.raports.list[i].date === input.value)
+					{
+						system.error("Raport z tego dnia już istnieje.")
+						return
+					}
+				}
+				const newRaport = JSON.parse(JSON.stringify(system.dataDefault.raport))
+				newRaport.date = input.value
+				const raports = data.raports.list
+				data.raports.list = [0,newRaport]
+				for (let i=1 ; i<12 ; i++)
+				{
+					if (raports[i])
+					{
+						data.raports.list.push(raports[i])
+					}
+				}
+				data.raports.select = 1
+				system.save("raports")
+				const selectRaportDiv = document.getElementById("selectRaport");
+				selectRaportDiv.classList.add("hidden")
+				return
+			}
+			else
+			{
+				system.error("Żeby utworzyć nowy raport musisz ustawić datę.")
+			}
+		},
+		keyReaction(event)
+		{
+			const reaction =
+			{
+				Enter: function()
+				{
+					if (Date.now() - events.enter < 150)
+					{
+						addPaper()
+					}
+					events.enter = Date.now();
+					event.preventDefault();
+					const inputs = Array.from(document.querySelectorAll('input'));
+					const currentInputIndex = inputs.indexOf(document.activeElement);
+					if (currentInputIndex !== -1 && currentInputIndex < inputs.length - 1)
+					{
+						inputs[currentInputIndex + 1].focus();
+					}
+				},
+				ArrowDown: function()
+				{
+					event.preventDefault();
+					const inputs = Array.from(document.querySelectorAll('input'));
+					const currentInputIndex = inputs.indexOf(document.activeElement);
+					if (currentInputIndex !== -1 && currentInputIndex < inputs.length - 1)
+					{
+						inputs[currentInputIndex + 1].focus();
+					}
+				},
+				ArrowUp: function()
+				{
+					event.preventDefault();
+					const inputs = Array.from(document.querySelectorAll('input'));
+					const currentInputIndex = inputs.indexOf(document.activeElement);
+					if (currentInputIndex > 0)
+					{
+						inputs[currentInputIndex - 1].focus();
+					}
+				},
+				Escape: function()
+				{
+					system.menu.hamburger()
+				},
+			}
+			if (typeof reaction[event.key] === "function")
+			{
+				reaction[event.key]()
+			}
+		},
+		read: function(type,dataDefault)
+		{
+			const string = localStorage.getItem(`biuro-${type}`)
+			if (!string)
+			{
+				data[type] = JSON.parse(JSON.stringify(dataDefault))
+			}
+			else
+			{
+				try
+				{
+					data[type] = JSON.parse(string)
+				}
+				catch
+				{
+					console.log(`nie udało się wczytać danych z pamięci podręcznej (${type})`)
+					console.log(string)
+					data[type] = dataDefault
+				}
+			}
+		},
+		save: function(type)
+		{
+			if (data[type])
+			{
+				localStorage.setItem(`biuro-${type}`,JSON.stringify(data[type]))
+			}
+		},
+		menu:
+		{
+			load: function()
+			{
+				system.menu.element = document.getElementById("menu");
+				for (const action of system.menu.actions)
+				{
+					const button = document.createElement("button");
+					button.onclick = action.action;
+					button.innerHTML = action.name;
+					system.menu.element.appendChild(button)
+				}
+				document.getElementById("hamburger").onclick = system.menu.hamburger;
+			},
+			hamburger: function()
+			{
+				if (system.menu.element.classList.contains('hidden'))
+				{
+					system.menu.open();
+				}
+				else
+				{
+					system.menu.close();
+				}
+			},
+			open: function()
+			{
+				menu.classList.remove('hidden');
+			},
+			close: function()
+			{
+				menu.classList.add('hidden');
+			},
+			actions:
+			[
+				{
+					name: "Zapisz Kierowcę",
+					action: function()
+					{
+						system.menu.close()
+						let select = Math.max(0,Number(data.raports.select)||0)
+						if (data.now.edit)
+						{
+							if (data.now.raportNr)
+							{
+								select = Math.max(0,Number(data.now.raportNr)||0)
+							}
+						}
+						const selectRaport = data.raports.list[select]
+						if (!selectRaport)
+						{
+							if (data.now.edit)
+							{
+								system.error("Raport edytowanego wpisu nie istnieje.<br>(zgłoś ten błąd)")
+								return
+							}
+							system.error("Żeby dodać kierowcę musi być zaznaczony raport.<br>(zgłoś ten błąd)")
+							return
+						}
+						else if (!(data.now.driver && data.now.firm && data.now.hour && data.now.car))
+						{
+							system.error("Należy uzupełnić dane kierowcy.")
+							return
+						}
+						else if (data.now.values.chicken+data.now.values.meat+data.now.values.smoke+data.now.values.lid+data.now.values.pallet < 1)
+						{
+							system.error("Należy wpisać ilość zdanych opakowań przez kierowcę.")
+							return
+						}
+						else if (data.now.papers.length < 1)
+						{
+							system.error("Należy dodać chociaż jeden dokument.")
+							return
+						}
+						else
+						{
+							if (data.now.edit)
+							{
+								selectRaport.list[Math.max(0,Number(data.now.entryNr)||0)] = JSON.parse(JSON.stringify(data.now))
+							}
+							else
+							{
+								selectRaport.list.push(JSON.parse(JSON.stringify(data.now)))
+							}
+							data.now = JSON.parse(JSON.stringify(system.dataDefault.now))
+							system.view.refresh.paperBox()
+							system.view.refresh.evidence()
+							system.view.refresh.raports()
+							system.save("raports")
+							system.save("now")
+							return
+						}
+					}
+				},
+				{
+					name: "Zapisz Raport",
+					action: async function()
+					{
+						system.menu.close();
+						const selectRaport = data.raports.list[Math.max(0,Number(data.raports.select)||0)];
+						if (!selectRaport)
+						{
+							system.info("Nie można zapisać nie zaznaczonego raportu.");
+							return;
+						}
+						const firms = {};
+						for (let entry of selectRaport.list)
+						{
+							firms[entry.firm] = firms[entry.firm] || [];
+							firms[entry.firm].push(entry);
+						}
+						const workbook = new ExcelJS.Workbook();
+						const worksheet = workbook.addWorksheet(selectRaport.date);
+						// Ustawienie szerokości kolumn
+						worksheet.columns =
+						[
+							{ width: 2 },
+							{ width: 30 },
+							{ width: 14 },
+							{ width: 7 },
+							{ width: 7 },
+							{ width: 7 },
+							{ width: 7 },
+							{ width: 7 },
+							{ width: 2 },
+						];
+						let selectLine = 0;
+						const lines = {total:[0,0],totalFirm:{},firm:{}};
+						const table = [];
+						const merges = [];
+						const centers = [];
+						const bolds = [];
+						const borders = [];
+						const bilans = [];
+						const description = [];
+						addLine(["","Podsumowanie zdanych opakowań z dnia:","",selectRaport.date]);
+						bolds.push({row:[selectLine],col:[4]});
+						merges.push([`B${selectLine}`, `C${selectLine}`]);
+						merges.push([`D${selectLine}`, `E${selectLine}`]);
+						addLine();
+						addLine(["","Suma całkowita"]);
+						merges.push([`B${selectLine}`, `H${selectLine}`]);
+						centers.push({row:[selectLine],col:[2]});
+						borders.push({row:[selectLine,selectLine+4],col:[2,8]});
+						if (true)
+						{
+							addLine(["","","","DRB","MSO","WDN","PKR","PAL"]);
+							centers.push({row:[selectLine],col:[2,8]});
+							merges.push([`B${selectLine}`, `C${selectLine}`]);
+							//
+							addLine(["",selectRaport.date,"Oczekiwane","","","","",""]);
+							lines.total[0] = selectLine;
+							addLine(["",selectRaport.date,"Oddane","","","","",""]);
+							lines.total[1] = selectLine;
+							addLine(["",selectRaport.date,"Bilans","","","","",""]);
+							bilans.push(selectLine)
+						}
+						addLine();
+						addLine(["","Sumy dla przewoźników"]);
+						merges.push([`B${selectLine}`, `H${selectLine}`]);
+						centers.push({row:[selectLine],col:[2]});
+						for (let key in firms)
+						{
+							const firm = firms[key]
+							addLine(["",key,"","DRB","MSO","WDN","PKR","PAL"]);
+							let border = [selectLine,selectLine];
+							bolds.push({row:[selectLine],col:[2]});
+							centers.push({row:[selectLine],col:[2,8]});
+							merges.push([`B${selectLine}`, `C${selectLine}`]);
+							//
+							addLine(["","","Oczekiwane","","","","",""]);
+							lines.totalFirm[key] = [selectLine];
+							addLine(["","","Oddane","","","","",""]);
+							lines.totalFirm[key][1] = selectLine;
+							addLine(["","","Bilans","","","","",""]);
+							bilans.push(selectLine)
+							border[1] = selectLine;
+							borders.push({row:[border[0],border[1]],col:[2,8]});
+							addLine();
+						}
+						for (let key in firms)
+						{
+							addLine();
+							addLine(["",`Kierowcy przewoźnika ${key}`]);
+							merges.push([`B${selectLine}`, `H${selectLine}`]);
+							centers.push({row:[selectLine],col:[2]});
+							const firm = firms[key]
+							let border = [selectLine+1,selectLine+1];
+							lines.firm[key] = [[],[]];
+							for (let driver of firm)
+							{
+								addLine(["",driver.driver,"","DRB","MSO","WDN","PKR","PAL"]);
+								bolds.push({row:[selectLine],col:[2]});
+								centers.push({row:[selectLine],col:[2,8]});
+								merges.push([`B${selectLine}`, `C${selectLine}`]);
+								//
+								console.log(driver)
+								let line = ["",driver.firm,"Oczekiwane"];
+								const allPapers = calc.allPapers(driver.papers)
+								for (let i=0 ; i<5 ; i++)
+								{
+									line[3+i] = allPapers[["chicken","meat","smoke","lid","pallet"][i]]
+								}
+								addLine(line);
+								lines.firm[key][0].push(selectLine)
+								line = ["",driver.car,"Oddane"];
+								for (let i=0 ; i<5 ; i++)
+								{
+									line[3+i] = driver.values[["chicken","meat","smoke","lid","pallet"][i]]
+								}
+								addLine(line);
+								lines.firm[key][1].push(selectLine)
+								addLine(["",driver.hour,"Bilans","","","","",""]);
+								bilans.push(selectLine)
+							}
+							border[1] = selectLine;
+							borders.push({row:[border[0],border[1]],col:[2,8]});
+						}
+						addLine()
+						addLine(["","Opis skrótów:"])
+						description.push(selectLine)
+						addLine(["","DRB - pojemniki na drób"])
+						description.push(selectLine)
+						addLine(["","MSO - pojemniki na mięso"])
+						description.push(selectLine)
+						addLine(["","WDN - pojemniki na wędliny"])
+						description.push(selectLine)
+						addLine(["","PKR - pokrywy"])
+						description.push(selectLine)
+						addLine(["","PAL - pół-palety plastikowe"])
+						description.push(selectLine)
+						// dodawanie tabeli do arkuszu
+						for (const row of table)
+						{
+							worksheet.addRow(row);
+						}
+						// dodawanie formuł
+						for (let col = 4 ; col<=8 ; col++)
+						{
+							for (let i=0 ; i<2 ; i++)
+							{
+								if (true)
+								{
+									const cell = worksheet.getCell(`${"XABCDEFGH"[col]}${lines.total[i]}`);
+									const sum = []
+									for (let key in lines.totalFirm)
+									{
+										sum.push(`${"XABCDEFGH"[col]}${lines.totalFirm[key][i]}`)
+									}
+									cell.value = { formula: `SUM(${sum.join(",")})` };
+								}
+								for (let key in lines.totalFirm)
+								{
+									const cell = worksheet.getCell(`${"XABCDEFGH"[col]}${lines.totalFirm[key][i]}`);
+									const sum = []
+									for (const lin of lines.firm[key][i])
+									{
+										sum.push(`${"XABCDEFGH"[col]}${lin}`)
+									}
+									cell.value = { formula: `SUM(${sum.join(",")})` };
+								}
+							}
+							for (const bil of bilans)
+							{
+								const cell = worksheet.getCell(`${"XABCDEFGH"[col]}${bil}`);
+								cell.value = { formula: `IF(${"XABCDEFGH"[col]}${bil-1}-${"XABCDEFGH"[col]}${bil-2}=0,"",${"XABCDEFGH"[col]}${bil-1}-${"XABCDEFGH"[col]}${bil-2})` };
+								cell.font = {bold: true, color: { argb: "FFFF0000" }};
+							}
+						}
+						// dodawanie scaleń
+						for (const merge of merges)
+						{
+							worksheet.mergeCells(`${merge[0]}:${merge[1]}`);
+						}
+						for (const center of centers)
+						{
+							// center musi mieć format {row:[3,7],col:[1,3]}
+							for (let row = center.row[0]; row <= (center.row[1]||center.row[0]); row++)
+							{
+								for (let col = center.col[0]; col <= (center.col[1]||center.col[0]); col++)
+								{
+									const cell = worksheet.getCell(row, col);
+									cell.alignment = { vertical: 'middle', horizontal: 'center' };
+								}
+							}
+						}
+						for (const bold of bolds)
+						{
+							// bold musi mieć format {row:[3,7],col:[1,3]}
+							for (let row = bold.row[0]; row <= (bold.row[1]||bold.row[0]); row++)
+							{
+								for (let col = bold.col[0]; col <= (bold.col[1]||bold.col[0]); col++)
+								{
+									const cell = worksheet.getCell(row, col);
+									cell.font = { bold: true };
+								}
+							}
+						}
+						for (const d of description)
+						{
+							const cell = worksheet.getCell(d, 2);
+							cell.font = {color: { argb: "FFB1B1B1" }};
+						}
+						for (const border of borders)
+						{
+							// border musi mieć format {row:[3,7],col:[1,3]}
+							for (let row = border.row[0]; row <= border.row[1]; row++)
+							{
+								for (let col = border.col[0]; col <= border.col[1]; col++)
+								{
+									const cell = worksheet.getCell(row, col);
+									cell.border =
+									{
+										top: { style: 'thin' },
+										left: { style: 'thin' },
+										bottom: { style: 'thin' },
+										right: { style: 'thin' },
+									}
+								}
+							}
+							for (let row = border.row[0]; row <= border.row[1]; row++)
+							{
+								for (let col = border.col[0]; col <= border.col[1]; col++)
+								{
+									const cell = worksheet.getCell(row, col);
+									if (row === border.row[0])
+									{
+										cell.border.top = { style: 'medium' }
+									}
+									if (row === border.row[1])
+									{
+										cell.border.bottom = { style: 'medium' }
+									}
+									if (col === border.col[0])
+									{
+										cell.border.left = { style: 'medium' }
+									}
+									if (col === border.col[1])
+									{
+										cell.border.right = { style: 'medium' }
+									}
+								}
+							}
+						}
+						const blob = await workbook.xlsx.writeBuffer();
+						saveAs(new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `Opakowania ${selectRaport.date}.xlsx`);
+						//
+						function addLine(line)
+						{
+							table.push(line||[])
+							selectLine++
+						}
+					}
+				},
+				{
+					name: "Edytuj Wpisy",
+					action: function()
+					{
+						system.menu.close()
+						const selectRaport = data.raports.list[Math.max(0,Number(data.raports.select)||0)]
+						if (!selectRaport)
+						{
+							system.error("Nie zaznaczono raportu w którym można edytować wpisy.")
+							return
+						}
+						const entryDiv = document.getElementById("entry");
+						entryDiv.innerHTML = ""
+						entryDiv.classList.remove("hidden")
+						if (true)
+						{
+							const button = document.createElement("button");
+							button.onclick = ()=>{entryDiv.classList.add("hidden")};
+							button.innerHTML = "Anuluj";
+							entryDiv.appendChild(button);
+							const separator = document.createElement("div");
+							separator.classList.add("separator");
+							entryDiv.appendChild(separator);
+						}
+						for (let i=0 ; i<selectRaport.list.length ; i++)
+						{
+							const entry = selectRaport.list[i];
+							if (!entry){continue}
+							const button = document.createElement("button");
+							button.onclick = function()
+							{
+								entryDiv.classList.add("hidden")
+								data.now = JSON.parse(JSON.stringify(entry))
+								data.now.edit = true
+								data.now.entryNr = i
+								data.now.raportNr = data.raports.select
+								system.view.refresh.paperBox()
+								system.view.refresh.evidence()
+								system.save("now")
+							}
+							button.innerHTML = `${entry.driver} - ${entry.firm}`;
+							entryDiv.appendChild(button);
+						}
+					}
+				},
+				{
+					name: "Kasuj Wpisy",
+					action: function()
+					{
+						system.menu.close()
+						const selectRaport = data.raports.list[Math.max(0,Number(data.raports.select)||0)]
+						if (!selectRaport)
+						{
+							system.error("Nie zaznaczono raportu w którym można Usunąć wpisy.")
+							return
+						}
+						const entryDiv = document.getElementById("entry");
+						entryDiv.innerHTML = ""
+						entryDiv.classList.remove("hidden")
+						if (true)
+						{
+							const button = document.createElement("button");
+							button.onclick = ()=>{entryDiv.classList.add("hidden")};
+							button.innerHTML = "Anuluj";
+							entryDiv.appendChild(button);
+							const separator = document.createElement("div");
+							separator.classList.add("separator");
+							entryDiv.appendChild(separator);
+						}
+						for (let i=0 ; i<selectRaport.list.length ; i++)
+						{
+							const entry = selectRaport.list[i];
+							if (!entry){continue}
+							const button = document.createElement("button");
+							button.onclick = function()
+							{
+								entryDiv.classList.add("hidden")
+								const newTab = []
+								for (let j=0 ; j<selectRaport.list.length ; j++)
+								{
+									if (j != i)
+									{
+										newTab.push(selectRaport.list[j])
+									}
+								}
+								selectRaport.list = newTab
+								system.save("raports")
+								system.view.refresh.raports()
+							}
+							button.innerHTML = `${entry.driver} - ${entry.firm}`;
+							entryDiv.appendChild(button);
+						}
+					}
+				},
+			]
+		},
+		view:
+		{
+			refresh:
+			{
+				paperBox: function()
+				{
+					const box = document.getElementById("paperBox");
+					box.innerHTML = "";
+					for (let i=0 ; i<data.now.papers.length ; i++)
+					{
+						box.appendChild(system.view.create.paper(i,data.now.papers[i]));
+						system.view.mark.paper(data.now.papers[i],i)
+					}
+				},
+				evidence: function()
+				{
+					const editInfo = document.getElementById("editInfo");
+					if (data.now.edit)
+					{
+						editInfo.innerHTML = "Wpis edytowany";
+					}
+					else
+					{
+						editInfo.innerHTML = "Nowy wpis";
+					}
+					let select = Math.max(0,Number(data.raports.select)||0)
+					if (data.now.edit)
+					{
+						select = Math.max(0,Number(data.now.raportNr)||0)
+					}
+					const selectRaport = data.raports.list[select];
+					const dateInfo = document.getElementById("dateInfo");
+					if (selectRaport)
+					{
+						dateInfo.innerHTML = system.dateText(Number(new Date(selectRaport.date)));
+					}
+					else
+					{
+						dateInfo.innerHTML = "Raport nie zaznaczony";
+					}
+					const evidence = document.getElementById("evidence");
+					const inputs = Array.from(evidence.getElementsByTagName("input"))
+					inputs.forEach(input =>
+					{
+						if (input.dataset.reaction === "evidenceData")
+						{
+							input.value = data.now[input.name];
+						}
+						else if (input.dataset.reaction === "evidenceValue")
+						{
+							input.value = data.now.values[input.name]||"";
+						}
+					});
+					const sum = calc.allPapers();
+					for (const key in sum)
+					{
+						system.view.mark.evidence(sum[key],data.now.values[key],key)
+					}
+				},
+				raports: function()
+				{
+					const raports = document.getElementById("raports")
+					raports.innerHTML = ""
+					const selectRaport = data.raports.list[Math.max(0,Number(data.raports.select)||0)]
+					if (selectRaport)
+					{
+						const firms = {};
+						for (let entry of selectRaport.list)
+						{
+							firms[entry.firm] = firms[entry.firm] || []
+							firms[entry.firm].push(entry)
+						}
+						for (let key in firms)
+						{
+							const div = document.createElement("div")
+							const button = document.createElement("button")
+							button.innerHTML = "&#11015;"
+							button.onclick = system.downloadFirm
+							button.dataset.firm = key
+							button.dataset.date = selectRaport.date
+							div.appendChild(button)
+							const canvas = system.view.create.firmCanvas(key,firms[key],selectRaport.date)
+							canvas.dataset.firm = key
+							div.appendChild(canvas)
+							raports.appendChild(div)
+						}
+					}
+				}
+			},
+			mark:
+			{
+				colors:
+				{
+					orange: "#f78900",
+					green: "#89f700",
+					red: "#f70000",
+				},
+				evidence: function(expect,value,type)
+				{
+					const evidence = document.getElementById("evidence");
+					const element = evidence.querySelector(`[data-expect="${type}"]`);
+					element.innerHTML = expect||0;
+					if (expect === 0)
+					{
+						element.style.textShadow = "none";
+					}
+					else if (expect < value)
+					{
+						element.style.textShadow = `0 0 10px ${this.colors.orange}`;
+					}
+					else if (expect == value)
+					{
+						element.style.textShadow = `0 0 10px ${this.colors.green}`;
+					}
+					else
+					{
+						element.style.textShadow = `0 0 10px ${this.colors.red}`;
+					}
+				},
+				paper: function(values,paperIndex)
+				{
+					const error =
+					{
+						chicken: 30,
+						meat: 40,
+						smoke: 17,
+						lid: 15,
+						pallet: 4,
+					}
+					const paperBox = document.getElementById("paperBox");
+					const paper = paperBox.querySelector(`[data-index="${paperIndex}"]`);
+					let total = 0
+					for (const type in values)
+					{
+						const value = Number(values[type])||0
+						total += value
+						const element = paper.querySelector(`[name="${type}"]`);
+						if (value > (error[type]||1000)*2)
+						{
+							element.style.textShadow = `0 0 10px ${this.colors.red}`;
+						}
+						else if (value > (error[type]||1000))
+						{
+							element.style.textShadow = `0 0 10px ${this.colors.orange}`;
+						}
+						else
+						{
+							element.style.textShadow = "none";
+						}
+					}
+					paper.querySelector(`[data-total="total"]`).innerHTML = total
+				}
+			},
+			create:
+			{
+				paper: function(index,values)
+				{
+					const paper = document.createElement("div");
+					paper.dataset.index = index
+					paper.classList.add("paper");
+					const deletrButton = document.createElement("button");
+					deletrButton.dataset.paperIndex = index;
+					deletrButton.onclick = deletePaper;
+					paper.appendChild(deletrButton);
+					const paperName = document.createElement("div");
+					paperName.classList.add("paperName");
+					paperName.innerHTML = `Dokument ${index+1}`;
+					paper.appendChild(paperName);
+					const table = [document.createElement("table"),document.createElement("table")];
+					paper.appendChild(table[0]);
+					paper.appendChild(table[1]);
+					if (true)
+					{
+						const tr = document.createElement("tr");
+						tr.style.background = "#939393";
+						const td = [document.createElement("td"),document.createElement("td")];
+						td[0].colSpan = 2;
+						td[0].innerHTML = "OPIS ARTYKUŁU";
+						td[1].classList.add("bold")
+						td[1].innerHTML = "ILOSC";
+						tr.appendChild(td[0]);
+						tr.appendChild(td[1]);
+						table[0].appendChild(tr);
+					}
+					let total = 0
+					for (let i=0 ; i<6 ; i++)
+					{
+						const tr = document.createElement("tr");
+						if (i === 0)
+						{
+							tr.classList.add("hidden-row");
+							for (let j=0 ; j<3 ; j++)
+							{
+								const td = document.createElement("td");
+								tr.appendChild(td);
+							}
+						}
+						else
+						{
+							for (let j=0 ; j<2 ; j++)
+							{
+								const td = document.createElement("td");
+								if (j === 0)
+								{
+									td.colSpan = 2;
+									td.innerHTML = ["BŁĄD","PÓŁPALETY","DRÓB","MIĘSO","WĘDLINY","POKRYWY","BŁĄD"][i];
+								}
+								else if (j === 1)
+								{
+									const input = document.createElement("input");
+									input.addEventListener('input',changeInput)
+									input.dataset.reaction = "paper"
+									input.dataset.paperIndex = index
+									input.type = "number";
+									input.classList.add("bold");
+									input.name = ["error","pallet","chicken","meat","smoke","lid","error"][i];
+									const value = Number((values||{})[["error","pallet","chicken","meat","smoke","lid","error"][i]])||"";
+									input.value = value
+									total += value
+									td.appendChild(input);
+								}
+								tr.appendChild(td)
+							}
+						}
+						table[0].appendChild(tr)
+					}
+					if (true)
+					{
+						const tr = document.createElement("tr");
+						table[1].appendChild(tr)
+						const td = [document.createElement("td"),document.createElement("td")];
+						td[0].colSpan = 2;
+						td[0].innerHTML = "RAZEM";
+						td[1].classList.add("bold")
+						td[1].innerHTML = total;
+						td[1].dataset.total = "total"
+						tr.appendChild(td[0]);
+						tr.appendChild(td[1]);
+						table[1].appendChild(tr);
+						table[1].style.marginTop = "3vh"
+					}
+					return paper
+				},
+				firmCanvas: function(name,list,date)
+				{
+					const canvas = document.createElement("canvas");
+					canvas.width = 600;
+					canvas.height = 275+(60*list.length)
+					const ctx = canvas.getContext('2d');
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "#939393"
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "black"
+					ctx.fillRect(1, 1, canvas.width-2, canvas.height-2);
+					// nagłówek
+					ctx.font = `20px Arial, Helvetica, sans-serif`;
+					ctx.fillStyle = "#b1b1b1"
+					ctx.fillText(`Podsumowanie zdanych opakowań z dnia:`, 10, 25);
+					ctx.fillText(`Przewoźnik :`, 10, 55);
+					ctx.fillStyle = "white"
+					if (date)
+					{
+						ctx.fillText(`${system.dateText(new Date(date))}`, 430, 25);
+					}
+					else
+					{
+						ctx.fillText(`${system.dateText()}`, 430, 25);
+					}
+					ctx.fillText(name, 430, 55);
+					// tabelka ilości
+					ctx.font = `bold 20px "Courier New", monospace`;
+					ctx.strokeStyle = "#b1b1b1";
+					ctx.lineWidth = 2;
+					ctx.strokeRect(10,68,295,60);
+					ctx.fillText("Kierowca", 15, 90);
+					ctx.fillText("Rejestracja - Godzina", 15, 120);
+					ctx.strokeRect(305,68,285,30);
+					ctx.fillText("Oczekiwane / Oddane", 310, 90);
+					for (let j=0 ; j<5 ; j++)
+					{
+						ctx.strokeRect(305+(57*j),98,57,30);
+						ctx.fillText(["Drb","Mso","Wdn","pkr","Pal"][j], 310+(57*j), 120);
+					}
+					for (let i=0 ; i<list.length ; i++)
+					{
+						// dane
+						const entry = list[i]
+						const top = 60*i
+						ctx.textAlign = "left";
+						ctx.fillStyle = "white"
+						ctx.strokeRect(10,128+top,295,60);
+						ctx.fillText(`${entry.driver}`, 15, 150+top);
+						ctx.fillText(`${entry.car} - ${entry.hour}`, 15, 180+top);
+						// ilości
+						const valueIn = entry.values
+						const valueOut = calc.allPapers(entry.papers)
+						const values = []
+						values[0] = [valueOut.chicken,valueIn.chicken]
+						values[1] = [valueOut.meat,valueIn.meat]
+						values[2] = [valueOut.smoke,valueIn.smoke]
+						values[3] = [valueOut.lid,valueIn.lid]
+						values[4] = [valueOut.pallet,valueIn.pallet]
+						ctx.textAlign = "right";
+						for (let j=0 ; j<values.length ; j++)
+						{
+							if (values[j][0] == values[j][1])
+							{
+								ctx.fillStyle = "#b1f700"
+							}
+							else if (values[j][0] < values[j][1])
+							{
+								ctx.fillStyle = "#f7a700"
+							}
+							else if (values[j][0] == values[j][1]+1)
+							{
+								ctx.fillStyle = "#f76b00"
+							}
+							else
+							{
+								ctx.fillStyle = "#f7392f"
+							}
+							ctx.strokeRect(305+(57*j),128+top,57,60);
+							ctx.fillText(Math.min(9999,values[j][0]), 358+(57*j), 150+top);
+							ctx.fillText(Math.min(9999,values[j][1]), 358+(57*j), 180+top);
+						}
+					}
+					// opis skrótów
+					const top = 60*list.length
+					const left = 15
+					ctx.textAlign = "left";
+					ctx.fillStyle = "#b1b1b1"
+					ctx.font = `15px Arial, Helvetica, sans-serif`;
+					ctx.fillText("Wyjaśnienie skrótów:", left, top+155);
+					ctx.fillText("Drb - pojemniki na drób", left, top+175);
+					ctx.fillText("Mso - pojemniki na mięso", left, top+195);
+					ctx.fillText("Wdn - pojemniki na wędliny", left, top+215);
+					ctx.fillText("Pkr - pokrywy", left, top+235);
+					ctx.fillText("Pal - półpalety plastikowe", left, top+255);
+					//
+					return canvas
+				}
+			},
+		},
+		dateText: function(dateValue)
+		{
+			dateValue = new Date(dateValue||Date.now())
+			return `${["Nd","Pn","Wt","Śr","Cz","Pt","Sb","WTF"][dateValue.getDay()]} ${("0"+dateValue.getDate()).slice(-2)}.${("0"+(dateValue.getMonth()+1)).slice(-2)}.${`${dateValue.getFullYear()}`.slice(2,4)}r`
+		},
+		downloadFirm: function(event)
+		{
+			const firm = event.target.dataset.firm
+			const date = event.target.dataset.date
+			const canvas = document.getElementById("raports").querySelector(`canvas[data-firm="${firm}"]`)
+			if (!canvas)
+			{
+				system.error("Coś poszło nie tak. (zgłoś błąd)")
+				return
+			}
+			const dataURL = canvas.toDataURL('image/png');
+			const link = document.createElement('a');
+			link.href = dataURL;
+			link.download = `Podsumowanie pojemników przewoźnika ${firm} z dnia ${date||"?"}.png`;
+			link.click();
+		},
+		error: function(info)
+		{
+			const erorrWindow = document.getElementById("error")
+			erorrWindow.querySelector("span").innerHTML = info || "Komunikat błędu nie został podany."
+			erorrWindow.classList.remove("hidden")
+		}
+	}
+	const calc =
+	{
+		allPapers: function(listOfPapers)
+		{
+			const sum = {chicken:0,meat:0,smoke:0,lid:0,pallet:0}
+			listOfPapers = listOfPapers || data.now.papers
+			for (const paper of listOfPapers)
+			{
+				for (const key in paper)
+				{
+					sum[key] += paper[key]
+				}
+			}
+			return sum
+		},
+	}
+	function addPaper()
+	{
+		const box = document.getElementById("paperBox");
+		const i = data.now.papers.length;
+		data.now.papers[i] = {chicken:0,meat:0,smoke:0,lid:0,pallet:0};
+		const paper = system.view.create.paper(i)
+		box.appendChild(paper);
+		setTimeout(()=>{paper.querySelector('input').focus()},10);
+	}
+	function deletePaper(event)
+	{
+		const paperIndex = Math.max(0,Number(event.target.dataset.paperIndex) || 0);
+		const newTab = [];
+		for (let i=0 ; i<data.now.papers.length ; i++)
+		{
+			if (i != paperIndex)
+			{
+				newTab.push(data.now.papers[i])
+			}
+		}
+		data.now.papers = newTab
+		system.view.refresh.paperBox()
+		system.view.refresh.evidence()
+		system.save("now")
+	}
+	function changeInput(event)
+	{
+		const reaction =
+		{
+			paper: function(target)
+			{
+
+				const value = Math.min(1000,Math.max(0,Number(target.value) || 0));
+				target.value = value
+				const paperIndex = Math.max(0,Number(target.dataset.paperIndex) || 0);
+				const name = target.name || "";
+				if (data.now.papers[paperIndex])
+				{
+					data.now.papers[paperIndex][name] = value
+					system.view.mark.paper(data.now.papers[paperIndex],paperIndex)
+					system.view.refresh.evidence()
+					events.saveNow = Date.now()
+					setTimeout(saveNow,2000)
+				}
+				function saveNow()
+				{
+					if (Date.now() - events.saveNow > 1998)
+					{
+						system.save("now")
+					}
+				}
+			},
+			evidenceData: function(target)
+			{
+				const value = target.value;
+				const name = target.name || "error";
+				if (name === "hour")
+				{
+					data.now[name] = value;
+				}
+				else if (name === "car")
+				{
+					data.now[name] = value.toUpperCase();
+				}
+				else
+				{
+					data.now[name] = capitalizeSentence(value);
+				}
+				setTimeout(saveNow,2000);
+				function saveNow()
+				{
+					if (Date.now() - events.saveNow > 1998)
+					{
+						system.save("now");
+					}
+				}
+				function capitalizeSentence(sentence)
+				{
+					sentence = sentence.split(" ");
+					sentence = sentence.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+					return sentence.join(" ");
+				}
+			},
+			evidenceValue: function(target)
+			{
+				const value = Math.min(9999,Math.max(0,Number(target.value)||0));
+				const name = target.name || "error";
+				data.now.values[name] = value;
+				target.value = value || 0
+				setTimeout(saveNow,2000);
+				function saveNow()
+				{
+					if (Date.now() - events.saveNow > 1998)
+					{
+						system.save("now");
+					}
+				}
+				system.view.refresh.evidence()
+			},
+		}
+		if (!event.target){return}
+		if (reaction[event.target.dataset.reaction])
+		{
+			reaction[event.target.dataset.reaction](event.target)
+		}
+	}
+</script>
+</head>
+<body onload="system.load()">
+	<section id="raports" class="scrollable"></section>
+	<main>
+		<div id="paperBox">
+		</div>
+		<button id="addPaper">+</button>
+	</main>
+	<section id="evidence">
+		<span id="dateInfo"></span>
+		<table>
+			<tr>
+				<td colspan="3">
+					<span>Kierowca</span>
+					<input type="text" data-reaction="evidenceData" name="driver" maxlength="27" style="text-transform: capitalize;">
+				</td>
+				<td>
+					<span>Godzina</span>
+					<input type="time" data-reaction="evidenceData" name="hour">
+				</td>
+			</tr>
+			<tr class="hidden-row"><td></td><td></td><td></td><td></td></tr>
+			<tr>
+				<td colspan="2">
+					<span>Przewoźnik</span>
+					<input type="text" data-reaction="evidenceData" name="firm" maxlength="17" style="text-transform: capitalize;">
+				</td>
+				<td colspan="2">
+					<span>Rejestracja</span>
+					<input type="text" data-reaction="evidenceData" name="car" maxlength="11" style="text-transform: uppercase;">
+				</td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td colspan="2">Nazwa artykułu</td>
+				<td>Przyjęto</td>
+				<td>Oczekiwano</td>
+			</tr>
+			<tr class="hidden-row"><td></td><td></td><td></td><td></td></tr>
+			<tr>
+				<td colspan="2">Drób</td>
+				<td>
+					<input type="number" data-reaction="evidenceValue" name="chicken" class="bold">
+				</td>
+				<td class="bold" data-expect="chicken">0</td>
+			</tr>
+			<tr>
+				<td colspan="2">Mięso</td>
+				<td>
+					<input type="number" data-reaction="evidenceValue" name="meat" class="bold">
+				</td>
+				<td class="bold" data-expect="meat">0</td>
+			</tr>
+			<tr>
+				<td colspan="2">Wędliny</td>
+				<td>
+					<input type="number" data-reaction="evidenceValue" name="smoke" class="bold">
+				</td>
+				<td class="bold" data-expect="smoke">0</td>
+			</tr>
+			<tr>
+				<td colspan="2">Pokrywy</td>
+				<td>
+					<input type="number" data-reaction="evidenceValue" name="lid" class="bold">
+				</td>
+				<td class="bold" data-expect="lid">0</td>
+			</tr>
+			<tr>
+				<td colspan="2">Półpalety</td>
+				<td>
+					<input type="number" data-reaction="evidenceValue" name="pallet" class="bold">
+				</td>
+				<td class="bold" data-expect="pallet">0</td>
+			</tr>
+		</table>
+		<span id="editInfo"></span>
+	</section>
+	<div id="menu" class="scrollable window hidden"><h1>Menu</h1></div>
+	<div id="entry" class="scrollable window hidden"><h1>Wybierz Wpis</h1></div>
+	<button id="hamburger">
+		<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" data-path="menu">
+			<polygon fill="white" points="0,0 0,20 100,20 100,0"></polygon>
+			<polygon fill="white" points="0,40 0,60 100,60 100,40"></polygon>
+			<polygon fill="white" points="0,80 0,100 100,100 100,80"></polygon>
+		</svg>
+	</button>
+	<div id="selectRaport" class="window scrollable"><h1>Wybierz Raport</h1></div>
+	<div id="error" class="window hidden"><span></span><button>ok</button></div>
+</body>
+</html>
