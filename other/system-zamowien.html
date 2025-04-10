@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>System zamówień zakupów</title>
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		background: rgba(0,0,0,0);
+		font-family: Arial, Helvetica, sans-serif;
+	}
+	body, html
+	{
+		overflow: hidden;
+		background: black;
+		font-size: 2.5vh;
+		color: white;
+	}
+	input
+	{
+		position: relative;
+		box-sizing: border-box;
+		border: solid 0.4vh white;
+		background: black;
+		color: white;
+		box-shadow: inset 0 0 0.8vh 0.4vh #939393;
+		padding: 0.5vh;
+		padding-left: 0.7vh;
+		padding-right: 0.7vh;
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+		width: 100%;
+		color: white;
+		font-size: 2.2vh;
+		text-align: center;
+	}
+	input:focus
+	{
+		outline: none;
+	}
+	li
+	{
+		list-style-type: none;
+	}
+	.window
+	{
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		max-width: 50vh;
+		max-height: 90vh;
+		overflow-x: hidden;
+		overflow-y: scroll;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		border: solid 0.4vh #393939;
+		background: #2F2F2F;
+		box-shadow: 0 0 1.5vh 1vh black;
+	}
+	.window.hidden
+	{
+		display: none;
+	}
+	.window::-webkit-scrollbar
+	{
+		display: none;
+	}
+	.roll
+	{
+		overflow-y: hidden;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		white-space: nowrap;
+	}
+	.roll::-webkit-scrollbar
+	{
+		display: none;
+	}
+	.window .content
+	{
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: flex-start;
+		align-content: center;
+		width: 100%;
+		margin-top: 5vh;
+	}
+	.window .close
+	{
+		position: absolute;
+		top: 0.5vh;
+		right: 0.5vh;
+		width: 4vh;
+		height: 4vh;
+		border: none;
+		border-radius: 0.7vh;
+		align-items: center;
+		text-align: center;
+		background: red;
+	}
+	.window .close::after
+	{
+		content: 'X';
+		color: black;
+		font-weight: bold;
+		font-size: 3vh;
+	}
+	main
+	{
+		position: relative;
+		height: 93vh;
+		width: 240vh;
+		background: rgba(0,0,0,0);
+		left: 50%;
+		margin-left: -175vh;
+		transition: 0.7s;
+	}
+	section.screen
+	{
+		position: relative;
+		box-sizing: border-box;
+		margin-left: 6vh;
+		margin-right: 6vh;
+		float: left;
+		width: 48vh;
+		height: 90vh;
+		top: 1vh;
+		background: #1B1B1B;
+		border: solid 0.4vh #252525;
+		overflow-y: scroll;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	section.screen::-webkit-scrollbar
+	{
+		display: none;
+	}
+	section.screen h1
+	{
+		position: relative;
+		width: 80%;
+		margin-left: 10%;
+		padding: 0.7vh;
+		color: white;
+		text-align: center;
+		letter-spacing: 0.05vh;
+		border-bottom: solid 0.5vh white;
+		font-size: 3vh;
+	}
+	footer
+	{
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		height: 7vh;
+		width: 24vh;
+		background: rgba(207,207,207,0.2);
+		border: solid 0.4vh rgba(207,207,207,0.4);
+		border-bottom: none;
+		border-left: none;
+		border-top-right-radius: 3.5vh;
+	}
+	footer button
+	{
+		position: relative;
+		box-sizing: border-box;
+		margin: 0.5vh;
+		float: left;
+		width: 5vh;
+		height: 5vh;
+		border-radius: 50%;
+		top: 1vh;
+		background: black;
+		border: solid 0.4vh #252525;
+		transition: 0.2s;
+	}
+	footer button.marked
+	{
+		top: 0;
+	}
+	#searchBox li
+	{
+		position: relative;
+		align-content: center;
+		width: 92%;
+		margin-top: 0.5vh;
+		margin-bottom: 0.5vh;
+		min-height: 4vh;
+		background: #393939;
+	}
+	#searchBox li span
+	{
+		display: block;
+		padding: 0.5vh;
+		padding-left: 1vh;
+		padding-right: 1vh;
+		color: white;
+		font-size: 1.7vh;
+	}
+	#searchBox li span.description
+	{
+		color: #7F7F7F;
+		font-size: 1.4vh;
+	}
+	#orderStatistics
+	{
+		position: relative;
+		width: 100%;
+		height: 7vh;
+		margin-top: 2vh;
+		margin-bottom: 2vh;
+		background: #252525;
+	}
+	#wardrobesButtonBox
+	{
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		width: 100%;
+		height: 5vh;
+		background: #252525;
+	}
+	#wardrobesButtonBox button
+	{
+		margin: 0;
+		margin-left: 1vh;
+		margin-right: 1vh;
+		padding: 0;
+		border: 0;
+	}
+	#wardrobesButtonBox button svg
+	{
+		width: 5vh;
+		height: 5vh;
+	}
+</style>
+<script>
+	const system =
+	{
+		load: function()
+		{
+			system.screen.load()
+			system.screen.get(0,5)
+			system.search.product.load()
+			system.windows.searchBox = new AppWindow('searchBox',45,75,'close')
+			system.refresh.wardrobesButtonBox()
+		},
+		screen:
+		{
+			width: 60,
+			window: 0,
+			buttons: [],
+			load: function()
+			{
+				system.screen.window = document.getElementsByTagName('main')[0]
+				const footer = document.getElementsByTagName('footer')[0]
+				const screens = Array.from(document.querySelectorAll('section.screen'))
+				system.screen.window.style.width = `${screens.length * system.screen.width}vh`
+				for (let i=0 ; i<screens.length ; i++)
+				{
+					const screen = screens[i]
+					const color = Number(screen.dataset.theme)
+					screen.style.borderColor = `hsl(${color},100%,70%)`
+					screen.style.boxShadow = `0 0 1.5vh 0.3vh hsl(${color},100%,50%)`
+					const h1 = (screen.getElementsByTagName('h1')||[])[0]
+					if (h1)
+					{
+						h1.style.borderColor = `hsl(${color},100%,70%)`
+						h1.style.boxShadow = `0 2.2vh 2vh -2vh hsl(${color},100%,50%)`
+						h1.style.color = `hsl(${color},100%,90%)`
+						h1.style.textShadow = `0 0 1vh hsl(${color},100%,50%)`
+					}
+					if (Number(screen.dataset.accessible))
+					{
+						const button = document.createElement('button')
+						button.style.borderColor = `hsl(${color},100%,50%)`
+						button.style.boxShadow = `0 0 1vh 0.2vh hsl(${color},100%,30%)`
+						button.dataset.screenNr = i+1
+						button.onclick = system.screen.get
+						footer.appendChild(button)
+						system.screen.buttons.push(button)
+					}
+				}
+				footer.style.width = `${6*(system.screen.buttons.length)}vh`
+			},
+			get: function(event,screenNr)
+			{
+				screenNr = Number(screenNr)
+				if (!screenNr)
+				{
+					screenNr = Number(event.target.dataset.screenNr)
+				}
+				if (screenNr>0)
+				{
+					system.screen.window.style.marginLeft = `-${((screenNr-1)*system.screen.width)+(system.screen.width/2)}vh`
+					for (const button of system.screen.buttons)
+					{
+						if (!button)
+						{
+							continue
+						}
+						else if (Number(button.dataset.screenNr) === screenNr)
+						{
+							button.classList.add('marked')
+						}
+						else
+						{
+							button.classList.remove('marked')
+						}
+					}
+				}
+				else
+				{
+					console.error('problem z numerem ekranu')
+				}
+			},
+		},
+		search:
+		{
+			product:
+			{
+				input: 0,
+				result: 0,
+				load: function()
+				{
+					system.search.product.input = document.getElementsByName('search')[0]
+					system.search.product.result = document.getElementById('searchProduct')
+					system.search.product.input.addEventListener('input', system.search.product.action);
+				},
+				action: function()
+				{
+					events.search = Date.now()
+					setTimeout(system.search.product.get,1000)
+				},
+				get: function()
+				{
+					if (!(Date.now() - events.search > 998)){return}
+					const products = [1,2,3,4]
+					system.search.product.show(products)
+				},
+				show: function(list)
+				{
+					system.windows.searchBox.clear()
+					for (let index of list)
+					{
+						const product = data.products[index]
+						const li = document.createElement('li')
+						li.onclick = ()=>{system.windows.searchBox.close()}
+						//li.style.background = `hsl(${product.color},100%,15%)`
+						if (true)
+						{
+							const span = document.createElement('span')
+							span.innerHTML = `<b>${product.name}</b> &nbsp; ${product.content||product.unitValue||'X'}${['szt','kg','g','l','ml'][product.unit||product.contentUnit]}`
+							li.appendChild(span)
+						}
+						if (true)
+						{
+							const span = document.createElement('span')
+							span.className = 'description'
+							span.innerHTML = `${system.create.price(product.price)} &nbsp; (${system.create.priceContent(product)})`
+							li.appendChild(span)
+						}
+						const shop = (product.position||[])[0]||0
+						const wardrobe = (product.position||[])[1]||0
+						if (shop && wardrobe)
+						{
+							const span = document.createElement('span')
+							span.className = 'description'
+							span.innerHTML = `${data.shops[shop].name} > ${data.shops[shop].wardrobes[wardrobe].name}`
+							li.appendChild(span)
+							li.onclick = ()=>{get.wardrobes(shop,wardrobe);system.windows.searchBox.close()}
+						}
+						system.windows.searchBox.add(li)
+					}
+					system.windows.searchBox.open()
+				}
+			}
+		},
+		create:
+		{
+			price: function(value)
+			{
+				let string = Math.floor(value)
+				string += ','
+				string += ('0'+Math.round((value*100)%100)).slice(-2)
+				return string + ' zł'
+			},
+			priceContent: function(product)
+			{
+				if (product.unit)
+				{
+					return `${system.create.price(product.price)} / ${product.unitValue}${['szt','kg','g','l','ml'][product.unit]}.`
+				}
+				else
+				{
+					if (product.unitValue > 1)
+					{
+						return `${system.create.price((product.price / product.content) * product.unitValue)} / ${product.unitValue}${['szt','kg','g','l','ml'][product.contentUnit]}.`
+					}
+					return `${system.create.price((product.price / product.content) * product.unitValue)} / ${['szt','kg','g','l','ml'][product.contentUnit]}.`
+				}
+			}
+		},
+		refresh:
+		{
+			wardrobesButtonBox: function()
+			{
+				const content = document.getElementById('wardrobesButtonBox')
+				content.innerHTML = ''
+				for (let i=0 ; i<25 ; i++)
+				{
+					const button = document.createElement('button')
+					button.innerHTML = `<svg fill="${'green'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M31.594,4.881C31.175,4.474,30.64,4.489,30.282,4.5L1.955,4.504L1.762,4.499c-0.374-0.011-0.925-0.027-1.355,0.39 C0.222,5.07,0,5.396,0,5.926v20.578c0,0.552,0.447,1,1,1s1-0.448,1-1v-20h28v20c0,0.552,0.447,1,1,1s1-0.448,1-1V5.926 C32,5.388,31.779,5.061,31.594,4.881z"></path><path d="M31,24.504H1c-0.553,0-1,0.448-1,1s0.447,1,1,1h30c0.553,0,1-0.448,1-1S31.553,24.504,31,24.504z"></path><path d="M31,14.504H1c-0.553,0-1,0.448-1,1c0,0.552,0.447,1,1,1h30c0.553,0,1-0.448,1-1C32,14.952,31.553,14.504,31,14.504z"></path><path d="M31,9.504H1c-0.553,0-1,0.448-1,1s0.447,1,1,1h30c0.553,0,1-0.448,1-1S31.553,9.504,31,9.504z"></path><path d="M31,19.504H1c-0.553,0-1,0.448-1,1s0.447,1,1,1h30c0.553,0,1-0.448,1-1S31.553,19.504,31,19.504z"></path><path d="M13,4.504c-0.553,0-1,0.448-1,1v20c0,0.552,0.447,1,1,1s1-0.448,1-1v-20C14,4.952,13.553,4.504,13,4.504z"></path><path d="M7,4.504c-0.553,0-1,0.448-1,1v20c0,0.552,0.447,1,1,1s1-0.448,1-1v-20C8,4.952,7.553,4.504,7,4.504z"></path></svg>`
+					content.appendChild(button)
+				}
+			},
+		},
+		windows:{},
+	}
+	const get =
+	{
+		wardrobes: function(shop,wardrobe)
+		{
+			//
+		},
+	}
+	const events =
+	{
+		search: 0,
+	}
+	class AppWindow
+	{
+		constructor(html_id,width,height,close)
+		{
+			this.window = document.getElementById(html_id)
+			this.content = document.createElement('ul')
+			this.content.className = 'content'
+			this.window.appendChild(this.content)
+			if (close)
+			{
+				const closeButton = document.createElement('button')
+				closeButton.className = 'close'
+				closeButton.onclick = ()=>{this.close()}
+				this.window.appendChild(closeButton)
+			}
+			this.window.style.width = `${width}vh`
+			this.window.style.height = `${height}vh`
+			this.window.className = 'window hidden'
+		}
+		clear()
+		{
+			this.content.innerHTML = ""
+		}
+		add(element)
+		{
+			this.content.appendChild(element)
+		}
+		open()
+		{
+			this.window.classList.remove('hidden')
+		}
+		close()
+		{
+			this.window.classList.add('hidden')
+		}
+	}
+	const data =
+	{
+		shops:
+		[
+			{
+				name: 'Brak',
+				color: 'black',
+				wardrobes:
+				[
+					{
+						name: 'Brak',
+						color: 'black',
+						shelves: [0,0,0,0,0,0,0,0]
+					},
+				],
+			},
+			{
+				name: 'Dino',
+				color: '#39b100',
+				wardrobes:
+				[
+					{
+						name: 'Brak',
+						color: 'black',
+						shelves: [0,0,0,0,0,0,0,0]
+					},
+					{
+						name: 'Pieczywo',
+						color: '#934d00',
+						shelves: [0,1,2,3,0,0,0,0]
+					},
+				],
+			},
+		],
+		products:
+		[
+			0,
+			{
+				name: 'Chleb',
+				color: 50,
+				symbol: 2,
+				price: 5.2,
+				unitValue: 100,
+				unit: 0,
+				baskedFill: 4,
+				content: 200,
+				contentUnit: 2,
+				tags: ['pieczywo'],
+				notes: ['testowa notatka'],
+				opinions: [{autor:'0303',text:'testowa opinia'}],
+				purchaseValue: 0,
+				position: [1,1,1],
+			},
+			{
+				name: 'Ciastka',
+				color: 70,
+				symbol: 3,
+				price: 2.99,
+				unitValue: 100,
+				unit: 0,
+				baskedFill: 4,
+				content: 500,
+				contentUnit: 2,
+				tags: ['pieczywo'],
+				notes: ['testowa notatka'],
+				opinions: [{autor:'0202',text:'testowa opinia'}],
+				purchaseValue: 0,
+				position: [1,1,2],
+			},
+			{
+				name: 'Kartofle',
+				color: 120,
+				symbol: 4,
+				price: 5,
+				unitValue: 1,
+				unit: 1,
+				baskedFill: 4,
+				content: 1,
+				contentUnit: 0,
+				tags: ['pieczywo'],
+				notes: ['testowa notatka'],
+				opinions: [{autor:'0202',text:'testowa opinia'}],
+				purchaseValue: 0,
+				position: [1,1,3],
+			},
+			{
+				name: 'gruszki',
+				color: 20,
+				symbol: 5,
+				price: 5,
+				unitValue: 1,
+				unit: 0,
+				baskedFill: 4,
+				content: 1,
+				contentUnit: 0,
+				tags: ['pieczywo'],
+				notes: ['testowa notatka'],
+				opinions: [{autor:'0202',text:'testowa opinia'}],
+				purchaseValue: 0,
+				position: 0,
+			},
+		]
+	}
+</script>
+</head>
+<body onload="system.load()">
+	<main>
+		<section class="screen" data-theme="87" data-accessible="0">
+			<h1>Edytowanie Produktu</h1>
+		</section>
+		<section class="screen" data-theme="198" data-accessible="0">
+			<h1>Edytowanie Klienta</h1>
+		</section>
+		<section class="screen" data-theme="87" data-accessible="1">
+			<h1>Produkty</h1>
+		</section>
+		<section class="screen" data-theme="198" data-accessible="1">
+			<h1>Klienci</h1>
+		</section>
+		<section class="screen" data-theme="271" data-accessible="1">
+			<h1>Zamówienia</h1>
+		</section>
+		<section class="screen" data-theme="55" data-accessible="1">
+			<h1>
+				<input type="text" name="search" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+			</h1>
+			<div id="orderStatistics"></div>
+			<div id="wardrobesButtonBox" class="roll"></div>
+			<div id="wardrobesBox" class="roll"></div>
+		</section>
+	</main>
+	<div id="searchBox"></div>
+	<footer></footer>
+</body>
+</html>
