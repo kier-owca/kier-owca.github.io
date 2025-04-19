@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>AgroTetris</title>
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: rgba(0,0,0,0);
+	}
+	body, html
+	{
+		background: black;
+		color: white;
+		font-size: 2.2vh;
+		font-family: Arial, Helvetica, sans-serif;
+	}
+	main
+	{
+		position: relative;
+		min-height: 80vh;
+		left: 50%;
+		width: 50vh;
+		margin-left: -25vh;
+		margin-top: 8vh;
+		margin-bottom: 25vh;
+	}
+	nav, footer
+	{
+		position: fixed;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: center;
+		width: 100%;
+		height: 7vh;
+		background: rgba(0,0,0,0.7);
+	}
+	nav
+	{
+		top: 0;
+		border-bottom: solid 0.4vh #6B6B6B;
+	}
+	footer
+	{
+		bottom: 0;
+		border-top: solid 0.4vh #6B6B6B;
+	}
+	.window
+	{
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		max-width: 50vh;
+		max-height: 90vh;
+		overflow-x: hidden;
+		overflow-y: scroll;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		border: solid 0.4vh #393939;
+		background: #2F2F2F;
+		box-shadow: 0 0 1.5vh 1vh black;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		align-content: center;
+		padding: 1vh;
+		padding-top: 1.5vh;
+	}
+	.window.hidden
+	{
+		display: none;
+	}
+	.window::-webkit-scrollbar
+	{
+		display: none;
+	}
+	.window .content
+	{
+		width: 100%;
+		text-align: center;
+	}
+	.window button
+	{
+		height: 6vh;
+		min-width: 7vh;
+		padding: 0.5vh;
+		padding-left: 5vh;
+		padding-right: 5vh;
+		border: none;
+		border-radius: 3vh;
+		background: black;
+		color: white;
+		font-size: 2.4vh;
+	}
+	#error
+	{
+		background: #2f0000;
+		width: 45vh;
+		height: 27vh;
+		border-color: #750700;
+	}
+	#placeName
+	{
+		width: 40vh;
+		height: 5vh;
+	}
+	#placeName section
+	{
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		font-size: 2.5vh;
+		font-weight: bold;
+	}
+	footer button
+	{
+		background: #6B6B6B;
+		border: none;
+		border-radius: 2.5vh;
+		padding: 0.5vh;
+		padding-left: 1vh;
+		padding-right: 1vh;
+		min-width: 6vh;
+		height: 5vh;
+		font-size: 2.5vh;
+		font-weight: bold;
+		color: black;
+	}
+	#rowPlace
+	{
+		position: relative;
+		width: 100%;
+		margin-bottom: 5vh;
+	}
+	#rowPlace section
+	{
+		position: relative;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: center;
+		width: 100%;
+		height: auto;
+		background: rgba(0,0,0,0);
+	}
+	.row
+	{
+		position: relative;
+		width: 100%;
+	}
+	.row section
+	{
+		position: relative;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: space-between;
+		align-items: center;
+		align-content: center;
+		width: 100%;
+		height: auto;
+		background: rgba(0,0,0,0);
+	}
+	.box
+	{
+		position: relative;
+		box-sizing: content-box;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		gap: 0.7vh;
+		padding: 0.7vh;
+		border: dashed 0.5vh #6B6B6B;
+		min-height: 9vh;
+		min-width: 6vh;
+		max-width: 19.5vh;
+		margin-top: 1vh;
+		margin-bottom: 1vh;
+	}
+	.box.right
+	{
+		flex-direction: row-reverse;
+	}
+	.ghost
+	{
+		opacity: 0;
+	}
+	.ghost *
+	{
+		display: none;
+	}
+	.chest
+	{
+		position: relative;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		height: 9vh;
+		width: 6vh;
+		font-size: 2.2vh;
+		border-top: solid 1vh rgba(0,0,0,0.5);
+		border-left: solid 1vh rgba(55,55,55,0.5);
+		border-right: solid 1vh rgba(200,200,200,0.5);
+		border-bottom: solid 1vh rgba(255,255,255,0.5);
+		background: green;
+		color: black;
+		text-transform: uppercase;
+	}
+	#car .chest
+	{
+		height: 10.5vh;
+		width: 7vh;
+		font-size: 2.5vh;
+	}
+	#hand .chest
+	{
+		height: 12vh;
+		width: 8vh;
+		font-size: 2.8vh;
+	}
+	#car
+	{
+		position: relative;
+		width: 42vh;
+		height: 105vh;
+		background: #1B1B1B;
+		left: 50%;
+		margin-left: -21vh;
+		margin-top: 1vh;
+	}
+	#car section
+	{
+		position: relative;
+		float: left;
+		display: flex;
+		flex-direction: column-reverse;
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		align-items: center;
+		align-content: center;
+		width: 7vh;
+		height: 100%;
+		box-shadow: inset 0 0 0 0.4vh #1B1B1B, inset 0 0 0 0.9vh #111111;
+	}
+	#hand
+	{
+		position: fixed;
+		box-sizing: content-box;
+		bottom: 9vh;
+		left: 1vh;
+		padding: 1vh;
+		border: dashed 0.5vh #6B6B6B;
+		height: 12vh;
+		width: 8vh;
+		background: rgba(0,0,0,0.6);
+		box-shadow: 0 0 0 1vh rgba(0,0,0,0.6);
+	}
+	.hidden
+	{
+		display: none !important;
+	}
+</style>
+<script>
+	const system =
+	{
+		load()
+		{
+			situation.hand = 0
+			situation.places = [{publisher:[]}]
+			situation.commodity = []
+			document.getElementsByTagName('footer')[0].getElementsByTagName('button')[0].onclick = next
+			const divWin = document.getElementsByClassName('window')
+			for (let div of divWin)
+			{
+				div.getElementsByTagName('button')[0].onclick = system.close
+			}
+			el.main = document.getElementsByTagName('main')[0]
+			el.hand = document.getElementById('hand')
+			el.placeName = document.getElementById('placeName')
+			el.places = []
+			if (true)
+			{
+				el.rowPlace = document.createElement('div')
+				el.rowPlace.id = 'rowPlace'
+				const section = document.createElement('section')
+				const box = document.createElement('div')
+				box.className = 'box'
+				el.places[0] = [box,0]
+				box.onclick = click.publisher
+				section.appendChild(box)
+				el.rowPlace.appendChild(section)
+				el.main.appendChild(el.rowPlace)
+			}
+			const row = document.createElement('div')
+			row.className = 'row'
+			el.main.appendChild(row)
+			el.cubby = [[0]]
+			situation.cubby = [[0]]
+			for (let s=0 ; s<2 ; s++)
+			{
+				const section = document.createElement('section')
+				for (let b=0 ; b<2 ; b++)
+				{
+					const nr = 1+(s*2)+b
+					const box = document.createElement('div')
+					box.className = `box ${['left','right'][b]}`
+					box.dataset.place = `cubby`
+					box.dataset.type = `0`
+					box.dataset.nr = `${nr}`
+					el.cubby[0][nr] = box
+					situation.cubby[0][nr] = []
+					box.onclick = click.box
+					section.appendChild(box)
+				}
+				row.appendChild(section)
+			}
+			situation.car = [[0]]
+			el.car = [[0]]
+			if (true)
+			{
+				const car = document.createElement('div')
+				car.id = 'car'
+				for (let s=0 ; s<6 ; s++)
+				{
+					const nr = s+1
+					const section = document.createElement('section')
+					section.dataset.place = `car`
+					section.dataset.type = `0`
+					section.dataset.nr = `${nr}`
+					el.car[0][nr] = section
+					situation.car[0][nr] = []
+					section.onclick = click.box
+					car.appendChild(section)
+				}
+				row.appendChild(car)
+			}
+			//
+			system.newRoutes(0)
+		},
+		newRoutes: function(lvl,difficulty)
+		{
+			difficulty = difficulty||0
+			const route = system.routes[lvl]
+			situation.dam = route.dam
+			situation.lvl = lvl
+			situation.place = 0
+			situation.hand = 0
+			situation.commodity = []
+			situation.places = []
+			situation.namePlaces = []
+			situation.places[0] = [[],[]]
+			situation.namePlaces[0] = 'Załadunek'
+			for (const shop of route.shops)
+			{
+				for (let i=0 ; i<3 ; i++)
+				{
+					const value = Number(shop.commodity[i][difficulty])
+					if (value > 0)
+					{
+						const chest = {content: true}
+						chest.type = ['chicken','meat','smoke'][i]
+						chest.value = value
+						chest.shop = shop.name
+						chest.short = shop.short
+						situation.commodity.push(chest)
+					}
+				}
+				const place = [[],[]]
+				for (let i=0 ; i<3 ; i++)
+				{
+					const value = Number(shop.empty[i][difficulty])
+					if (value > 0)
+					{
+						const chest = {content: false}
+						chest.type = ['chicken','meat','smoke'][i]
+						chest.value = value
+						place[0].push(chest)
+					}
+				}
+				situation.places.push(place)
+				situation.namePlaces.push(shop.name)
+			}
+			click.publisher()
+			system.refresh()
+		},
+		refresh: function()
+		{
+			for (let i=1 ; i<situation.cubby[0].length ; i++)
+			{
+				refreshBox(situation.cubby[0][i],el.cubby[0][i])
+			}
+			for (let i=1 ; i<situation.car[0].length ; i++)
+			{
+				refreshBox(situation.car[0][i],el.car[0][i])
+			}
+			el.placeName.innerHTML = ''
+			for (let i=0 ; i<situation.namePlaces.length ; i++)
+			{
+				const section = document.createElement('section')
+				section.innerHTML = situation.namePlaces[i]
+				if (i != situation.place)
+				{
+					section.classList.add('hidden')
+				}
+				el.placeName.appendChild(section)
+			}
+			el.rowPlace.innerHTML = ''
+			el.places = []
+			for (let i=0 ; i<situation.places.length ; i++)
+			{
+				const section = document.createElement('section')
+				if (i === 0)
+				{
+					const box = document.createElement('div')
+					box.className = 'box'
+					el.places[0] = [box,0]
+					box.onclick = click.publisher
+					section.appendChild(box)
+					refreshBox(situation.places[0][0],box)
+				}
+				else
+				{
+					el.places[i] = []
+					for (let j=0 ; j<2 ; j++)
+					{
+						const box = document.createElement('div')
+						box.className = 'box'
+						el.places[i][j] = box
+						box.dataset.place = `places`
+						box.dataset.type = `${i}`
+						box.dataset.nr = `${j}`
+						box.onclick = click.box
+						section.appendChild(box)
+						refreshBox(situation.places[i][j],box)
+					}
+				}
+				if (i != situation.place)
+				{
+					section.classList.add('hidden')
+				}
+				el.rowPlace.appendChild(section)
+			}
+		},
+		routes:
+		[
+			{
+				name: "Góry",
+				points: 7,
+				dam: 2,
+				shops:
+				[
+					{
+						name: "Czernina",
+						short: "Czer",
+						commodity: [[5,10],[8,15],[8,9]],
+						empty: [[5,10],[7,15],[8,9]],
+					},
+					{
+						name: "Witaszyce",
+						short: "Wit",
+						commodity: [[4,10],[7,15],[8,9]],
+						empty: [[2,10],[9,15],[8,9]],
+					},
+					{
+						name: "Góra",
+						short: "Gr",
+						commodity: [[5,10],[7,15],[8,9]],
+						empty: [[5,10],[7,15],[8,9]],
+					},
+					{
+						name: "Niechlów",
+						short: "Nch",
+						commodity: [[7,10],[4,15],[8,9]],
+						empty: [[6,10],[7,15],[10,9]],
+					},
+					{
+						name: "Szlichtyngowa",
+						short: "szl",
+						commodity: [[5,10],[7,15],[8,9]],
+						empty: [[5,10],[7,15],[8,9]],
+					},
+					{
+						name: "Jędrzychowice",
+						short: "Jed",
+						commodity: [[4,10],[6,15],[9,9]],
+						empty: [[7,10],[2,15],[5,9]],
+					},
+				]
+			}
+		],
+		colors:
+		{
+			chicken: 0,
+			meat: 50,
+			smoke: 220,
+			dam: 80,
+		},
+		close: function(event)
+		{
+			const parent = event.target.parentElement;
+			parent.classList.add('hidden');
+		}
+	}
+	const situation = {};
+	const el = {};
+	const click =
+	{
+		publisher: function()
+		{
+			const list = situation.places[0][0]
+			if (!hand.value())
+			{
+				if (list.length > 0)
+				{
+					hand.add(list.pop())
+				}
+				if (situation.commodity.length > 0)
+				{
+					const nr = Math.floor(Math.random()*situation.commodity.length)
+					list.push(situation.commodity.splice(nr,1)[0])
+				}
+				else if (situation.dam > 0)
+				{
+					list.push({content:false,type:'dam',value:10})
+					situation.dam--
+				}
+			}
+			refreshBox(list,el.places[0][0])
+		},
+		box: function(event)
+		{
+			const chestIndex = (Number(event.target.dataset.index)||0)
+			const t = event.currentTarget
+			const element = el[t.dataset.place][Number(t.dataset.type)][Number(t.dataset.nr)]
+			const list = situation[t.dataset.place][Number(t.dataset.type)][Number(t.dataset.nr)]
+			const maxValue = {cubby:3,car:10,places:9}[t.dataset.place]
+			if (hand.value() && chestIndex && t.dataset.place==='car')
+			{
+				const chest = list[chestIndex-1]
+				const hand = hand.value()
+				if (!chest.content && chest.type === hand.type)
+				{
+					console.log(chest)
+				}
+			}
+			if (list.length < maxValue)
+			{
+				if (hand.value())
+				{
+					list.push(hand.grab())
+					refreshBox(list,element)
+				}
+				else
+				{
+					hand.add(list.pop())
+					refreshBox(list,element)
+				}
+			}
+			else
+			{
+				if (!hand.value())
+				{
+					hand.add(list.pop())
+					refreshBox(list,element)
+				}
+			}
+		},
+	}
+	function next()
+	{
+		if (hand.value())
+		{
+			return info('Żeby przejść dalej musisz upuścić trzymany klocek.')
+		}
+		for (let i=1 ; i<situation.cubby[0].length ; i++)
+		{
+			if (situation.cubby[0][i].length > 0)
+			{
+				return info('Nie możesz przejść dalej jeżeli masz klocki w schowku.')
+			}
+		}
+		for (let r=1 ; r<situation.car[0].length ; r++)
+		{
+			for (let i=0 ; i<situation.car[0][r].length ; i++)
+			{
+				const chest = ((situation.car[0][r]||[])[i]||{})
+				if ((chest.value||0) > 0 && chest.type != 'dam')
+				{
+					if (i > 0)
+					{
+						const neighbor = ((situation.car[0][r]||[])[(i-1)]||{})
+						if ((neighbor.value||0)+4 < chest.value||0)
+						{
+							if (chest.short)
+							{
+								return info(`Słupek klocków (${chest.short} ${chest.value}) na samochodzie nie ma podparcia z przodu.`)
+							}
+							else
+							{
+								return info(`Słupek klocków na samochodzie nie ma podparcia z przodu.`)
+							}
+						}
+					}
+					if (r > 1)
+					{
+						const neighbor = ((situation.car[0][r-1]||[])[i]||{})
+						if ((neighbor.value||0)+3 < chest.value||0)
+						{
+							if (chest.short)
+							{
+								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${chest.short} ${chest.value})`)
+							}
+							else
+							{
+								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.`)
+							}
+						}
+					}
+					if (r < 6)
+					{
+						const neighbor = ((situation.car[0][r+1]||[])[i]||{})
+						if ((neighbor.value||0)+3 < chest.value||0)
+						{
+							if (chest.short)
+							{
+								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${chest.short} ${chest.value})`)
+							}
+							else
+							{
+								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.`)
+							}
+						}
+					}
+				}
+			}
+		}
+		if (situation.place === 0)
+		{
+			if (situation.commodity.length > 0)
+			{
+				return info('Żeby zakończyć załadunek musisz załadować wszystkie klocki.')
+			}
+		}
+		else
+		{
+			for (let r=0 ; r<2 ; r++)
+			{
+				const boxes = situation.places[situation.place][r]
+				for (let i=0 ; i<boxes.length ; i++)
+				{
+					if (!boxes[i].content)
+					{
+						return info('Żeby przejść dalej zabierz puste klocki.')
+					}
+					if (boxes[i].shop != situation.namePlaces[situation.place])
+					{
+						return info('Zostawiłeś niewłaściwe klocki!')
+					}
+				}
+			}
+			for (let r=1 ; r<situation.car[0].length ; r++)
+			{
+				for (let i=0 ; i<situation.car[0][r].length ; i++)
+				{
+					const chest = ((situation.car[0][r]||[])[i]||{})
+					if (chest.shop === situation.namePlaces[situation.place])
+					{
+						return info('Nie zostawiłeś całego towaru!')
+					}
+				}
+			}
+		}
+		if (situation.places[situation.place+1])
+		{
+			situation.place++
+			for (let i=0 ; i<el.placeName.children.length ; i++)
+			{
+				const element = el.placeName.children[i]
+				if (i === situation.place)
+				{
+					element.classList.remove('hidden')
+				}
+				else
+				{
+					element.classList.add('hidden')
+				}
+			}
+			for (let i=0 ; i<el.rowPlace.children.length ; i++)
+			{
+				const element = el.rowPlace.children[i]
+				if (i === situation.place)
+				{
+					element.classList.remove('hidden')
+				}
+				else
+				{
+					element.classList.add('hidden')
+				}
+			}
+		}
+		else
+		{
+			alert('koniec')
+		}
+	}
+	const hand =
+	{
+		value: function()
+		{
+			const giveBack = JSON.parse(JSON.stringify(situation.hand))
+			return giveBack
+		},
+		grab: function()
+		{
+			const giveBack = JSON.parse(JSON.stringify(situation.hand))
+			situation.hand = 0
+			el.hand.innerHTML = ''
+			return giveBack
+		},
+		add: function(chestData)
+		{
+			if (!chestData){return}
+			const giveBack = JSON.parse(JSON.stringify(situation.hand))
+			if (giveBack)
+			{
+				return false
+			}
+			situation.hand = JSON.parse(JSON.stringify(chestData))
+			el.hand.innerHTML = ''
+			if (situation.hand)
+			{
+				const chest = createChest(chestData)
+				el.hand.appendChild(chest)
+			}
+			return true
+		},
+		reset: function()
+		{
+			situation.hand.dataset.chest = '0'
+			el.hand.innerHTML = ''
+		}
+	}
+	function createChest(data)
+	{
+		const chest = document.createElement('div')
+		chest.className = 'chest'
+		if (data.type === "dam")
+		{
+			chest.style.background = `#1b2f00`
+		}
+		else if (data.content)
+		{
+			chest.style.background = `hsl(${system.colors[data.type]},100%,55%)`
+			chest.innerHTML = `<span>${data.short}</span><span>${data.value}</span>`
+		}
+		else
+		{
+			chest.style.background = `hsl(${system.colors[data.type]},80%,70%)`
+			chest.innerHTML = `<span>${data.value}</span>`
+		}
+		return chest
+	}
+	function refreshBox(list,element)
+	{
+		if (!Array.isArray(list))
+		{
+			debugger
+		}
+		element.innerHTML = ''
+		for (let i=0 ; i<list.length ; i++)
+		{
+			const chest = createChest(list[i])
+			chest.dataset.index = `${i+1}`
+			element.appendChild(chest)
+		}
+	}
+	function info(text)
+	{
+		const frame = document.getElementById('error')
+		frame.getElementsByClassName('content')[0].innerHTML = text
+		frame.classList.remove('hidden')
+	}
+</script>
+</head>
+<body onload="system.load()">
+	<main></main>
+	<div id="hand"></div>
+	<nav></nav>
+	<footer>
+		<div id="placeName">
+		</div>
+		<button>Dalej</button>
+	</footer>
+	<div class="window hidden" id="error">
+		<div class="content">test</div>
+		<button>OK</button>
+	</div>
+</body>
+</html>
