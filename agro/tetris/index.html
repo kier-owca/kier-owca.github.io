@@ -46,7 +46,7 @@
 		top: 0;
 		border-bottom: solid 0.4vh #6B6B6B;
 	}
-	#hamburger, #register
+	#hamburger, #showPlan
 	{
 		width: 5vh;
 		height: 5vh;
@@ -86,10 +86,11 @@
 		box-shadow: 0 0 1.5vh 1vh black;
 		display: flex;
 		flex-direction: column;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		justify-content: space-between;
 		align-items: center;
 		align-content: center;
+		gap: 2vh;
 		padding: 1vh;
 		padding-top: 1.5vh;
 	}
@@ -131,7 +132,7 @@
 		width: 47vh;
 		height: 60vh;
 		border: solid 0.4vh #4D4D4D;
-		background: #111111;
+		background: #1b1b1b;
 		box-shadow: 0 0 5vh 10vh black;
 		display: flex;
 		flex-direction: column;
@@ -383,24 +384,74 @@
 	}
 	#routes .route
 	{
-		width: 10vh;
-		height: 10vh;
+		position: relative;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		flex-wrap: nowrap;
+		justify-content: center;
+		align-items: center;
+		align-content: flex-start;
+		width: 12.5vh;
+		height: 12.5vh;
 		margin-top: 1vh;
 		margin-bottom: 1vh;
-		background: gold;
+		background: #f7cf00;
+		border: solid 0.5vh black;
+	}
+	#routes .route svg
+	{
+		width: 100%;
+	}
+	#routes .route span
+	{
+		width: 100%;
+		height: auto;
+		margin-bottom: 0.5vh;
+		font-size: 1.7vh;
+		color: black;
+	}
+	#plan
+	{
+		width: 47vh;
+		height: 50vh;
+		background: white;
+		border-color: black;
+		color: black;
+	}
+	#plan .content
+	{
+		display: flex;
+		justify-content: center;
+		font-size: 2.1vh;
+	}
+	#plan table
+	{
+		border-collapse: collapse;
+	}
+	#plan td, th
+	{
+		border: 0.3vh solid black;
+		padding: 0.5vh
 	}
 </style>
 <script>
+	const unlockedAll = true;
 	const system =
 	{
 		load()
 		{
+			if (true)
+			{
+				showRoutes()
+			}
 			refreshStatistics()
 			situation.click = 0
 			situation.hand = 0
 			situation.places = [{publisher:[]}]
 			situation.commodity = []
 			document.getElementsByTagName('footer')[0].getElementsByTagName('button')[0].onclick = next
+			document.getElementById('showPlan').onclick = showPlan
 			const divWin = document.getElementsByClassName('window')
 			for (let div of divWin)
 			{
@@ -466,54 +517,77 @@
 				row.appendChild(car)
 			}
 		},
-		newRoutes: function(lvl,difficulty)
+		newRoutes: function(lvl)
 		{
 			document.getElementById('routes').classList.add('hidden')
-			difficulty = difficulty||0
-			const route = system.routes[lvl]
+			const route = system.routes[lvl[0]][lvl[1]]
 			situation.time = [[]]
 			situation.moves = [0]
 			situation.points = 0
 			situation.dam = route.dam
-			situation.lvl = lvl
+			situation.required = route.required
+			situation.lvl = [lvl[0],lvl[1]]
+			situation.lvlName = route.name
 			situation.place = 0
 			situation.hand = 0
 			situation.commodity = []
 			situation.places = []
 			situation.namePlaces = []
 			situation.places[0] = [[],[]]
-			situation.namePlaces[0] = 'Załadunek'
+			situation.namePlaces[0] = {name: 'Załadunek', short:'ZŁD', chicken:0, meat:0, smoke:0}
+			let column = 0
 			for (const shop of route.shops)
 			{
+				const placeNameRow = {name:shop.name, short:shop.short.toUpperCase(), chicken:0, meat:0, smoke:0}
 				situation.time.push([])
 				situation.moves.push(0)
 				for (let i=0 ; i<3 ; i++)
 				{
-					const value = Number(shop.commodity[i][difficulty])
-					if (value > 0)
+					let values = shop.commodity[i]
+					if (!Array.isArray(values))
 					{
-						const chest = {content: true}
-						chest.type = ['chicken','meat','smoke'][i]
-						chest.value = value
-						chest.shop = shop.name
-						chest.short = shop.short
-						situation.commodity.push(chest)
+						values = [values]
+					}
+					for (let j=0 ; j<values.length ; j++)
+					{
+						if (values[j] > 0)
+						{
+							column ++
+							placeNameRow[['chicken','meat','smoke'][i]] += values[j]
+							const chest = {content: true}
+							chest.type = ['chicken','meat','smoke'][i]
+							chest.value = values[j]
+							chest.shop = shop.name
+							chest.short = shop.short
+							situation.commodity.push(chest)
+						}
 					}
 				}
 				const place = [[],[]]
 				for (let i=0 ; i<3 ; i++)
 				{
-					const value = Number(shop.empty[i][difficulty])
-					if (value > 0)
+					let values = shop.empty[i]
+					if (!Array.isArray(values))
 					{
-						const chest = {content: false}
-						chest.type = ['chicken','meat','smoke'][i]
-						chest.value = value
-						place[0].push(chest)
+						values = [values]
+					}
+					for (let j=0 ; j<values.length ; j++)
+					{
+						if (values[j] > 0)
+						{
+							const chest = {content: false}
+							chest.type = ['chicken','meat','smoke'][i]
+							chest.value = values[j]
+							place[0].push(chest)
+						}
 					}
 				}
 				situation.places.push(place)
-				situation.namePlaces.push(shop.name)
+				situation.namePlaces.push(placeNameRow)
+			}
+			if (column > 60)
+			{
+				debugger
 			}
 			click.publisher()
 			system.refresh()
@@ -533,7 +607,7 @@
 			for (let i=0 ; i<situation.namePlaces.length ; i++)
 			{
 				const section = document.createElement('section')
-				section.innerHTML = situation.namePlaces[i]
+				section.innerHTML = situation.namePlaces[i].name
 				if (i != situation.place)
 				{
 					section.classList.add('hidden')
@@ -579,50 +653,252 @@
 		},
 		routes:
 		[
-			{
-				name: "Góry",
-				points: 7,
-				dam: 2,
-				shops:
-				[
-					{
-						name: "Czernina",
-						short: "Czer",
-						commodity: [[5,10],[8,15],[8,9]],
-						empty: [[5,10],[7,15],[8,9]],
-					},
-					{
-						name: "Witaszyce",
-						short: "Wit",
-						commodity: [[4,10],[7,15],[8,9]],
-						empty: [[2,10],[9,15],[8,9]],
-					},
-					{
-						name: "Góra",
-						short: "Gr",
-						commodity: [[5,10],[7,15],[8,9]],
-						empty: [[5,10],[7,15],[8,9]],
-					},
-					{
-						name: "Niechlów",
-						short: "Nch",
-						commodity: [[7,10],[4,15],[8,9]],
-						empty: [[6,10],[7,15],[10,9]],
-					},
-					{
-						name: "Szlichtyngowa",
-						short: "szl",
-						commodity: [[5,10],[7,15],[8,9]],
-						empty: [[5,10],[7,15],[8,9]],
-					},
-					{
-						name: "Jędrzychowice",
-						short: "Jed",
-						commodity: [[4,10],[6,15],[9,9]],
-						empty: [[7,10],[2,15],[5,9]],
-					},
-				]
-			}
+			[
+				{
+					name: "Góry",
+					required: 7,
+					dam: 2,
+					shops:
+					[
+						{
+							name: "Kłoda",
+							short: "KŁD",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Rydzyna",
+							short: "RDZ",
+							commodity: [10,10,10],
+							empty: [10,10,10],
+						},
+						{
+							name: "Bojanowo",
+							short: "BJN",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Golina W",
+							short: "GOL",
+							commodity: [10,10,10],
+							empty: [10,10,10],
+						},
+						{
+							name: "Czernina",
+							short: "CZR",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Witaszyce",
+							short: "WIT",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Góra 4",
+							short: "GR4",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Góra 1",
+							short: "GR1",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Góra 3",
+							short: "GR3",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Góra 5",
+							short: "GR5",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Góra 2",
+							short: "GR2",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+						{
+							name: "Niechlów",
+							short: "NCH",
+							commodity: [10,10,10],
+							empty: [5,5,5],
+						},
+					]
+				}
+			],
+			[
+				{
+					name: "Góry",
+					required: 7,
+					dam: 2,
+					shops:
+					[
+						{
+							name: "Kłoda",
+							short: "KŁD",
+							commodity: [4,6,4],
+							empty: [5,7,4],
+						},
+						{
+							name: "Rydzyna",
+							short: "RDZ",
+							commodity: [5,6,4],
+							empty: [7,7,3],
+						},
+						{
+							name: "Bojanowo",
+							short: "BJN",
+							commodity: [7,[6,8],5],
+							empty: [8,10,5],
+						},
+						{
+							name: "Golina W",
+							short: "GOL",
+							commodity: [5,7,4],
+							empty: [7,8,3],
+						},
+						{
+							name: "Czernina",
+							short: "CZR",
+							commodity: [5,7,4],
+							empty: [4,8,5],
+						},
+						{
+							name: "Witaszyce",
+							short: "WIT",
+							commodity: [5,6,4],
+							empty: [7,7,3],
+						},
+						{
+							name: "Góra 4",
+							short: "GR4",
+							commodity: [5,7,4],
+							empty: [7,8,3],
+						},
+						{
+							name: "Góra 1",
+							short: "GR1",
+							commodity: [7,[5,7],6],
+							empty: [8,[6,6],5],
+						},
+						{
+							name: "Góra 3",
+							short: "GR3",
+							commodity: [5,6,4],
+							empty: [7,7,3],
+						},
+						{
+							name: "Góra 5",
+							short: "GR5",
+							commodity: [6,7,4],
+							empty: [3,5,3],
+						},
+						{
+							name: "Góra 2",
+							short: "GR2",
+							commodity: [5,6,3],
+							empty: [7,8,4],
+						},
+						{
+							name: "Niechlów",
+							short: "NCH",
+							commodity: [5,7,4],
+							empty: [7,9,3],
+						},
+					]
+				}
+			],
+			[
+				{
+					name: "Poniec",
+					required: 7,
+					dam: 2,
+					shops:
+					[
+						{
+							name: "Poniec 2",
+							short: "PN2",
+							commodity: [5,[6,5],4],
+							empty: [[6,7],[7,7],5],
+						},
+						{
+							name: "Poniec 1",
+							short: "PN1",
+							commodity: [4,6,4],
+							empty: [5,7,4],
+						},
+						{
+							name: "Pudliszki",
+							short: "PDL",
+							commodity: [7,7,4],
+							empty: [7,9,4],
+						},
+						{
+							name: "Krobia 1",
+							short: "KR1",
+							commodity: [[5,6],[6,5],7],
+							empty: [[7,7],[7,7],9],
+						},
+						{
+							name: "Krobia 2",
+							short: "KR2",
+							commodity: [[5,6],[7,5],8],
+							empty: [[7,6],[5,7],8],
+						},
+						{
+							name: "Pępowo 2",
+							short: "PP2",
+							commodity: [7,7,4],
+							empty: [7,9,4],
+						},
+						{
+							name: "Pępowo 1",
+							short: "PP1",
+							commodity: [[5,6],[6,5],6],
+							empty: [[7,7],[5,7],9],
+						},
+						{
+							name: "Skoraszewice",
+							short: "SKR",
+							commodity: [4,6,2],
+							empty: [3,5,4],
+						},
+						{
+							name: "Niepart",
+							short: "NPR",
+							commodity: [7,7,4],
+							empty: [7,9,4],
+						},
+						{
+							name: "Konary",
+							short: "KNR",
+							commodity: [4,6,4],
+							empty: [5,7,4],
+						},
+						{
+							name: "Miejska Górka",
+							short: "MGR",
+							commodity: [[5,7],[7,6],8],
+							empty: [[7,6],[7,7],8],
+						},
+						{
+							name: "Sarnowa",
+							short: "SAR",
+							commodity: [4,6,4],
+							empty: [5,7,4],
+						},
+					]
+				}
+			]
 		],
 		colors:
 		{
@@ -637,6 +913,7 @@
 			parent.classList.add('hidden');
 		}
 	}
+	const results = [[{unlocked:true,data:[]}],[],[]]
 	const situation = {};
 	const el = {};
 	const click =
@@ -690,13 +967,13 @@
 				{
 					if (hand.disconnect(list,chestIndex-1,element))
 					{
-						addMoves(1)
+						(situation.moves||[])[situation.place] += 1
 						return
 					}
 				}
 				else if (hand.connect(list,chestIndex-1,element))
 				{
-					addMoves(2)
+					(situation.moves||[])[situation.place] += 2
 					return
 				}
 			}
@@ -706,11 +983,11 @@
 				{
 					if (hand.value().content)
 					{
-						addMoves(4)
+						(situation.moves||[])[situation.place] += 4
 					}
 					else
 					{
-						addMoves(3)
+						(situation.moves||[])[situation.place] += 3
 					}
 					list.push(hand.grab())
 					refreshBox(list,element)
@@ -868,7 +1145,7 @@
 		else
 		{
 			situation.time[situation.place][1] = Date.now()
-			alert('koniec')
+			showEnd()
 		}
 	}
 	const hand =
@@ -1032,9 +1309,81 @@
 		document.getElementById('statistics').innerHTML = `Czas: ${time||0}s. &nbsp; Ruchy: ${moves||0}`
 		setTimeout(refreshStatistics,1000)
 	}
-	function addMoves(value)
+	function showRoutes()
 	{
-		(situation.moves||[])[situation.place] += value
+		const routes = document.getElementById('routes')
+		const content = routes.getElementsByClassName('content')[0]
+		routes.classList.remove('hidden')
+		content.innerHTML = ''
+		for (let i=0 ; i<system.routes.length ; i++)
+		{
+			const section = document.createElement('section')
+			for (let j=0 ; j<system.routes[i].length ; j++)
+			{
+				const name = system.routes[i][j].name
+				const unlocked = ((results[i]||[])[j]||{}).unlocked
+				const route = document.createElement('div')
+				route.className = 'route'
+				if (unlocked || j===0 || unlockedAll)
+				{
+					const span = document.createElement('span')
+					span.innerHTML = name
+					route.appendChild(span)
+					route.onclick = ()=>{system.newRoutes([i,j])}
+				}
+				else
+				{
+					route.innerHTML = `<svg viewBox="0 0 16 16"><path d="M8 1C3 1 3 7 3 7H2v8h12V7h-1s0-6-5-6zm0 2c3 0 3 4 3 4H5s0-4 3-4z" style="fill:black; stroke:none; stroke-width:4"></path>
+					</svg>`
+				}
+				section.appendChild(route)
+			}
+			content.appendChild(section)
+		}
+	}
+	function showPlan()
+	{
+		if (!document.getElementById('plan').classList.contains('hidden'))
+		{
+			document.getElementById('plan').classList.add('hidden')
+		}
+		else
+		{
+			const content = document.getElementById('plan').getElementsByClassName('content')[0]
+			content.innerHTML = ''
+			const data = situation.namePlaces
+			if (!data){return}
+			const table = document.createElement('table')
+			if (true)
+			{
+				const tr = document.createElement('tr')
+				for (let j=0 ; j<5 ; j++)
+				{
+					const th = document.createElement('th')
+					th.innerHTML = ['','-- Sklep --','- D -','- M -','- W -','- X -'][j]
+					tr.appendChild(th)
+				}
+				table.appendChild(tr)
+			}
+			for (let i=1 ; i<data.length ; i++)
+			{
+				const tr = document.createElement('tr')
+				for (let j=0 ; j<5 ; j++)
+				{
+					const td = document.createElement('td')
+					td.innerHTML = data[i][['short','name','chicken','meat','smoke','short'][j]]
+					tr.appendChild(td)
+				}
+				table.appendChild(tr)
+			}
+			content.appendChild(table)
+			document.getElementById('plan').classList.remove('hidden')
+		}
+	}
+	function showEnd()
+	{
+		debugger
+		location.reload()
 	}
 </script>
 </head>
@@ -1048,7 +1397,7 @@
 			<polygon fill="white" points="0,80 0,100 100,100 100,80"></polygon>
 		</svg>
 		<div id="statistics"></div>
-		<svg id="register" viewBox="0 0 22 22" stroke="white" stroke-width="2">
+		<svg id="showPlan" viewBox="0 0 22 22" stroke="white" stroke-width="2">
 			<rect height="20" width="20" y="1" x="1"></rect>
 			<line x1="4" y1="6" x2="18" y2="6" />
 			<line x1="4" y1="11" x2="18" y2="11" />
@@ -1064,29 +1413,17 @@
 		<div class="content"></div>
 		<button>OK</button>
 	</div>
+	<div class="window hidden" id="plan">
+		<div class="content"></div>
+		<button>OK</button>
+	</div>
 	<div class="window hidden" id="curtain">
 		<div class="content">Kliknij guzik gdy będziesz gotowy.</div>
-		<button>Zaczynam</button>
+		<button>Gotowy</button>
 	</div>
-	<div class="window" id="routes">
+	<div class="window hidden" id="routes">
 		<span>Wybierz trasę</span>
-		<div class="content">
-			<section>
-				<div class="route" onclick="system.newRoutes(0)"></div>
-				<div class="route"></div>
-				<div class="route"></div>
-			</section>
-			<section>
-				<div class="route"></div>
-				<div class="route"></div>
-				<div class="route"></div>
-			</section>
-			<section>
-				<div class="route"></div>
-				<div class="route"></div>
-				<div class="route"></div>
-			</section>
-		</div>
+		<div class="content"></div>
 	</div>
 </body>
 </html>
