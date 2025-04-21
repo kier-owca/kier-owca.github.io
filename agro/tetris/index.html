@@ -123,6 +123,13 @@
 		height: 27vh;
 		border-color: #750700;
 	}
+	#tutorial
+	{
+		background: #0761b1;
+		width: 45vh;
+		height: 27vh;
+		border-color: #07256b;
+	}
 	#curtain
 	{
 		position: fixed;
@@ -368,15 +375,15 @@
 		flex-direction: row;
 		flex-wrap: wrap;
 		justify-content: center;
-		align-items: center;
-		align-content: center;
+		align-items: flex-start;
+		align-content: flex-start;
 	}
 	#routes section
 	{
 		display: flex;
 		flex-direction: column;
 		flex-wrap: nowrap;
-		justify-content: center;
+		justify-content: flex-start;
 		align-items: center;
 		align-content: center;
 		margin-left: 1vh;
@@ -415,8 +422,8 @@
 	{
 		width: 47vh;
 		height: 50vh;
-		background: white;
-		border-color: black;
+		background: #6B6B6B;
+		border-color: #4d4d4d;
 		color: black;
 	}
 	#plan .content
@@ -429,19 +436,72 @@
 	{
 		border-collapse: collapse;
 	}
-	#plan td, th
+	#plan td, #plan th
 	{
 		border: 0.3vh solid black;
 		padding: 0.5vh
 	}
+	#finish
+	{
+		width: 45vh;
+		height: 65vh;
+		background: #390000;
+		border-color: #6b0700;
+		color: white;
+	}
+	#finish.complete
+	{
+		background: #2f3900;
+		border-color: #576b00;
+	}
+	#finish .content
+	{
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-items: center;
+		align-content: center;
+		font-size: 2.1vh;
+	}
+	#finish table
+	{
+		border-collapse: collapse;
+	}
+	#finish td, #finish th
+	{
+		border: 0.3vh solid white;
+		padding: 0.5vh
+	}
+	#finish span
+	{
+		display: block;
+		font-size: 2.4vh;
+		margin-bottom: 2vh;
+	}
 </style>
 <script>
-	const unlockedAll = true;
+	const unlockedAll = false;
 	const system =
 	{
 		load()
 		{
-			if (true)
+			if (results.length === 0)
+			{
+				for (let i=0 ; i<system.routes.length ; i++)
+				{
+					results[i] = []
+					for (let j=0 ; j<system.routes[i].length ; j++)
+					{
+						results[i][j] = {unlocked: false, data:[]}
+					}
+				}
+			}
+			if (localStorage.getItem('agro-tetris: situation'))
+			{
+				situation = JSON.parse(localStorage.getItem('agro-tetris: situation'))
+			}
+			else
 			{
 				showRoutes()
 			}
@@ -535,6 +595,7 @@
 			situation.namePlaces = []
 			situation.places[0] = [[],[]]
 			situation.namePlaces[0] = {name: 'Załadunek', short:'ZŁD', chicken:0, meat:0, smoke:0}
+			situation.tutorial = []
 			let column = 0
 			for (const shop of route.shops)
 			{
@@ -655,7 +716,7 @@
 		[
 			[
 				{
-					name: "Góry",
+					name: "Samouczek",
 					required: 7,
 					dam: 2,
 					shops:
@@ -664,7 +725,7 @@
 							name: "Kłoda",
 							short: "KŁD",
 							commodity: [10,10,10],
-							empty: [5,5,5],
+							empty: [10,10,10],
 						},
 						{
 							name: "Rydzyna",
@@ -676,61 +737,141 @@
 							name: "Bojanowo",
 							short: "BJN",
 							commodity: [10,10,10],
-							empty: [5,5,5],
+							empty: [7,7,7],
 						},
 						{
 							name: "Golina W",
 							short: "GOL",
 							commodity: [10,10,10],
-							empty: [10,10,10],
+							empty: [3,3,3],
 						},
 						{
 							name: "Czernina",
 							short: "CZR",
 							commodity: [10,10,10],
-							empty: [5,5,5],
+							empty: [10,10,10],
 						},
 						{
 							name: "Witaszyce",
 							short: "WIT",
 							commodity: [10,10,10],
-							empty: [5,5,5],
+							empty: [10,10,10],
 						},
 						{
 							name: "Góra 4",
 							short: "GR4",
-							commodity: [10,10,10],
-							empty: [5,5,5],
+							commodity: [10,10,6],
+							empty: [8,8,8],
 						},
 						{
 							name: "Góra 1",
 							short: "GR1",
-							commodity: [10,10,10],
-							empty: [5,5,5],
+							commodity: [10,10,6],
+							empty: [2,2,2],
 						},
 						{
 							name: "Góra 3",
 							short: "GR3",
-							commodity: [10,10,10],
-							empty: [5,5,5],
+							commodity: [10,10,6],
+							empty: [10,10,10],
 						},
 						{
 							name: "Góra 5",
 							short: "GR5",
-							commodity: [10,10,10],
-							empty: [5,5,5],
+							commodity: [10,10,6],
+							empty: [10,10,10],
 						},
 						{
 							name: "Góra 2",
 							short: "GR2",
-							commodity: [10,10,10],
+							commodity: [10,10,6],
 							empty: [5,5,5],
 						},
 						{
 							name: "Niechlów",
 							short: "NCH",
-							commodity: [10,10,10],
+							commodity: [10,10,6],
 							empty: [5,5,5],
+						},
+					]
+				},
+				{
+					name: "Nowa Sól",
+					required: 7,
+					dam: 2,
+					shops:
+					[
+						{
+							name: "Jerzmanowa",
+							short: "JEZ",
+							commodity: [7,[6,7],5],
+							empty: [8,6,5],
+						},
+						{
+							name: "Nielubia",
+							short: "NLB",
+							commodity: [8,[7,7],6],
+							empty: [8,[6,6],5],
+						},
+						{
+							name: "Bytom odrzański 1",
+							short: "BT1",
+							commodity: [5,6,4],
+							empty: [7,4,3],
+						},
+						{
+							name: "Bytom odrzański 2",
+							short: "BT2",
+							commodity: [5,7,4],
+							empty: [7,8,3],
+						},
+						{
+							name: "Nowa Sól 1",
+							short: "NS1",
+							commodity: [5,7,4],
+							empty: [4,8,5],
+						},
+						{
+							name: "Nowa Sól 2",
+							short: "NS2",
+							commodity: [5,6,4],
+							empty: [7,7,3],
+						},
+						{
+							name: "Nowa Sól 3",
+							short: "NS3",
+							commodity: [6,[5,7],6],
+							empty: [[7,7],[6,6],5],
+						},
+						{
+							name: "Nowa Sól 4",
+							short: "NS4",
+							commodity: [7,[5,6],5],
+							empty: [8,10,6],
+						},
+						{
+							name: "Modrzyca",
+							short: "MDZ",
+							commodity: [6,[5,7],6],
+							empty: [[7,7],[6,6],5],
+						},
+						{
+							name: "Otyń",
+							short: "OTN",
+							commodity: [6,7,4],
+							empty: [3,5,3],
+						},
+						{
+							name: "Przyborów",
+							short: "PBR",
+							commodity: [5,6,3],
+							empty: [7,8,4],
+						},
+						{
+							name: "Siedlisko",
+							short: "SDL",
+							commodity: [6,[6,7],6],
+							empty: [[7,8],[5,6],5],
 						},
 					]
 				}
@@ -913,8 +1054,8 @@
 			parent.classList.add('hidden');
 		}
 	}
-	const results = [[{unlocked:true,data:[]}],[],[]]
-	const situation = {};
+	const results = JSON.parse(localStorage.getItem('agro-tetris: results')||'[]')
+	let situation = {};
 	const el = {};
 	const click =
 	{
@@ -930,11 +1071,13 @@
 				if (situation.commodity.length > 0)
 				{
 					const nr = Math.floor(Math.random()*situation.commodity.length)
-					list.push(situation.commodity.splice(nr,1)[0])
+					const chest = situation.commodity.splice(nr,1)[0]
+					list.push(chest)
 				}
 				else if (situation.dam > 0)
 				{
 					list.push({content:false,type:'dam',value:10})
+					showTutorial('Zielony klocek to tyczka. Tyczka nie może się przewrócić. Użyj jej do zabezpieczenia towaru.',4)
 					situation.dam--
 				}
 			}
@@ -981,6 +1124,14 @@
 			{
 				if (hand.value())
 				{
+					if (hand.value().value < 10)
+					{
+						showTutorial('Towar musisz ustawiać tak żeby nie było dużych różnic wysokości.',2)
+					}
+					else
+					{
+						showTutorial('Ruchy liczą się inaczej dla pustych i pełnych klocków. Przesunięcie pełnego klocka dodaje 4 do liczby ruchów',3)
+					}
 					if (hand.value().content)
 					{
 						(situation.moves||[])[situation.place] += 4
@@ -1004,6 +1155,11 @@
 				{
 					hand.add(list.pop())
 					refreshBox(list,element)
+					showTutorial('Do góry po prawej jest przycisk pokazujacy rozpiskę trasy. Przyda się żeby dobrze ułożyć towar.',8)
+				}
+				else
+				{
+					showTutorial('Pola mają ograniczoną pojemność. Towar można z nich wyciągać w kolejności odwrotnej niż był wkładany.',9)
 				}
 			}
 		},
@@ -1094,7 +1250,7 @@
 					{
 						return info('Żeby przejść dalej zabierz puste klocki.')
 					}
-					if (boxes[i].shop != situation.namePlaces[situation.place])
+					if (boxes[i].shop != situation.namePlaces[situation.place].name)
 					{
 						return info('Zostawiłeś niewłaściwe klocki!')
 					}
@@ -1105,7 +1261,7 @@
 				for (let i=0 ; i<situation.car[0][r].length ; i++)
 				{
 					const chest = ((situation.car[0][r]||[])[i]||{})
-					if (chest.shop === situation.namePlaces[situation.place])
+					if (chest.shop === situation.namePlaces[situation.place].name)
 					{
 						return info('Nie zostawiłeś całego towaru!')
 					}
@@ -1141,11 +1297,12 @@
 				}
 			}
 			curtain.open()
+			//localStorage.setItem('agro-tetris: situation',JSON.stringify(situation))
 		}
 		else
 		{
 			situation.time[situation.place][1] = Date.now()
-			showEnd()
+			finish()
 		}
 	}
 	const hand =
@@ -1295,6 +1452,22 @@
 			situation.time[situation.place][0] = Date.now()
 			const div = document.getElementById('curtain')
 			div.classList.add('hidden')
+			if (situation.place == 0)
+			{
+				showTutorial('Na ekranie zobaczysz pakę ciężarówki podzieloną na 6 kolumn. Wyżej są schowki i miejsce wydawania towaru. Towar jest podawany losowo. Ułuż go na pace w odpowiedniej kolejności klikając na miejsce skąd chcesz wziąć klocek a później w miejscu gdzie chcesz go upuścić.',1)
+			}
+			else if (situation.place == 1)
+			{
+				showTutorial('Podczas rozładunku musisz zostawić odpowiednie klocki i zabrać puste',5)
+			}
+			else if (situation.place == 4)
+			{
+				showTutorial('Puste klocki można łączyć. Kliknij na pusty klocek tego samego rodzaju. Utworzy się bloczek o wysokości 10.',6)
+			}
+			else if (situation.place == 5)
+			{
+				showTutorial('Puste klocki można też rozłączyć klikając podwójnie.',7)
+			}
 		}
 	}
 	function refreshStatistics()
@@ -1380,10 +1553,93 @@
 			document.getElementById('plan').classList.remove('hidden')
 		}
 	}
-	function showEnd()
+	function showTutorial(text,nr)
 	{
-		debugger
-		location.reload()
+		if (situation.tutorial[nr]){return}
+		situation.tutorial[nr] = true
+		if (situation.lvl[0] === 0 && situation.lvl[1] === 0)
+		{
+			const frame = document.getElementById('tutorial')
+			frame.getElementsByClassName('content')[0].innerHTML = text
+			frame.classList.remove('hidden')
+		}
+	}
+	function finish()
+	{
+		const div = document.getElementById('finish')
+		const content = div.getElementsByClassName('content')[0]
+		content.innerHTML = ''
+		const data = []
+		const total = [0,0]
+		for (let i=0 ;  i<situation.namePlaces.length ; i ++)
+		{
+			data[i] = {name:situation.namePlaces[i].name}
+		}
+		for (let i=0 ;  i<situation.time.length ; i ++)
+		{
+			data[i].time = 0
+			if (situation.time[i][0])
+			{
+				data[i].time = Math.round(((situation.time[i][1]||situation.time[i][0])-situation.time[i][0])/1000)
+			}
+			total[0] += data[i].time
+		}
+		for (let i=0 ;  i<situation.moves.length ; i ++)
+		{
+			data[i].moves = situation.moves[i]
+			total[1] += data[i].moves
+		}
+		results[situation.lvl[0]][situation.lvl[1]].data.push(total)
+		if (situation.required > total[0])
+		{
+			div.classList.add('complete')
+			if (results[situation.lvl[0]][situation.lvl[1]+1])
+			{
+				results[situation.lvl[0]][situation.lvl[1]+1].unlocked = true
+			}
+		}
+		else
+		{
+			div.classList.remove('complete')
+		}
+		data.push({name:'podsumowanie',time:total[0],moves:total[1]})
+		const table = document.createElement('table')
+		const span = document.createElement('span')
+		if (situation.required > total[0])
+		{
+			span.innerHTML = `Poziom ${situation.lvlName} ukończony.<br>`
+		}
+		else
+		{
+			span.innerHTML = `Poziom ${situation.lvlName} nie ukończony.<br>`
+		}
+		span.innerHTML += `Czas: ${total[0]}s &nbsp; Kroki: ${total[1]}`
+		if (true)
+		{
+			const tr = document.createElement('tr')
+			for (let j=0 ; j<3 ; j++)
+			{
+				const th = document.createElement('th')
+				th.innerHTML = ['- - Punkt - -','- Czas -','- kroki -'][j]
+				tr.appendChild(th)
+			}
+			table.appendChild(tr)
+		}
+		for (let i=0 ; i<data.length ; i++)
+		{
+			const tr = document.createElement('tr')
+			for (let j=0 ; j<3 ; j++)
+			{
+				const td = document.createElement('td')
+				td.innerHTML = data[i][['name','time','moves'][j]]+['','s',''][j]
+				tr.appendChild(td)
+			}
+			table.appendChild(tr)
+		}
+		content.appendChild(span)
+		content.appendChild(table)
+		div.classList.remove('hidden')
+		showRoutes()
 	}
 </script>
 </head>
@@ -1409,11 +1665,15 @@
 		</div>
 		<button>Dalej</button>
 	</footer>
+	<div class="window hidden" id="plan">
+		<div class="content"></div>
+		<button>OK</button>
+	</div>
 	<div class="window hidden" id="error">
 		<div class="content"></div>
 		<button>OK</button>
 	</div>
-	<div class="window hidden" id="plan">
+	<div class="window hidden" id="tutorial">
 		<div class="content"></div>
 		<button>OK</button>
 	</div>
@@ -1424,6 +1684,10 @@
 	<div class="window hidden" id="routes">
 		<span>Wybierz trasę</span>
 		<div class="content"></div>
+	</div>
+	<div class="window hidden" id="finish">
+		<div class="content"></div>
+		<button>OK</button>
 	</div>
 </body>
 </html>
