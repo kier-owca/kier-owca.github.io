@@ -317,7 +317,7 @@
 		position: relative;
 		width: 42vh;
 		height: 105vh;
-		background: #1B1B1B;
+		background: #252525;
 		left: 50%;
 		margin-left: -21vh;
 		margin-top: 1vh;
@@ -334,7 +334,7 @@
 		align-content: center;
 		width: 7vh;
 		height: 100%;
-		box-shadow: inset 0 0 0 0.4vh #1B1B1B, inset 0 0 0 0.9vh #111111;
+		box-shadow: inset 0 0 0 0.4vh #252525, inset 0 0 0 0.9vh #111111;
 	}
 	#hand
 	{
@@ -422,7 +422,7 @@
 	{
 		width: 47vh;
 		height: 50vh;
-		background: #6B6B6B;
+		background: #b1b1b1;
 		border-color: #4d4d4d;
 		color: black;
 	}
@@ -496,10 +496,12 @@
 						results[i][j] = {unlocked: false, data:[]}
 					}
 				}
+				localStorage.setItem('agro-tetris: results',JSON.stringify(results))
 			}
 			if (localStorage.getItem('agro-tetris: situation'))
 			{
 				situation = JSON.parse(localStorage.getItem('agro-tetris: situation'))
+				system.refresh()
 			}
 			else
 			{
@@ -512,6 +514,7 @@
 			situation.commodity = []
 			document.getElementsByTagName('footer')[0].getElementsByTagName('button')[0].onclick = next
 			document.getElementById('showPlan').onclick = showPlan
+			document.getElementById('hamburger').onclick = showRoutes
 			const divWin = document.getElementsByClassName('window')
 			for (let div of divWin)
 			{
@@ -577,22 +580,30 @@
 				row.appendChild(car)
 			}
 		},
-		newRoutes: function(lvl)
+		newRoutes: function(lvl,route)
 		{
 			document.getElementById('routes').classList.add('hidden')
-			const route = system.routes[lvl[0]][lvl[1]]
+			route = route || system.routes[lvl[0]][lvl[1]]
 			situation.time = [[]]
 			situation.moves = [0]
 			situation.points = 0
 			situation.dam = route.dam
 			situation.required = route.required
-			situation.lvl = [lvl[0],lvl[1]]
-			situation.lvlName = route.name
+			if (lvl)
+			{
+				situation.lvl = [lvl[0],lvl[1]]
+				situation.lvlName = route.name
+			}
+			else
+			{
+				situation.lvl = 0
+				situation.lvlName = 'Losowa'
+			}
 			situation.place = 0
 			situation.hand = 0
 			situation.commodity = []
 			situation.places = []
-			situation.car = [0,[],[],[],[],[],[],[]]
+			situation.car = [[0,[],[],[],[],[],[]]]
 			situation.namePlaces = []
 			situation.places[0] = [[],[]]
 			situation.namePlaces[0] = {name: 'Załadunek', short:'ZŁD', chicken:0, meat:0, smoke:0}
@@ -797,249 +808,2439 @@
 					]
 				},
 				{
-					name: "Nowa Sól",
-					required: 2500,
+					name: 'Kobylin',
+					required: 812,
 					dam: 2,
 					shops:
 					[
 						{
-							name: "Jerzmanowa",
-							short: "JEZ",
-							commodity: [7,[6,7],5],
-							empty: [8,6,5],
+							name: 'Rawicz 3',
+							short: 'RA3',
+							commodity: [4,5,2],
+							empty: [3,6,3],
 						},
 						{
-							name: "Nielubia",
-							short: "NLB",
-							commodity: [8,[7,7],6],
-							empty: [8,[6,6],5],
+							name: 'Rawicz 2',
+							short: 'RA2',
+							commodity: [4,8,2],
+							empty: [5,9,2],
 						},
 						{
-							name: "Bytom odrzański 1",
-							short: "BT1",
-							commodity: [5,6,4],
-							empty: [7,4,3],
+							name: 'Rawicz 1',
+							short: 'RA1',
+							commodity: [4,5,3],
+							empty: [3,6,2],
 						},
 						{
-							name: "Bytom odrzański 2",
-							short: "BT2",
-							commodity: [5,7,4],
-							empty: [7,8,3],
+							name: 'Słupia kapitulna',
+							short: 'SŁP',
+							commodity: [8,6,7],
+							empty: [9,7,6],
 						},
 						{
-							name: "Nowa Sól 1",
-							short: "NS1",
-							commodity: [5,7,4],
-							empty: [4,8,5],
+							name: 'Chojno',
+							short: 'CHN',
+							commodity: [5,4,4],
+							empty: [4,3,3],
 						},
 						{
-							name: "Nowa Sól 2",
-							short: "NS2",
-							commodity: [5,6,4],
-							empty: [7,7,3],
+							name: 'Pakosław',
+							short: 'PAK',
+							commodity: [7,7,5],
+							empty: [6,8,6],
 						},
 						{
-							name: "Nowa Sól 3",
-							short: "NS3",
-							commodity: [6,[5,7],6],
-							empty: [[7,7],[6,6],5],
+							name: 'Nowy sielec',
+							short: 'NSC',
+							commodity: [7,6,3],
+							empty: [6,5,2],
 						},
 						{
-							name: "Nowa Sól 4",
-							short: "NS4",
-							commodity: [7,[5,6],5],
+							name: 'Jutrosin',
+							short: 'JUT',
+							commodity: [9,10,6],
+							empty: [8,9,5],
+						},
+						{
+							name: 'Smolice',
+							short: 'SMO',
+							commodity: [[5,6],10,7],
+							empty: [8,7,6],
+						},
+						{
+							name: 'Kobylin 2',
+							short: 'KO2',
+							commodity: [9,[6,5],6],
+							empty: [[7,5],10,5],
+						},
+						{
+							name: 'Kobylin 1',
+							short: 'KO1',
+							commodity: [8,9,5],
+							empty: [9,10,6],
+						},
+					],
+				},
+				{
+					name: 'Sieroszewice',
+					required: 796,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Janków przygodzki',
+							short: 'JAN',
+							commodity: [10,10,9],
+							empty: [[6,5],[6,5],10],
+						},
+						{
+							name: 'Przygodzice',
+							short: 'PRZ',
+							commodity: [9,[6,5],7],
 							empty: [8,10,6],
 						},
 						{
-							name: "Modrzyca",
-							short: "MDZ",
-							commodity: [6,[5,7],6],
-							empty: [[7,7],[6,6],5],
+							name: 'Ostrów 15',
+							short: 'O15',
+							commodity: [6,6,4],
+							empty: [5,5,7],
 						},
 						{
-							name: "Otyń",
-							short: "OTN",
-							commodity: [6,7,4],
-							empty: [3,5,3],
+							name: 'Wysocko wielkie',
+							short: 'WYS',
+							commodity: [8,9,4],
+							empty: [9,8,5],
 						},
 						{
-							name: "Przyborów",
-							short: "PBR",
-							commodity: [5,6,3],
-							empty: [7,8,4],
+							name: 'Wtórek',
+							short: 'WTR',
+							commodity: [[5,6],10,6],
+							empty: [[6,6],7,7],
 						},
 						{
-							name: "Siedlisko",
-							short: "SDL",
-							commodity: [6,[6,7],6],
-							empty: [[7,8],[5,6],5],
+							name: 'Sieroszewice',
+							short: 'SIR',
+							commodity: [[9,10],[7,7],9],
+							empty: [[9,7],[8,9],8],
 						},
-					]
-				}
-			],
-			[
+						{
+							name: 'Wielowieś',
+							short: 'WLW',
+							commodity: [8,10,4],
+							empty: [9,9,5],
+						},
+						{
+							name: 'Wola droszewska',
+							short: 'WDR',
+							commodity: [7,5,3],
+							empty: [8,4,2],
+						},
+					],
+				},
 				{
-					name: "Góry",
-					required: 2000,
+					name: 'PLESZEWY',
+					required: 842,
 					dam: 2,
 					shops:
 					[
 						{
-							name: "Kłoda",
-							short: "KŁD",
-							commodity: [4,6,4],
-							empty: [5,7,4],
+							name: 'Witaszyce',
+							short: 'WIT',
+							commodity: [9,[7,5],6],
+							empty: [10,[7,8],5],
 						},
 						{
-							name: "Rydzyna",
-							short: "RDZ",
-							commodity: [5,6,4],
-							empty: [7,7,3],
+							name: 'Kotlin 2',
+							short: 'KOT',
+							commodity: [9,9,9],
+							empty: [10,10,8],
 						},
 						{
-							name: "Bojanowo",
-							short: "BJN",
-							commodity: [7,[6,8],5],
+							name: 'Kowalew',
+							short: 'KWL',
+							commodity: [7,[8,5],6],
+							empty: [8,[7,7],5],
+						},
+						{
+							name: 'Pleszew 3',
+							short: 'P3',
+							commodity: [9,10,7],
+							empty: [10,[6,5],8],
+						},
+						{
+							name: 'Pleszew 5',
+							short: 'P5',
+							commodity: [[7,7],[10,6],10],
+							empty: [[9,8],[8,7],9],
+						},
+						{
+							name: 'Pleszew 2',
+							short: 'P2',
+							commodity: [7,8,5],
+							empty: [6,7,2],
+						},
+						{
+							name: 'Pleszew 4',
+							short: 'P4',
+							commodity: [[7,4],[7,6],6],
+							empty: [10,[7,7],5],
+						},
+						{
+							name: 'Pleszew 1',
+							short: 'P1',
+							commodity: [7,4,3],
+							empty: [8,2,2],
+						},
+					],
+				},
+				{
+					name: 'Zagórów',
+					required: 1032,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Kołaczkowo',
+							short: 'KOŁ',
+							commodity: [9,7,6],
+							empty: [10,6,7],
+						},
+						{
+							name: 'Sokolniki',
+							short: 'SKL',
+							commodity: [7,7,6],
 							empty: [8,10,5],
 						},
 						{
-							name: "Golina W",
-							short: "GOL",
-							commodity: [5,7,4],
-							empty: [7,8,3],
+							name: 'Ciążeń',
+							short: 'CĄŻ',
+							commodity: [5,7,5],
+							empty: [4,6,8],
 						},
 						{
-							name: "Czernina",
-							short: "CZR",
-							commodity: [5,7,4],
-							empty: [4,8,5],
+							name: 'Lądek',
+							short: 'LĄD',
+							commodity: [6,6,4],
+							empty: [5,5,5],
 						},
 						{
-							name: "Witaszyce",
-							short: "WIT",
-							commodity: [5,6,4],
-							empty: [7,7,3],
+							name: 'Zagórów',
+							short: 'ZGR',
+							commodity: [[8,8],[8,5,8],[5,6]],
+							empty: [[9,8],[7,4,9],[8,6]],
 						},
 						{
-							name: "Góra 4",
-							short: "GR4",
-							commodity: [5,7,4],
-							empty: [7,8,3],
+							name: 'Pyzdry 2',
+							short: 'PZ2',
+							commodity: [7,8,5],
+							empty: [8,7,2],
 						},
 						{
-							name: "Góra 1",
-							short: "GR1",
-							commodity: [7,[5,7],6],
-							empty: [8,[6,6],5],
+							name: 'Pyzdry 1',
+							short: 'PZ1',
+							commodity: [8,6,9],
+							empty: [[6,5],7,[6,6]],
 						},
 						{
-							name: "Góra 3",
-							short: "GR3",
-							commodity: [5,6,4],
-							empty: [7,7,3],
+							name: 'Komorze przybysławskie',
+							short: 'KOM',
+							commodity: [4,3,3],
+							empty: [5,6,2],
 						},
 						{
-							name: "Góra 5",
-							short: "GR5",
-							commodity: [6,7,4],
-							empty: [3,5,3],
+							name: 'Żerków 2',
+							short: 'ŻR2',
+							commodity: [6,7,6],
+							empty: [5,10,7],
 						},
 						{
-							name: "Góra 2",
-							short: "GR2",
-							commodity: [5,6,3],
-							empty: [7,8,4],
+							name: 'Żerków 1',
+							short: 'ŻR1',
+							commodity: [4,7,5],
+							empty: [5,6,6],
 						},
 						{
-							name: "Niechlów",
-							short: "NCH",
-							commodity: [5,7,4],
-							empty: [7,9,3],
+							name: 'Chrzan',
+							short: 'CH',
+							commodity: [7,6,6],
+							empty: [8,7,3],
 						},
-					]
-				}
-			],
-			[
+						{
+							name: 'Wilkowyja',
+							short: 'WLK',
+							commodity: [6,8,7],
+							empty: [5,7,6],
+						},
+					],
+				},
 				{
-					name: "Poniec",
-					required: 2000,
+					name: 'Nowe Sole',
+					required: 1122,
 					dam: 2,
 					shops:
 					[
 						{
-							name: "Poniec 2",
-							short: "PN2",
-							commodity: [5,[6,5],4],
-							empty: [[6,7],[7,7],5],
+							name: 'Jerzmanowa',
+							short: 'JEZ',
+							commodity: [9,[6,5],5],
+							empty: [[7,5],10,4],
 						},
 						{
-							name: "Poniec 1",
-							short: "PN1",
-							commodity: [4,6,4],
-							empty: [5,7,4],
+							name: 'Nielubia',
+							short: 'NLB',
+							commodity: [9,[5,6],6],
+							empty: [6,10,5],
 						},
 						{
-							name: "Pudliszki",
-							short: "PDL",
-							commodity: [7,7,4],
-							empty: [7,9,4],
+							name: 'Bytom odrzański 1',
+							short: 'BY1',
+							commodity: [5,5,2],
+							empty: [2,4,2],
 						},
 						{
-							name: "Krobia 1",
-							short: "KR1",
-							commodity: [[5,6],[6,5],7],
-							empty: [[7,7],[7,7],9],
+							name: 'Bytom odrzański 2',
+							short: 'BY2',
+							commodity: [5,8,3],
+							empty: [4,9,4],
 						},
 						{
-							name: "Krobia 2",
-							short: "KR2",
-							commodity: [[5,6],[7,5],8],
-							empty: [[7,6],[5,7],8],
+							name: 'Nowa sól 1',
+							short: 'NS1',
+							commodity: [10,10,5],
+							empty: [[6,5],9,6],
 						},
 						{
-							name: "Pępowo 2",
-							short: "PP2",
-							commodity: [7,7,4],
-							empty: [7,9,4],
+							name: 'Nowa sól 2',
+							short: 'NS2',
+							commodity: [7,9,5],
+							empty: [6,6,8],
 						},
 						{
-							name: "Pępowo 1",
-							short: "PP1",
-							commodity: [[5,6],[6,5],6],
-							empty: [[7,7],[5,7],9],
+							name: 'Nowa sól 3',
+							short: 'NS3',
+							commodity: [[7,5],[9,8],8],
+							empty: [[7,6],[10,8],9],
 						},
 						{
-							name: "Skoraszewice",
-							short: "SKR",
-							commodity: [4,6,2],
+							name: 'Nowa sól 4',
+							short: 'NS4',
+							commodity: [10,9,6],
+							empty: [[7,4],10,3],
+						},
+						{
+							name: 'Modrzyca',
+							short: 'MDZ',
+							commodity: [[7,6],[7,7],10],
+							empty: [[10,6],[8,7],7],
+						},
+						{
+							name: 'Otyń',
+							short: 'OTŃ',
+							commodity: [8,6,4],
+							empty: [7,7,5],
+						},
+						{
+							name: 'Przyborów',
+							short: 'PBR',
+							commodity: [5,6,3],
+							empty: [6,7,4],
+						},
+						{
+							name: 'Siedlisko',
+							short: 'SDL',
+							commodity: [9,10,7],
+							empty: [10,9,4],
+						},
+					],
+				},
+				{
+					name: 'Pobiedziska',
+					required: 1106,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Czapury',
+							short: 'CZP',
+							commodity: [8,[6,5],8],
+							empty: [7,10,7],
+						},
+						{
+							name: 'Kamionki',
+							short: 'KAM',
+							commodity: [[8,4],[8,6],6],
+							empty: [[7,6],[8,7],9],
+						},
+						{
+							name: 'Robakowo',
+							short: 'ROB',
+							commodity: [9,10,6],
+							empty: [10,7,3],
+						},
+						{
+							name: 'Koninko 1',
+							short: 'KON',
+							commodity: [8,[7,6],7],
+							empty: [5,[9,5],8],
+						},
+						{
+							name: 'Gowarzewo',
+							short: 'GOW',
+							commodity: [8,10,[6,5]],
+							empty: [5,7,8],
+						},
+						{
+							name: 'Zalasewo',
+							short: 'ZAL',
+							commodity: [[6,5],[7,5],8],
+							empty: [[7,5],[6,5],9],
+						},
+						{
+							name: 'Siekierki wielkie',
+							short: 'SKR',
+							commodity: [7,8,5],
+							empty: [6,7,2],
+						},
+						{
+							name: 'Paczkowo',
+							short: 'PCZ',
+							commodity: [5,5,3],
+							empty: [4,4,2],
+						},
+						{
+							name: 'Pobiedziska 2',
+							short: 'PB2',
+							commodity: [9,8,4],
+							empty: [8,9,5],
+						},
+						{
+							name: 'Pobiedziska 1',
+							short: 'PB1',
+							commodity: [[5,6],[8,6],9],
+							empty: [10,[9,6],8],
+						},
+						{
+							name: 'Kostrzyn',
+							short: 'KOS',
+							commodity: [8,9,8],
+							empty: [9,8,[6,5]],
+						},
+					],
+				},
+				{
+					name: 'Doruchów',
+					required: 1210,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Topola mała',
+							short: 'TOP',
+							commodity: [8,10,7],
+							empty: [9,[7,4],10],
+						},
+						{
+							name: 'Strzyżew',
+							short: 'STŻ',
+							commodity: [9,[7,5],9],
+							empty: [10,9,[7,5]],
+						},
+						{
+							name: 'Mikstat 1',
+							short: 'MK1',
+							commodity: [8,10,6],
+							empty: [7,9,5],
+						},
+						{
+							name: 'Mikstat 2',
+							short: 'MK2',
+							commodity: [5,5,3],
+							empty: [4,8,6],
+						},
+						{
+							name: 'Kaliszkowice kaliskie',
+							short: 'KAL',
+							commodity: [6,8,5],
+							empty: [5,5,8],
+						},
+						{
+							name: 'Siedlików',
+							short: 'SDL',
+							commodity: [10,[6,5],4],
+							empty: [[6,5],10,2],
+						},
+						{
+							name: 'Bukownica',
+							short: 'BUK',
+							commodity: [8,9,5],
+							empty: [9,6,4],
+						},
+						{
+							name: 'Doruchów',
+							short: 'DOR',
+							commodity: [[7,6],[8,7],9],
+							empty: [[9,7],[8,6],6],
+						},
+						{
+							name: 'Grabów 1',
+							short: 'G1',
+							commodity: [10,[6,5],7],
+							empty: [7,10,10],
+						},
+						{
+							name: 'Grabów 2',
+							short: 'G2',
+							commodity: [10,[5,6],6],
+							empty: [9,10,5],
+						},
+						{
+							name: 'Kraszewice',
+							short: 'KRA',
+							commodity: [10,9,6],
+							empty: [[6,5],8,5],
+						},
+						{
+							name: 'Czajków',
+							short: 'CZJ',
+							commodity: [9,[8,5],7],
+							empty: [10,[6,6],8],
+						},
+					],
+				},
+				{
+					name: 'Ostrowy',
+					required: 1252,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Gorzyce wielkie 2',
+							short: 'GRZ',
+							commodity: [7,10,4],
+							empty: [8,9,3],
+						},
+						{
+							name: 'Ostrów 13',
+							short: 'O13',
+							commodity: [5,6,3],
+							empty: [6,7,4],
+						},
+						{
+							name: 'Ostrów 8',
+							short: 'O8',
+							commodity: [7,9,5],
+							empty: [10,10,6],
+						},
+						{
+							name: 'Ostrów 2',
+							short: 'O2',
+							commodity: [9,9,7],
+							empty: [[7,5],10,4],
+						},
+						{
+							name: 'Ostrów 10',
+							short: 'O10',
+							commodity: [[8,5],[7,7],[6,5]],
+							empty: [10,[6,7],[8,4]],
+						},
+						{
+							name: 'Ostrów 16',
+							short: 'O16',
+							commodity: [6,8,4],
+							empty: [9,9,5],
+						},
+						{
+							name: 'Ostrów 3',
+							short: 'O3',
+							commodity: [10,[6,5],7],
+							empty: [9,10,6],
+						},
+						{
+							name: 'Sobótka',
+							short: 'SOB',
+							commodity: [9,[6,5],5],
+							empty: [10,10,6],
+						},
+						{
+							name: 'Lewków',
+							short: 'LEW',
+							commodity: [8,10,7],
+							empty: [5,9,8],
+						},
+						{
+							name: 'Biskupice ołoboczne',
+							short: 'BIS',
+							commodity: [6,6,4],
+							empty: [7,3,3],
+						},
+						{
+							name: 'Skalmierzyce',
+							short: 'SKL',
+							commodity: [[9,5],[9,7],[6,5]],
+							empty: [[7,6],[10,7],10],
+						},
+						{
+							name: 'Kalisz 4',
+							short: 'K4',
+							commodity: [[8,7],[7,8],9],
+							empty: [[10,6],[9,7],10],
+						},
+					],
+				},
+				{
+					name: 'Dziadowa Kłoda',
+					required: 1316,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Stradomia wierzchnia',
+							short: 'STR',
+							commodity: [8,10,8],
+							empty: [9,[7,4],9],
+						},
+						{
+							name: 'Dziadowa kłoda',
+							short: 'KŁD',
+							commodity: [[6,7],[10,8],9],
+							empty: [10,[8,9],10],
+						},
+						{
+							name: 'Perzów',
+							short: 'PEZ',
+							commodity: [8,9,6],
+							empty: [[6,5],10,5],
+						},
+						{
+							name: 'Nowy dwór',
+							short: 'ND',
+							commodity: [9,9,6],
+							empty: [8,8,7],
+						},
+						{
+							name: 'Syców',
+							short: 'SC',
+							commodity: [9,9,7],
+							empty: [10,10,6],
+						},
+						{
+							name: 'Wioska',
+							short: 'WIO',
+							commodity: [9,9,8],
+							empty: [8,8,9],
+						},
+						{
+							name: 'Międzybórz',
+							short: 'MDZ',
+							commodity: [7,10,7],
+							empty: [8,[6,5],6],
+						},
+						{
+							name: 'Kobyla góra',
+							short: 'KG',
+							commodity: [[7,7],[7,6],10],
+							empty: [[8,7],10,[6,5]],
+						},
+						{
+							name: 'Rojów ',
+							short: 'ROJ',
+							commodity: [10,[7,5],8],
+							empty: [[6,5],[7,8],7],
+						},
+						{
+							name: 'Olszyna',
+							short: 'OSZ',
+							commodity: [7,9,5],
+							empty: [8,8,4],
+						},
+						{
+							name: 'Rogaszyce',
+							short: 'ROG',
+							commodity: [7,8,9],
+							empty: [6,5,8],
+						},
+						{
+							name: 'Ostrzeszów',
+							short: 'OST',
+							commodity: [[5,6],[5,6],8],
+							empty: [10,10,9],
+						},
+					],
+				},
+				{
+					name: 'Poznań',
+					required: 1260,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Nochowo',
+							short: 'NOH',
+							commodity: [8,[5,6],7],
+							empty: [9,10,8],
+						},
+						{
+							name: 'Śrem 1',
+							short: 'Ś1',
+							commodity: [7,9,4],
+							empty: [6,8,3],
+						},
+						{
+							name: 'Śrem 2',
+							short: 'Ś2',
+							commodity: [7,10,4],
+							empty: [6,[6,5],3],
+						},
+						{
+							name: 'Brodnica',
+							short: 'BRD',
+							commodity: [10,10,6],
+							empty: [9,9,3],
+						},
+						{
+							name: 'Pecna',
+							short: 'PEC',
+							commodity: [8,8,6],
+							empty: [7,9,5],
+						},
+						{
+							name: 'Mosina',
+							short: 'MOS',
+							commodity: [[7,4],[9,6],8],
+							empty: [10,[9,7],7],
+						},
+						{
+							name: 'Witobel',
+							short: 'WIT',
+							commodity: [10,10,7],
+							empty: [[5,6],9,4],
+						},
+						{
+							name: 'Stęszew 2',
+							short: 'STĘ',
+							commodity: [9,[7,5],10],
+							empty: [8,[7,6],9],
+						},
+						{
+							name: 'Komorniki',
+							short: 'KOM',
+							commodity: [9,9,6],
+							empty: [6,[8,4],7],
+						},
+						{
+							name: 'Plewiska',
+							short: 'PLW',
+							commodity: [[7,5],[9,6],7],
+							empty: [[6,5],[9,5],6],
+						},
+						{
+							name: 'Poznań 1',
+							short: 'PZ1',
+							commodity: [[7,5],[6,6],10],
+							empty: [[7,8],9,9],
+						},
+						{
+							name: 'Poznań 2',
+							short: 'PZ2',
+							commodity: [8,10,8],
+							empty: [7,9,7],
+						},
+					],
+				},
+				{
+					name: 'Jelcz Laskowice',
+					required: 1382,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Ligota piękna',
+							short: 'LIG',
+							commodity: [[8,6],[8,9],[8,4]],
+							empty: [[5,6],[7,5,8],[6,7]],
+						},
+						{
+							name: 'Siedlec',
+							short: 'SDL',
+							commodity: [8,10,5],
+							empty: [9,7,8],
+						},
+						{
+							name: 'Długołęka 1',
+							short: 'DŁG',
+							commodity: [[7,5],[10,7],[6,5]],
+							empty: [9,[9,7],8],
+						},
+						{
+							name: 'Wrocław 4',
+							short: 'W4',
+							commodity: [10,[6,7],8],
+							empty: [7,[8,6],5],
+						},
+						{
+							name: 'Kamieniec wrocławski',
+							short: 'KAM',
+							commodity: [10,[8,4],8],
+							empty: [9,[7,8],7],
+						},
+						{
+							name: 'Czernica',
+							short: 'CZR',
+							commodity: [[6,5],[7,6],7],
+							empty: [[7,5],[7,5],8],
+						},
+						{
+							name: 'Jelcz laskowice',
+							short: 'JEL',
+							commodity: [[7,6],[6,5],7],
+							empty: [[7,5],10,4],
+						},
+						{
+							name: 'Stanowice',
+							short: 'STN',
+							commodity: [[5,6],[7,6],9],
+							empty: [[7,7],[7,5],8],
+						},
+						{
+							name: 'Siechnice',
+							short: 'SCH',
+							commodity: [9,[5,6],10],
+							empty: [8,[7,5],7],
+						},
+						{
+							name: 'Św. katarzyna',
+							short: 'ŚWK',
+							commodity: [10,10,6],
+							empty: [[6,5],7,7],
+						},
+						{
+							name: 'Wrocław 9',
+							short: 'W9',
+							commodity: [[7,6],[8,6],9],
+							empty: [[9,5],[7,6],8],
+						},
+					],
+				},
+			],
+			[
+				{
+					name: 'Raszków',
+					required: 756,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Kobierno',
+							short: 'KOB',
+							commodity: [6,8,7],
+							empty: [7,9,8],
+						},
+						{
+							name: 'Orpiszew',
+							short: 'ORP',
+							commodity: [7,10,6],
+							empty: [6,9,7],
+						},
+						{
+							name: 'Biadki',
+							short: 'BIA',
+							commodity: [8,6,4],
+							empty: [7,7,7],
+						},
+						{
+							name: 'Łąkociny',
+							short: 'ŁKC',
+							commodity: [9,8,6],
+							empty: [10,7,7],
+						},
+						{
+							name: 'Przybysławice',
+							short: 'PBS',
+							commodity: [10,8,4],
+							empty: [9,[5,6],5],
+						},
+						{
+							name: 'Raszków',
+							short: 'RSZ',
+							commodity: [[5,6],[8,7],8],
+							empty: [[7,5],[9,7],9],
+						},
+						{
+							name: 'Ligota',
+							short: 'LIG',
+							commodity: [7,7,5],
+							empty: [8,6,6],
+						},
+						{
+							name: 'Koźminiec',
+							short: 'KOŹ',
+							commodity: [7,9,5],
+							empty: [8,[8,4],4],
+						},
+					],
+				},
+				{
+					name: 'Głogów',
+					required: 774,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Pęcław',
+							short: 'PCŁ',
+							commodity: [10,[6,5],8],
+							empty: [[5,6],8,[6,5]],
+						},
+						{
+							name: 'Grębocice',
+							short: 'GRB',
+							commodity: [[6,5],[8,5],8],
+							empty: [[8,4],[9,7],9],
+						},
+						{
+							name: 'Głogów 3',
+							short: 'GŁ3',
+							commodity: [10,10,8],
+							empty: [[6,5],9,9],
+						},
+						{
+							name: 'Głogów 2',
+							short: 'GŁ2',
+							commodity: [9,8,10],
+							empty: [8,9,9],
+						},
+						{
+							name: 'Głogów 1',
+							short: 'GŁ1',
+							commodity: [8,9,5],
+							empty: [9,6,2],
+						},
+						{
+							name: 'Ruszowice 2',
+							short: 'RU2',
+							commodity: [8,8,5],
+							empty: [7,7,2],
+						},
+						{
+							name: 'Ruszowice 1',
+							short: 'RU1',
+							commodity: [[7,4],[7,6],9],
+							empty: [[8,6],[8,6],[7,5]],
+						},
+					],
+				},
+				{
+					name: 'Koźmin',
+					required: 840,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Pogorzela 1',
+							short: 'PG1',
+							commodity: [[7,5],10,7],
+							empty: [[8,5],7,4],
+						},
+						{
+							name: 'Pogorzela 2',
+							short: 'PG2',
+							commodity: [7,8,4],
+							empty: [6,5,7],
+						},
+						{
+							name: 'Borzęciczki',
+							short: 'BRZ',
+							commodity: [7,8,4],
+							empty: [4,9,5],
+						},
+						{
+							name: 'Rusko',
+							short: 'RUS',
+							commodity: [5,6,7],
+							empty: [4,5,6],
+						},
+						{
+							name: 'Koźmin wlkp 1',
+							short: 'KŹ1',
+							commodity: [[6,5],[7,6],7],
+							empty: [10,[9,7],8],
+						},
+						{
+							name: 'Koźmin wlkp 2',
+							short: 'KŹ2',
+							commodity: [6,6,4],
+							empty: [9,5,5],
+						},
+						{
+							name: 'Rozdrażew 1',
+							short: 'RD1',
+							commodity: [5,9,5],
+							empty: [6,10,6],
+						},
+						{
+							name: 'Rozdrażew 2',
+							short: 'RD2',
+							commodity: [8,6,3],
+							empty: [7,7,4],
+						},
+						{
+							name: 'Krotoszyn 10',
+							short: 'K10',
+							commodity: [9,8,6],
+							empty: [10,9,5],
+						},
+						{
+							name: 'Benice',
+							short: 'BEN',
+							commodity: [8,8,4],
+							empty: [7,5,5],
+						},
+					],
+				},
+				{
+					name: 'Jarocin',
+					required: 890,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Borek wlkp 1',
+							short: 'BR1',
+							commodity: [9,10,5],
+							empty: [6,[5,6],8],
+						},
+						{
+							name: 'Borek wlkp 2',
+							short: 'BR2',
+							commodity: [[6,5],8,6],
+							empty: [8,5,9],
+						},
+						{
+							name: 'Siedlemin',
+							short: 'SDL',
+							commodity: [6,7,4],
+							empty: [9,8,5],
+						},
+						{
+							name: 'Jarocin 4',
+							short: 'J4',
+							commodity: [10,9,9],
+							empty: [9,10,10],
+						},
+						{
+							name: 'Jarocin 5',
+							short: 'J5',
+							commodity: [[6,5],8,6],
+							empty: [10,7,5],
+						},
+						{
+							name: 'Jarocin 7',
+							short: 'J7',
+							commodity: [6,9,4],
+							empty: [7,[6,6],5],
+						},
+						{
+							name: 'Zakrzew',
+							short: 'ZKW',
+							commodity: [8,9,7],
+							empty: [5,8,6],
+						},
+						{
+							name: 'Golina 3',
+							short: 'GOL',
+							commodity: [7,9,6],
+							empty: [6,10,5],
+						},
+						{
+							name: 'Borzęcice 1',
+							short: 'BĘC',
+							commodity: [4,5,2],
+							empty: [5,4,2],
+						},
+						{
+							name: 'Dobrzyca',
+							short: 'DOB',
+							commodity: [8,9,8],
+							empty: [9,10,[7,4]],
+						},
+					],
+				},
+				{
+					name: 'Kościan',
+					required: 1052,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Widziszewo',
+							short: 'WIDZ',
+							commodity: [10,8,6],
+							empty: [9,9,7],
+						},
+						{
+							name: 'Kościan 3',
+							short: 'K3',
+							commodity: [10,[8,7],6],
+							empty: [9,[9,9],5],
+						},
+						{
+							name: 'Kościan 2',
+							short: 'K2',
+							commodity: [9,9,7],
+							empty: [8,6,8],
+						},
+						{
+							name: 'Kościan 1',
+							short: 'K1',
+							commodity: [6,5,4],
+							empty: [9,4,3],
+						},
+						{
+							name: 'Nowy lubosz',
+							short: 'NLB',
+							commodity: [8,9,5],
+							empty: [9,[6,6],6],
+						},
+						{
+							name: 'Sierakowo',
+							short: 'SRK',
+							commodity: [6,5,8],
+							empty: [5,8,7],
+						},
+						{
+							name: 'Kiełczewo',
+							short: 'KŁC',
+							commodity: [8,7,5],
+							empty: [9,8,4],
+						},
+						{
+							name: 'Stare oborzyska',
+							short: 'STR',
+							commodity: [[6,5],[7,7],5],
+							empty: [[6,6],[8,7],6],
+						},
+						{
+							name: 'Czempiń 2',
+							short: 'CZ2',
+							commodity: [8,9,6],
+							empty: [7,10,9],
+						},
+						{
+							name: 'Czempiń 1',
+							short: 'CZ1',
+							commodity: [8,9,8],
+							empty: [9,8,5],
+						},
+						{
+							name: 'Turew',
+							short: 'TUR',
+							commodity: [4,6,3],
 							empty: [3,5,4],
 						},
 						{
-							name: "Niepart",
-							short: "NPR",
+							name: 'Racot',
+							short: 'RAC',
+							commodity: [4,4,2],
+							empty: [5,5,3],
+						},
+					],
+				},
+				{
+					name: 'Dolsk',
+					required: 1076,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Wilkowice',
+							short: 'WLK',
+							commodity: [5,6,4],
+							empty: [2,9,3],
+						},
+						{
+							name: 'Lipno',
+							short: 'LIP',
+							commodity: [9,9,6],
+							empty: [10,8,5],
+						},
+						{
+							name: 'Osieczna',
+							short: 'OSI',
+							commodity: [8,10,6],
+							empty: [7,7,5],
+						},
+						{
+							name: 'Świerczyna',
+							short: 'ŚWR',
+							commodity: [6,6,5],
+							empty: [5,5,4],
+						},
+						{
+							name: 'Krzywiń',
+							short: 'KRZ',
+							commodity: [[8,6],[8,4],10],
+							empty: [[7,6],[6,5],[7,4]],
+						},
+						{
+							name: 'Jerka',
+							short: 'JER',
+							commodity: [[6,7],[7,6],7],
+							empty: [[9,5],[7,7],6],
+						},
+						{
+							name: 'Bieżyń',
+							short: 'BŻŃ',
+							commodity: [8,7,6],
+							empty: [7,6,7],
+						},
+						{
+							name: 'Bielewo',
+							short: 'BLW',
+							commodity: [7,7,6],
+							empty: [8,8,5],
+						},
+						{
+							name: 'Kunowo',
+							short: 'KUN',
+							commodity: [5,5,3],
+							empty: [6,4,2],
+						},
+						{
+							name: 'Dolsk',
+							short: 'DLS',
+							commodity: [[7,4],[6,5],5],
+							empty: [10,8,6],
+						},
+						{
+							name: 'Gostyń 2',
+							short: 'GS2',
+							commodity: [9,[5,6],7],
+							empty: [10,[8,4],6],
+						},
+						{
+							name: 'Gostyń 1',
+							short: 'GS1',
+							commodity: [7,8,4],
+							empty: [8,7,3],
+						},
+					],
+				},
+				{
+					name: 'Krobia',
+					required: 1164,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Poniec 2',
+							short: 'PN2',
+							commodity: [[7,4],[8,6],6],
+							empty: [10,[7,6],5],
+						},
+						{
+							name: 'Poniec 1',
+							short: 'PN1',
+							commodity: [8,7,6],
+							empty: [7,8,7],
+						},
+						{
+							name: 'Pudliszki',
+							short: 'PUD',
+							commodity: [7,9,6],
+							empty: [4,10,9],
+						},
+						{
+							name: 'Krobia wlkp 1',
+							short: 'KR1',
+							commodity: [[7,8],[6,5],6],
+							empty: [[8,6],[7,5],7],
+						},
+						{
+							name: 'Krobia wlkp 2',
+							short: 'KR2',
+							commodity: [[8,5],[6,6],10],
+							empty: [[7,5],[6,7],[7,6]],
+						},
+						{
+							name: 'Pępowo 2',
+							short: 'PP2',
+							commodity: [9,8,6],
+							empty: [8,9,7],
+						},
+						{
+							name: 'Pępowo 1',
+							short: 'PP1',
+							commodity: [[7,5],10,7],
+							empty: [[6,5],[6,5],6],
+						},
+						{
+							name: 'Skoraszewice',
+							short: 'SKR',
+							commodity: [4,4,2],
+							empty: [5,2,2],
+						},
+						{
+							name: 'Niepart',
+							short: 'NPR',
+							commodity: [6,6,4],
+							empty: [9,5,5],
+						},
+						{
+							name: 'Konary',
+							short: 'KNR',
+							commodity: [6,7,4],
+							empty: [5,6,3],
+						},
+						{
+							name: 'Miejska górka',
+							short: 'MG',
+							commodity: [[8,6],[9,5],7],
+							empty: [[7,4],[8,7],10],
+						},
+						{
+							name: 'Sarnowa',
+							short: 'SAR',
+							commodity: [5,7,5],
+							empty: [6,10,4],
+						},
+					],
+				},
+				{
+					name: 'Przemęt',
+					required: 1322,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Święciechowa',
+							short: 'ŚW',
+							commodity: [5,6,4],
+							empty: [6,9,3],
+						},
+						{
+							name: 'Krzycko wielkie',
+							short: 'KRZ',
+							commodity: [7,[6,5],5],
+							empty: [10,[8,4],8],
+						},
+						{
+							name: 'Bukówiec górny',
+							short: 'BUK',
+							commodity: [7,[6,5],7],
+							empty: [10,[9,5],6],
+						},
+						{
+							name: 'Włoszakowice 1',
+							short: 'WŁ1',
+							commodity: [[6,6],[8,4],6],
+							empty: [[8,5],[8,5],7],
+						},
+						{
+							name: 'Włoszakowice 2',
+							short: 'WŁ2',
+							commodity: [7,9,6],
+							empty: [8,[6,6],7],
+						},
+						{
+							name: 'Boszkowo',
+							short: 'BSZ',
+							commodity: [5,4,6],
+							empty: [6,5,5],
+						},
+						{
+							name: 'Bucz',
+							short: 'BCZ',
+							commodity: [7,7,6],
+							empty: [6,6,7],
+						},
+						{
+							name: 'Przemęt',
+							short: 'PMT',
+							commodity: [[7,6],[8,4],9],
+							empty: [[6,6],[7,6],10],
+						},
+						{
+							name: 'Śmigiel 1',
+							short: 'Ś1',
+							commodity: [10,[6,5],6],
+							empty: [9,[7,5],7],
+						},
+						{
+							name: 'Śmigiel 2',
+							short: 'Ś2',
+							commodity: [10,[7,4],6],
+							empty: [9,[8,6],3],
+						},
+						{
+							name: 'Nowa wieś',
+							short: 'NW',
+							commodity: [9,[7,5],8],
+							empty: [[6,6],[6,5],7],
+						},
+						{
+							name: 'Wilkowo polskie',
+							short: 'WLK',
+							commodity: [9,10,7],
+							empty: [8,9,6],
+						},
+						{
+							name: 'Stare bojanowo',
+							short: 'BOJ',
+							commodity: [9,9,6],
+							empty: [10,10,9],
+						},
+					],
+				},
+				{
+					name: 'Oborniki',
+					required: 1262,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Oborniki śląskie 1',
+							short: 'O1',
+							commodity: [6,8,4],
+							empty: [7,9,3],
+						},
+						{
+							name: 'Oborniki śląskie 3',
+							short: 'O3',
+							commodity: [[7,6],[7,7],8],
+							empty: [[8,6],[8,7],9],
+						},
+						{
+							name: 'Oborniki śląskie 2',
+							short: 'O2',
+							commodity: [[6,5],[6,7],[7,4]],
+							empty: [8,[7,7],8],
+						},
+						{
+							name: 'Trzebnica 1',
+							short: 'TB1',
+							commodity: [9,[8,4],7],
+							empty: [[7,5],[6,7],6],
+						},
+						{
+							name: 'Trzebnica 2',
+							short: 'TB2',
+							commodity: [[9,8],[8,5,7],[7,4]],
+							empty: [[9,7],[9,8],[6,6]],
+						},
+						{
+							name: 'Zawonia 1',
+							short: 'ZW1',
+							commodity: [9,[8,4],8],
+							empty: [[8,4],[7,4],5],
+						},
+						{
+							name: 'Zawonia 2',
+							short: 'ZW2',
+							commodity: [[7,5],[6,5],7],
+							empty: [9,[8,4],6],
+						},
+						{
+							name: 'Bukowice',
+							short: 'BUK',
+							commodity: [9,[6,5],8],
+							empty: [6,8,5],
+						},
+						{
+							name: 'Sułów 2',
+							short: 'SŁ2',
+							commodity: [7,8,7],
+							empty: [10,7,8],
+						},
+						{
+							name: 'Sułów 1',
+							short: 'SŁ1',
+							commodity: [9,8,9],
+							empty: [10,5,8],
+						},
+						{
+							name: 'Szkaradowo',
+							short: 'SZK',
+							commodity: [9,8,5],
+							empty: [[6,6],7,6],
+						},
+					],
+				},
+				{
+					name: 'Krośnice',
+					required: 1274,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Dobroszyce',
+							short: 'DOB',
+							commodity: [[6,7],[8,7],8],
+							empty: [10,[8,4],[6,5]],
+						},
+						{
+							name: 'Oleśnica',
+							short: 'OLE',
+							commodity: [4,4,2],
+							empty: [2,5,3],
+						},
+						{
+							name: 'Ligota wielka',
+							short: 'LGT',
+							commodity: [9,[7,4],5],
+							empty: [6,8,6],
+						},
+						{
+							name: 'Zbytowa',
+							short: 'ZBT',
+							commodity: [3,3,2],
+							empty: [2,2,3],
+						},
+						{
+							name: 'Twardogóra',
+							short: 'TWG',
+							commodity: [[6,5],10,7],
+							empty: [10,7,6],
+						},
+						{
+							name: 'Moszyce',
+							short: 'MSZ',
+							commodity: [[7,5],[7,5],8],
+							empty: [[6,5],[6,5],7],
+						},
+						{
+							name: 'Goszcz',
+							short: 'GSZ',
+							commodity: [[9,5],[8,7],8],
+							empty: [[8,7],[8,6],9],
+						},
+						{
+							name: 'Krośnice',
+							short: 'KRŚ',
+							commodity: [[9,7],[9,7],10],
+							empty: [[9,8],[8,7],9],
+						},
+						{
+							name: 'Milicz 2',
+							short: 'M2',
+							commodity: [[6,6],[8,8],[8,5]],
+							empty: [[6,5],[10,8],[8,6]],
+						},
+						{
+							name: 'Milicz 3',
+							short: 'M3',
+							commodity: [10,[5,6],7],
+							empty: [[6,5],[7,5],6],
+						},
+						{
+							name: 'Milicz 1',
+							short: 'M1',
+							commodity: [[7,7],[8,6],9],
+							empty: [[5,6],[8,9],[8,4]],
+						},
+					],
+				},
+				{
+					name: 'Sława',
+					required: 1316,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Szlichtyngowa',
+							short: 'SZL',
+							commodity: [9,[6,5],7],
+							empty: [8,10,6],
+						},
+						{
+							name: 'Jędrzychowice',
+							short: 'JĘD',
+							commodity: [4,5,3],
+							empty: [5,4,6],
+						},
+						{
+							name: 'Wschowa 3',
+							short: 'W3',
+							commodity: [[5,6],[7,7],10],
+							empty: [[8,4],[7,6],[6,5]],
+						},
+						{
+							name: 'Wschowa 1',
+							short: 'W1',
+							commodity: [6,6,6],
+							empty: [5,5,7],
+						},
+						{
+							name: 'Wschowa 2',
+							short: 'W2',
+							commodity: [[6,5],[6,5],7],
+							empty: [10,[6,6],8],
+						},
+						{
+							name: 'Wschowa 4',
+							short: 'W4',
+							commodity: [8,8,5],
+							empty: [7,5,4],
+						},
+						{
+							name: 'Wijewo',
+							short: 'WIJ',
+							commodity: [9,6,7],
+							empty: [10,7,4],
+						},
+						{
+							name: 'Brenno 1',
+							short: 'BRN',
+							commodity: [9,6,5],
+							empty: [8,7,8],
+						},
+						{
+							name: 'Sława 2',
+							short: 'SŁ2',
+							commodity: [[9,8],[9,8],[6,5]],
+							empty: [[9,7],[10,8],10],
+						},
+						{
+							name: 'Sława 1',
+							short: 'SŁ1',
+							commodity: [[6,7],[10,8],[7,6]],
+							empty: [[7,5],[9,10],[9,5]],
+						},
+						{
+							name: 'Krzepielów',
+							short: 'KPL',
+							commodity: [7,10,5],
+							empty: [6,[6,5],4],
+						},
+						{
+							name: 'Kotla',
+							short: 'KOT',
+							commodity: [[7,5],[7,6],10],
+							empty: [[7,6],[7,7],9],
+						},
+					],
+				},
+			],
+			[
+				{
+					name: 'Wrocław',
+					required: 642,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Wydawy',
+							short: 'WYD',
+							commodity: [9,7,5],
+							empty: [8,8,6],
+						},
+						{
+							name: 'Wrocław 7',
+							short: 'WR7',
+							commodity: [6,4,5],
+							empty: [5,3,4],
+						},
+						{
+							name: 'Wrocław 13',
+							short: 'W13',
 							commodity: [7,7,4],
-							empty: [7,9,4],
+							empty: [10,6,5],
 						},
 						{
-							name: "Konary",
-							short: "KNR",
-							commodity: [4,6,4],
-							empty: [5,7,4],
+							name: 'Wrocław 15',
+							short: 'W15',
+							commodity: [[6,7],[7,7],8],
+							empty: [[6,6],[7,8],7],
 						},
 						{
-							name: "Miejska Górka",
-							short: "MGR",
-							commodity: [[5,7],[7,6],8],
-							empty: [[7,6],[7,7],8],
+							name: 'Wrocław 1',
+							short: 'WR1',
+							commodity: [9,9,5],
+							empty: [6,6,6],
 						},
 						{
-							name: "Sarnowa",
-							short: "SAR",
-							commodity: [4,6,4],
-							empty: [5,7,4],
+							name: 'Wrocław 3',
+							short: 'WR3',
+							commodity: [[6,5],8,4],
+							empty: [8,7,7],
 						},
-					]
-				}
+						{
+							name: 'Wrocław 2',
+							short: 'WR2',
+							commodity: [10,[7,5],7],
+							empty: [[6,5],9,8],
+						},
+					],
+				},
+				{
+					name: 'Leszna',
+					required: 876,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Dąbcze',
+							short: 'DĄB',
+							commodity: [5,7,4],
+							empty: [4,10,2],
+						},
+						{
+							name: 'Leszno 7',
+							short: 'L7',
+							commodity: [9,[7,5],7],
+							empty: [8,[7,6],6],
+						},
+						{
+							name: 'Strzyżewice 1',
+							short: 'STR',
+							commodity: [6,6,4],
+							empty: [5,3,5],
+						},
+						{
+							name: 'Leszno 4',
+							short: 'L4',
+							commodity: [5,6,4],
+							empty: [6,7,5],
+						},
+						{
+							name: 'Leszno 5',
+							short: 'L5',
+							commodity: [8,7,3],
+							empty: [9,6,4],
+						},
+						{
+							name: 'Leszno 1',
+							short: 'L1',
+							commodity: [5,6,3],
+							empty: [8,9,4],
+						},
+						{
+							name: 'Leszno 10',
+							short: 'L10',
+							commodity: [2,4,3],
+							empty: [3,7,6],
+						},
+						{
+							name: 'Leszno 8',
+							short: 'L8',
+							commodity: [5,7,4],
+							empty: [6,10,2],
+						},
+						{
+							name: 'Leszno 6',
+							short: 'L6',
+							commodity: [4,5,3],
+							empty: [5,6,2],
+						},
+						{
+							name: 'Leszno 3',
+							short: 'L3',
+							commodity: [10,6,4],
+							empty: [9,5,5],
+						},
+						{
+							name: 'Leszno 9',
+							short: 'L9',
+							commodity: [8,8,9],
+							empty: [9,7,10],
+						},
+						{
+							name: 'Leszno 2',
+							short: 'L2',
+							commodity: [5,8,7],
+							empty: [6,9,8],
+						},
+					],
+				},
+				{
+					name: 'Ostrowy',
+					required: 842,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Lamki',
+							short: 'Lam',
+							commodity: [7,8,4],
+							empty: [10,[6,5],2],
+						},
+						{
+							name: 'Ostrów 7',
+							short: 'O7',
+							commodity: [9,9,6],
+							empty: [6,10,9],
+						},
+						{
+							name: 'Ostrów 4',
+							short: 'O4',
+							commodity: [9,10,6],
+							empty: [10,9,5],
+						},
+						{
+							name: 'Ostrów 12',
+							short: 'O12',
+							commodity: [10,[8,4],8],
+							empty: [9,[6,5],[5,6]],
+						},
+						{
+							name: 'Ostrów 9',
+							short: 'O9',
+							commodity: [[5,6],[7,5],7],
+							empty: [10,[8,7],8],
+						},
+						{
+							name: 'Ostrów 11',
+							short: 'O11',
+							commodity: [10,9,6],
+							empty: [[6,7],10,5],
+						},
+						{
+							name: 'Ostrów 1',
+							short: 'O1',
+							commodity: [5,4,4],
+							empty: [2,2,3],
+						},
+						{
+							name: 'Ostrów 14',
+							short: 'O14',
+							commodity: [7,8,5],
+							empty: [8,5,6],
+						},
+						{
+							name: 'Ostrów 5',
+							short: 'O5',
+							commodity: [7,8,6],
+							empty: [8,9,7],
+						},
+					],
+				},
+				{
+					name: 'Września',
+					required: 850,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Gułtowy',
+							short: 'GŁT',
+							commodity: [6,[6,5],5],
+							empty: [5,[8,6],2],
+						},
+						{
+							name: 'Nekla',
+							short: 'NKL',
+							commodity: [[6,5],8,7],
+							empty: [10,5,6],
+						},
+						{
+							name: 'Przyborki',
+							short: 'PBI',
+							commodity: [6,[5,6],5],
+							empty: [5,10,4],
+						},
+						{
+							name: 'Psary polskie',
+							short: 'PSR',
+							commodity: [5,7,4],
+							empty: [2,8,3],
+						},
+						{
+							name: 'Sokołowo',
+							short: 'SKŁ',
+							commodity: [8,9,7],
+							empty: [7,8,6],
+						},
+						{
+							name: 'Gutowo małe',
+							short: 'GUT',
+							commodity: [5,6,4],
+							empty: [4,3,3],
+						},
+						{
+							name: 'Września 1',
+							short: 'W1',
+							commodity: [5,6,6],
+							empty: [2,5,5],
+						},
+						{
+							name: 'Września 2',
+							short: 'W2',
+							commodity: [6,8,7],
+							empty: [5,9,6],
+						},
+						{
+							name: 'Września 3',
+							short: 'W3',
+							commodity: [5,6,3],
+							empty: [6,3,2],
+						},
+						{
+							name: 'Bierzglinek 1',
+							short: 'BGL',
+							commodity: [5,7,5],
+							empty: [4,8,6],
+						},
+						{
+							name: 'Miłosław',
+							short: 'MŁS',
+							commodity: [[6,5],[8,5],8],
+							empty: [[8,6],[8,4],7],
+						},
+					],
+				},
+				{
+					name: 'Krotoszyny',
+					required: 1058,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Krotoszyn 5',
+							short: 'K5',
+							commodity: [10,[6,6],6],
+							empty: [[6,5],[6,7],5],
+						},
+						{
+							name: 'Krotoszyn 2',
+							short: 'K2',
+							commodity: [2,6,2],
+							empty: [2,5,2],
+						},
+						{
+							name: 'Krotoszyn 8',
+							short: 'K8',
+							commodity: [8,9,4],
+							empty: [7,8,5],
+						},
+						{
+							name: 'Krotoszyn 3',
+							short: 'K3',
+							commodity: [9,[6,5],[7,4]],
+							empty: [10,[6,6],10],
+						},
+						{
+							name: 'Krotoszyn 4',
+							short: 'K4',
+							commodity: [7,6,3],
+							empty: [10,7,2],
+						},
+						{
+							name: 'Krotoszyn 7',
+							short: 'K7',
+							commodity: [10,9,8],
+							empty: [9,10,9],
+						},
+						{
+							name: 'Krotoszyn 6',
+							short: 'K6',
+							commodity: [5,5,3],
+							empty: [2,4,2],
+						},
+						{
+							name: 'Krotoszyn 11',
+							short: 'K11',
+							commodity: [9,10,5],
+							empty: [10,[6,5],4],
+						},
+						{
+							name: 'Krotoszyn 1',
+							short: 'K1',
+							commodity: [7,9,4],
+							empty: [4,8,5],
+						},
+						{
+							name: 'Krotoszyn 9',
+							short: 'K9',
+							commodity: [6,9,6],
+							empty: [5,8,7],
+						},
+						{
+							name: 'Konarzew',
+							short: 'KON',
+							commodity: [9,7,7],
+							empty: [6,6,8],
+						},
+						{
+							name: 'Zduny 2',
+							short: 'ZD2',
+							commodity: [5,6,3],
+							empty: [2,7,2],
+						},
+						{
+							name: 'Zduny 1',
+							short: 'ZD1',
+							commodity: [9,8,6],
+							empty: [8,7,5],
+						},
+					],
+				},
+				{
+					name: 'Bnin',
+					required: 1130,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Bnin',
+							short: 'BNN',
+							commodity: [[7,5],[7,6],10],
+							empty: [[6,7],[8,4],[6,5]],
+						},
+						{
+							name: 'Środa wlkp. 2',
+							short: 'ŚR2',
+							commodity: [[7,5],[7,5],9],
+							empty: [[7,6],[7,6],8],
+						},
+						{
+							name: 'Dominowo',
+							short: 'DOM',
+							commodity: [5,6,4],
+							empty: [6,5,3],
+						},
+						{
+							name: 'Środa wlkp. 1',
+							short: 'ŚR1',
+							commodity: [10,[6,5],7],
+							empty: [[6,7],[6,6],6],
+						},
+						{
+							name: 'Murzynowo leśne 1',
+							short: 'MRZ',
+							commodity: [8,[6,7],6],
+							empty: [9,[7,5],5],
+						},
+						{
+							name: 'Sulęcinek',
+							short: 'SUL',
+							commodity: [10,9,6],
+							empty: [[6,5],10,9],
+						},
+						{
+							name: 'Orzechowo',
+							short: 'ORZ',
+							commodity: [10,10,7],
+							empty: [9,7,4],
+						},
+						{
+							name: 'Nowe miasto nad wartą',
+							short: 'NM',
+							commodity: [7,8,5],
+							empty: [6,7,4],
+						},
+						{
+							name: 'Klęka',
+							short: 'KLK',
+							commodity: [6,6,7],
+							empty: [9,5,6],
+						},
+						{
+							name: 'Mieszków',
+							short: 'MSZ',
+							commodity: [9,[6,7],6],
+							empty: [6,[10,6],7],
+						},
+						{
+							name: 'Cielcza',
+							short: 'CIE',
+							commodity: [10,8,7],
+							empty: [[6,5],7,8],
+						},
+					],
+				},
+				{
+					name: 'Góry',
+					required: 1200,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Kłoda',
+							short: 'KŁ',
+							commodity: [2,5,4],
+							empty: [5,4,3],
+						},
+						{
+							name: 'Rydzyna',
+							short: 'RDZ',
+							commodity: [9,9,5],
+							empty: [6,8,6],
+						},
+						{
+							name: 'Bojanowo',
+							short: 'BOJ',
+							commodity: [[8,5],[8,4],10],
+							empty: [[9,5],[6,5],9],
+						},
+						{
+							name: 'Golina wielka',
+							short: 'GOL',
+							commodity: [8,10,5],
+							empty: [7,9,6],
+						},
+						{
+							name: 'Czernina',
+							short: 'CZR',
+							commodity: [6,8,5],
+							empty: [5,9,6],
+						},
+						{
+							name: 'Witoszyce',
+							short: 'WIT',
+							commodity: [9,[6,5],7],
+							empty: [8,[8,6],8],
+						},
+						{
+							name: 'Góra 4',
+							short: 'G4',
+							commodity: [7,8,7],
+							empty: [8,[5,6],4],
+						},
+						{
+							name: 'Góra 1',
+							short: 'G1',
+							commodity: [10,[7,5],7],
+							empty: [[7,4],[5,6],4],
+						},
+						{
+							name: 'Góra 3',
+							short: '',
+							commodity: [10,[6,5],6],
+							empty: [9,[9,5],9],
+						},
+						{
+							name: 'Góra 5',
+							short: 'G5',
+							commodity: [9,9,7],
+							empty: [10,[8,4],6],
+						},
+						{
+							name: 'Góra 2',
+							short: 'G2',
+							commodity: [7,[7,5],5],
+							empty: [6,[7,6],6],
+						},
+						{
+							name: 'Niechlów',
+							short: 'NCH',
+							commodity: [[8,4],[7,4],8],
+							empty: [[6,5],[8,6],7],
+						},
+					],
+				},
+				{
+					name: 'Odolanów',
+					required: 1246,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Cieszków 1',
+							short: 'C1',
+							commodity: [8,9,4],
+							empty: [5,8,3],
+						},
+						{
+							name: 'Cieszków 2',
+							short: 'C2',
+							commodity: [8,6,5],
+							empty: [9,9,4],
+						},
+						{
+							name: 'Sulmierzyce 2',
+							short: 'SL2',
+							commodity: [6,6,4],
+							empty: [5,3,5],
+						},
+						{
+							name: 'Sulmierzyce 1',
+							short: 'SL1',
+							commodity: [7,8,5],
+							empty: [10,9,4],
+						},
+						{
+							name: 'Raczyce',
+							short: 'RCZ',
+							commodity: [[7,6],[7,6],10],
+							empty: [[8,6],[8,4],[6,5]],
+						},
+						{
+							name: 'Odolanów 1',
+							short: 'O1',
+							commodity: [[8,7],[8,6],8],
+							empty: [[7,7],[7,8],9],
+						},
+						{
+							name: 'Granowiec',
+							short: 'GRN',
+							commodity: [10,[7,4],10],
+							empty: [[6,5],[8,6],7],
+						},
+						{
+							name: 'Sośnie',
+							short: 'SOŚ',
+							commodity: [[7,4],[7,8],8],
+							empty: [10,[9,7],[5,6]],
+						},
+						{
+							name: 'Czarnylas',
+							short: 'CZL',
+							commodity: [10,8,6],
+							empty: [9,7,5],
+						},
+						{
+							name: 'Odolanów 2',
+							short: 'O2',
+							commodity: [[10,6],[10,6],[6,5]],
+							empty: [[9,6],[10,9],[6,6]],
+						},
+						{
+							name: 'Tarchały wielkie',
+							short: 'TAR',
+							commodity: [[6,5],9,7],
+							empty: [[7,5],10,8],
+						},
+					],
+				},
+				{
+					name: 'Gizałki',
+					required: 1314,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Witaszyce 2',
+							short: 'WIT',
+							commodity: [[6,5],8,5],
+							empty: [10,7,6],
+						},
+						{
+							name: 'Jarocin 1',
+							short: 'J1',
+							commodity: [5,6,4],
+							empty: [6,7,3],
+						},
+						{
+							name: 'Jarocin 6',
+							short: 'J6',
+							commodity: [8,9,5],
+							empty: [7,8,4],
+						},
+						{
+							name: 'Jarocin 2',
+							short: 'J2',
+							commodity: [[6,5],10,4],
+							empty: [[7,5],7,3],
+						},
+						{
+							name: 'Jarocin 3',
+							short: 'J3',
+							commodity: [8,6,4],
+							empty: [7,7,5],
+						},
+						{
+							name: 'Dobieszczyzna',
+							short: 'DBS',
+							commodity: [6,8,6],
+							empty: [7,9,7],
+						},
+						{
+							name: 'Gizałki 2',
+							short: 'GIZ',
+							commodity: [[7,4],[7,5],7],
+							empty: [[8,6],[7,4],6],
+						},
+						{
+							name: 'Czermin',
+							short: 'CZR',
+							commodity: [[7,5],[5,6],6],
+							empty: [[7,6],[8,4],7],
+						},
+						{
+							name: 'Broniszewice',
+							short: 'BRO',
+							commodity: [7,9,8],
+							empty: [8,10,9],
+						},
+						{
+							name: 'Chocz',
+							short: 'HCZ',
+							commodity: [[6,6],[7,6],7],
+							empty: [[6,5],[8,4],6],
+						},
+						{
+							name: 'Janków drugi',
+							short: 'JAN',
+							commodity: [[8,8],[7,8],[7,5]],
+							empty: [[8,7],[6,6],[7,6]],
+						},
+						{
+							name: 'Gołuchów',
+							short: 'GOŁ',
+							commodity: [[10,7],[10,7],10],
+							empty: [[9,8],[8,4,8],[7,6]],
+						},
+					],
+				},
+				{
+					name: 'Żmigrody',
+					required: 1302,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Chobienia',
+							short: 'CHB',
+							commodity: [6,7,4],
+							empty: [7,6,7],
+						},
+						{
+							name: 'Jemielno',
+							short: 'JEM',
+							commodity: [8,9,4],
+							empty: [7,10,5],
+						},
+						{
+							name: 'Wińsko',
+							short: 'WIŃ',
+							commodity: [[9,7],[10,6],[5,6]],
+							empty: [[8,7],[9,8],10],
+						},
+						{
+							name: 'Pełczyn',
+							short: 'PEŁ',
+							commodity: [7,9,10],
+							empty: [6,10,[8,5]],
+						},
+						{
+							name: 'Skokowa',
+							short: 'CKK',
+							commodity: [[7,4],[8,7],10],
+							empty: [10,[8,6],[6,7]],
+						},
+						{
+							name: 'Prusice',
+							short: 'PRC',
+							commodity: [[8,4],[8,8],9],
+							empty: [[6,7],[8,7],8],
+						},
+						{
+							name: 'Żmigród 1',
+							short: 'Ż1',
+							commodity: [[7,4],[6,6],7],
+							empty: [8,[6,7],8],
+						},
+						{
+							name: 'Żmigród 2',
+							short: 'Ż2',
+							commodity: [[8,4],[7,7],8],
+							empty: [9,[7,8],7],
+						},
+						{
+							name: 'Korzeńsko',
+							short: 'KRZ',
+							commodity: [9,8,6],
+							empty: [8,9,5],
+						},
+						{
+							name: 'Folwark',
+							short: 'FOL',
+							commodity: [6,7,4],
+							empty: [7,10,5],
+						},
+						{
+							name: 'Wąsosz',
+							short: 'WĄS',
+							commodity: [[9,6],[8,6],9],
+							empty: [[9,7],[9,8],6],
+						},
+					],
+				},
+				{
+					name: 'Gostyń',
+					required: 1404,
+					dam: 2,
+					shops:
+					[
+						{
+							name: 'Pawłowice',
+							short: 'PAW',
+							commodity: [10,9,6],
+							empty: [[7,4],8,7],
+						},
+						{
+							name: 'Kąkolewo',
+							short: 'KĄK',
+							commodity: [[6,5],[6,5],6],
+							empty: [[6,6],[7,5],5],
+						},
+						{
+							name: 'Krzemieniewo',
+							short: 'KMN',
+							commodity: [[7,5],[8,6],8],
+							empty: [[6,5],[8,7],5],
+						},
+						{
+							name: 'Gola',
+							short: 'GOL',
+							commodity: [9,7,10],
+							empty: [8,8,7],
+						},
+						{
+							name: 'Gostyń 4',
+							short: 'G4',
+							commodity: [10,[7,6],8],
+							empty: [[7,6],[9,7],7],
+						},
+						{
+							name: 'Gostyń 3',
+							short: 'G3',
+							commodity: [[5,6],[7,6],8],
+							empty: [10,[6,6],9],
+						},
+						{
+							name: 'Bodzewo',
+							short: 'BOD',
+							commodity: [8,8,9],
+							empty: [9,[6,5],10],
+						},
+						{
+							name: 'Piaski',
+							short: 'PSK',
+							commodity: [7,9,6],
+							empty: [6,6,5],
+						},
+						{
+							name: 'Jaraczewo',
+							short: 'JAR',
+							commodity: [[6,5],10,4],
+							empty: [10,9,5],
+						},
+						{
+							name: 'Chwałkowo kościelne',
+							short: 'HWŁ',
+							commodity: [4,4,2],
+							empty: [3,3,2],
+						},
+						{
+							name: 'Książ wlkp 1',
+							short: 'KS1',
+							commodity: [7,[6,5],5],
+							empty: [8,8,4],
+						},
+						{
+							name: 'Książ wlkp 2',
+							short: 'KS2',
+							commodity: [[9,8],[8,9],10],
+							empty: [[10,8],[9,9],[8,5]],
+						},
+						{
+							name: 'Chocicza',
+							short: 'HOC',
+							commodity: [8,[6,5],8],
+							empty: [7,10,9],
+						},
+					],
+				},
 			]
 		],
 		colors:
@@ -1131,7 +3332,7 @@
 					}
 					else
 					{
-						showTutorial('Ruchy liczą się inaczej dla pustych i pełnych klocków. Przesunięcie pełnego klocka dodaje 4 do liczby ruchów',3)
+						showTutorial('Do góry po prawej jest przycisk pokazujacy rozpiskę trasy. Przyda się żeby dobrze ułożyć towar.',3)
 					}
 					if (hand.value().content)
 					{
@@ -1156,7 +3357,7 @@
 				{
 					hand.add(list.pop())
 					refreshBox(list,element)
-					showTutorial('Do góry po prawej jest przycisk pokazujacy rozpiskę trasy. Przyda się żeby dobrze ułożyć towar.',8)
+					showTutorial('Ruchy liczą się inaczej dla pustych i pełnych klocków. Przesunięcie pełnego klocka dodaje 4 do liczby ruchów',8)
 				}
 				else
 				{
@@ -1298,7 +3499,7 @@
 				}
 			}
 			curtain.open()
-			//localStorage.setItem('agro-tetris: situation',JSON.stringify(situation))
+			localStorage.setItem('agro-tetris: situation',JSON.stringify(situation))
 		}
 		else
 		{
@@ -1590,18 +3791,33 @@
 			data[i].moves = situation.moves[i]
 			total[1] += data[i].moves
 		}
-		results[situation.lvl[0]][situation.lvl[1]].data.push(total)
-		if (situation.required > total[0])
+		if (Array.isArray(situation.lvl) && results[situation.lvl[0]])
 		{
-			div.classList.add('complete')
-			if (results[situation.lvl[0]][situation.lvl[1]+1])
+			results[situation.lvl[0]][situation.lvl[1]].data.push(total)
+			if (situation.required > total[0])
 			{
-				results[situation.lvl[0]][situation.lvl[1]+1].unlocked = true
+				div.classList.add('complete')
+				if (results[situation.lvl[0]][situation.lvl[1]+1])
+				{
+					results[situation.lvl[0]][situation.lvl[1]+1].unlocked = true
+				}
 			}
+			else
+			{
+				div.classList.remove('complete')
+			}
+			localStorage.setItem('agro-tetris: results',JSON.stringify(results))
 		}
 		else
 		{
-			div.classList.remove('complete')
+			if (situation.required > total[0])
+			{
+				div.classList.add('complete')
+			}
+			else
+			{
+				div.classList.remove('complete')
+			}
 		}
 		data.push({name:'podsumowanie',time:total[0],moves:total[1]})
 		const table = document.createElement('table')
