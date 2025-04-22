@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>AgroTetris</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style type="text/css">
 	*
 	{
@@ -482,6 +483,10 @@
 </style>
 <script>
 	const unlockedAll = false;
+	document.addEventListener('dblclick', function (e)
+	{
+		e.preventDefault();
+	});
 	const system =
 	{
 		load()
@@ -729,7 +734,7 @@
 			[
 				{
 					name: "Samouczek",
-					required: 1100,
+					required: 1500,
 					dam: 2,
 					shops:
 					[
@@ -809,7 +814,7 @@
 				},
 				{
 					name: 'Kobylin',
-					required: 812,
+					required: 1200,
 					dam: 2,
 					shops:
 					[
@@ -883,7 +888,7 @@
 				},
 				{
 					name: 'Sieroszewice',
-					required: 796,
+					required: 1200,
 					dam: 2,
 					shops:
 					[
