@@ -503,15 +503,6 @@
 				}
 				localStorage.setItem('agro-tetris: results',JSON.stringify(results))
 			}
-			if (false)//(localStorage.getItem('agro-tetris: situation'))
-			{
-				situation = JSON.parse(localStorage.getItem('agro-tetris: situation'))
-				system.refresh()
-			}
-			else
-			{
-				showRoutes()
-			}
 			refreshStatistics()
 			situation.click = 0
 			situation.hand = 0
@@ -584,6 +575,16 @@
 				}
 				row.appendChild(car)
 			}
+			if (localStorage.getItem('agro-tetris: situation'))
+			{
+				situation = JSON.parse(localStorage.getItem('agro-tetris: situation'))
+				system.refresh()
+				curtain.open()
+			}
+			else
+			{
+				showRoutes()
+			}
 		},
 		newRoutes: function(lvl,route)
 		{
@@ -593,7 +594,7 @@
 			situation.moves = [0]
 			situation.points = 0
 			situation.dam = route.dam
-			situation.required = route.required
+			situation.required = required(route,lvl)
 			if (lvl)
 			{
 				situation.lvl = [lvl[0],lvl[1]]
@@ -670,6 +671,7 @@
 			click.publisher()
 			system.refresh()
 			curtain.open()
+			showPlan()
 		},
 		refresh: function()
 		{
@@ -734,7 +736,7 @@
 			[
 				{
 					name: "Samouczek",
-					required: 1500,
+					required: 2000,
 					dam: 2,
 					shops:
 					[
@@ -814,7 +816,7 @@
 				},
 				{
 					name: 'Kobylin',
-					required: 1200,
+					required: 920,
 					dam: 2,
 					shops:
 					[
@@ -888,7 +890,7 @@
 				},
 				{
 					name: 'Sieroszewice',
-					required: 1200,
+					required: 796,
 					dam: 2,
 					shops:
 					[
@@ -943,7 +945,7 @@
 					],
 				},
 				{
-					name: 'PLESZEWY',
+					name: 'Pleszewy',
 					required: 842,
 					dam: 2,
 					shops:
@@ -1008,7 +1010,7 @@
 							name: 'Kołaczkowo',
 							short: 'KOŁ',
 							commodity: [9,7,6],
-							empty: [10,6,7],
+							empty: [6,6,7],
 						},
 						{
 							name: 'Sokolniki',
@@ -1026,13 +1028,13 @@
 							name: 'Lądek',
 							short: 'LĄD',
 							commodity: [6,6,4],
-							empty: [5,5,5],
+							empty: [3,3,1],
 						},
 						{
 							name: 'Zagórów',
 							short: 'ZGR',
 							commodity: [[8,8],[8,5,8],[5,6]],
-							empty: [[9,8],[7,4,9],[8,6]],
+							empty: [5,7,3],
 						},
 						{
 							name: 'Pyzdry 2',
@@ -1044,7 +1046,7 @@
 							name: 'Pyzdry 1',
 							short: 'PZ1',
 							commodity: [8,6,9],
-							empty: [[6,5],7,[6,6]],
+							empty: [7,7,4],
 						},
 						{
 							name: 'Komorze przybysławskie',
@@ -1056,7 +1058,7 @@
 							name: 'Żerków 2',
 							short: 'ŻR2',
 							commodity: [6,7,6],
-							empty: [5,10,7],
+							empty: [5,5,7],
 						},
 						{
 							name: 'Żerków 1',
@@ -1068,7 +1070,7 @@
 							name: 'Chrzan',
 							short: 'CH',
 							commodity: [7,6,6],
-							empty: [8,7,3],
+							empty: [4,7,1],
 						},
 						{
 							name: 'Wilkowyja',
@@ -1506,7 +1508,7 @@
 							name: 'Pecna',
 							short: 'PEC',
 							commodity: [8,8,6],
-							empty: [7,9,5],
+							empty: [[10,7],[10,9,7],10],
 						},
 						{
 							name: 'Mosina',
@@ -1592,7 +1594,7 @@
 							name: 'Czernica',
 							short: 'CZR',
 							commodity: [[6,5],[7,6],7],
-							empty: [[7,5],[7,5],8],
+							empty: [[7,5,7],[10,10,8],10],
 						},
 						{
 							name: 'Jelcz laskowice',
@@ -1880,31 +1882,31 @@
 							name: 'Widziszewo',
 							short: 'WIDZ',
 							commodity: [10,8,6],
-							empty: [9,9,7],
+							empty: [4,4,1],
 						},
 						{
 							name: 'Kościan 3',
 							short: 'K3',
 							commodity: [10,[8,7],6],
-							empty: [9,[9,9],5],
+							empty: [4,10,3],
 						},
 						{
 							name: 'Kościan 2',
 							short: 'K2',
 							commodity: [9,9,7],
-							empty: [8,6,8],
+							empty: [6,6,5],
 						},
 						{
 							name: 'Kościan 1',
 							short: 'K1',
 							commodity: [6,5,4],
-							empty: [9,4,3],
+							empty: [5,4,1],
 						},
 						{
 							name: 'Nowy lubosz',
 							short: 'NLB',
 							commodity: [8,9,5],
-							empty: [9,[6,6],6],
+							empty: [5,6,3],
 						},
 						{
 							name: 'Sierakowo',
@@ -1916,37 +1918,37 @@
 							name: 'Kiełczewo',
 							short: 'KŁC',
 							commodity: [8,7,5],
-							empty: [9,8,4],
+							empty: [5,4,0],
 						},
 						{
 							name: 'Stare oborzyska',
 							short: 'STR',
 							commodity: [[6,5],[7,7],5],
-							empty: [[6,6],[8,7],6],
+							empty: [4,4,1],
 						},
 						{
 							name: 'Czempiń 2',
 							short: 'CZ2',
 							commodity: [8,9,6],
-							empty: [7,10,9],
+							empty: [5,5,6],
 						},
 						{
 							name: 'Czempiń 1',
 							short: 'CZ1',
 							commodity: [8,9,8],
-							empty: [9,8,5],
+							empty: [7,8,5],
 						},
 						{
 							name: 'Turew',
 							short: 'TUR',
 							commodity: [4,6,3],
-							empty: [3,5,4],
+							empty: [3,4,4],
 						},
 						{
 							name: 'Racot',
 							short: 'RAC',
 							commodity: [4,4,2],
-							empty: [5,5,3],
+							empty: [5,10,3],
 						},
 					],
 				},
@@ -2310,7 +2312,7 @@
 							name: 'Moszyce',
 							short: 'MSZ',
 							commodity: [[7,5],[7,5],8],
-							empty: [[6,5],[6,5],7],
+							empty: [[6,7,10],[6,5,10],10],
 						},
 						{
 							name: 'Goszcz',
@@ -2408,7 +2410,7 @@
 							name: 'Sława 1',
 							short: 'SŁ1',
 							commodity: [[6,7],[10,8],[7,6]],
-							empty: [[7,5],[9,10],[9,5]],
+							empty: [[7,8,10],[9,10,10],[9,10]],
 						},
 						{
 							name: 'Krzepielów',
@@ -2478,7 +2480,7 @@
 				},
 				{
 					name: 'Leszna',
-					required: 980,
+					required: 970,
 					dam: 2,
 					shops:
 					[
@@ -2788,43 +2790,43 @@
 							name: 'Bnin',
 							short: 'BNN',
 							commodity: [[7,5],[7,6],10],
-							empty: [[6,7],[8,4],[6,5]],
+							empty: [9,8,5],
 						},
 						{
 							name: 'Środa wlkp. 2',
 							short: 'ŚR2',
 							commodity: [[7,5],[7,5],9],
-							empty: [[7,6],[7,6],8],
+							empty: [4,4,4],
 						},
 						{
 							name: 'Dominowo',
 							short: 'DOM',
 							commodity: [5,6,4],
-							empty: [6,5,3],
+							empty: [5,4,3],
 						},
 						{
 							name: 'Środa wlkp. 1',
 							short: 'ŚR1',
 							commodity: [10,[6,5],7],
-							empty: [[6,7],[6,6],6],
+							empty: [5,5,4],
 						},
 						{
 							name: 'Murzynowo leśne 1',
 							short: 'MRZ',
 							commodity: [8,[6,7],6],
-							empty: [9,[7,5],5],
+							empty: [3,3,0],
 						},
 						{
 							name: 'Sulęcinek',
 							short: 'SUL',
 							commodity: [10,9,6],
-							empty: [[6,5],10,9],
+							empty: [4,5,2],
 						},
 						{
 							name: 'Orzechowo',
 							short: 'ORZ',
 							commodity: [10,10,7],
-							empty: [9,7,4],
+							empty: [7,7,4],
 						},
 						{
 							name: 'Nowe miasto nad wartą',
@@ -2836,13 +2838,13 @@
 							name: 'Klęka',
 							short: 'KLK',
 							commodity: [6,6,7],
-							empty: [9,5,6],
+							empty: [5,5,6],
 						},
 						{
 							name: 'Mieszków',
 							short: 'MSZ',
 							commodity: [9,[6,7],6],
-							empty: [6,[10,6],7],
+							empty: [8,[6,6],7],
 						},
 						{
 							name: 'Cielcza',
@@ -3138,7 +3140,7 @@
 							name: 'Żmigród 2',
 							short: 'Ż2',
 							commodity: [[8,4],[7,7],8],
-							empty: [9,[7,8],7],
+							empty: [[9,9],[7,8,7],10],
 						},
 						{
 							name: 'Korzeńsko',
@@ -3194,7 +3196,7 @@
 							name: 'Gostyń 4',
 							short: 'G4',
 							commodity: [10,[7,6],8],
-							empty: [[7,6],[9,7],7],
+							empty: [[7,6,9],[9,7,10],[6,7]],
 						},
 						{
 							name: 'Gostyń 3',
@@ -3398,11 +3400,11 @@
 						{
 							if (chest.short)
 							{
-								return info(`Słupek klocków (${chest.short} ${chest.value}) na samochodzie nie ma podparcia z przodu.`)
+								return info(`Słupek klocków (${{chicken:'Czerwone',meat:'Żółte',smoke:'Niebieskie'}[chest.type]||''} ${chest.short}) na samochodzie nie ma podparcia z przodu.`)
 							}
 							else
 							{
-								return info(`Słupek klocków na samochodzie nie ma podparcia z przodu.`)
+								return info(`Słupek klocków (${{chicken:'Czerwone',meat:'Żółte',smoke:'Niebieskie'}[chest.type]||''} ${chest.value}) na samochodzie nie ma podparcia z przodu.`)
 							}
 						}
 					}
@@ -3411,13 +3413,20 @@
 						const neighbor = ((situation.car[0][r-1]||[])[i]||{})
 						if ((neighbor.value||0)+3 < chest.value||0)
 						{
-							if (chest.short)
+							if (neighbor.value > 0)
 							{
-								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${chest.short} ${chest.value})`)
+								if (chest.short)
+								{
+									return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${{chicken:'Czerwone',meat:'Żółte',smoke:'Niebieskie'}[chest.type]||''} ${chest.short})`)
+								}
+								else
+								{
+									return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${{chicken:'Czerwone',meat:'Żółte',smoke:'Niebieskie'}[chest.type]||''} ${chest.value})`)
+								}
 							}
 							else
 							{
-								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.`)
+								return info(`Towar nie jest zabezpieczony.`)
 							}
 						}
 					}
@@ -3426,13 +3435,20 @@
 						const neighbor = ((situation.car[0][r+1]||[])[i]||{})
 						if ((neighbor.value||0)+3 < chest.value||0)
 						{
-							if (chest.short)
+							if (neighbor.value > 0)
 							{
-								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${chest.short} ${chest.value})`)
+								if (chest.short)
+								{
+									return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${{chicken:'Czerwone',meat:'Żółte',smoke:'Niebieskie'}[chest.type]||''} ${chest.short})`)
+								}
+								else
+								{
+									return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.<br>(${{chicken:'Czerwone',meat:'Żółte',smoke:'Niebieskie'}[chest.type]||''} ${chest.value})`)
+								}
 							}
 							else
 							{
-								return info(`Na samochodzie są różnice w wysokości klocków większe niż 3.`)
+								return info(`Towar nie jest zabezpieczony.`)
 							}
 						}
 					}
@@ -3737,10 +3753,10 @@
 			if (true)
 			{
 				const tr = document.createElement('tr')
-				for (let j=0 ; j<5 ; j++)
+				for (let j=0 ; j<6 ; j++)
 				{
 					const th = document.createElement('th')
-					th.innerHTML = ['','-- Sklep --','- D -','- M -','- W -','- X -'][j]
+					th.innerHTML = ['- Nr -','','--- Sklep ---','- D -','- M -','- W -','- X -'][j]
 					tr.appendChild(th)
 				}
 				table.appendChild(tr)
@@ -3748,10 +3764,17 @@
 			for (let i=1 ; i<data.length ; i++)
 			{
 				const tr = document.createElement('tr')
-				for (let j=0 ; j<5 ; j++)
+				for (let j=0 ; j<6 ; j++)
 				{
 					const td = document.createElement('td')
-					td.innerHTML = data[i][['short','name','chicken','meat','smoke','short'][j]]
+					if (j === 0)
+					{
+						td.innerHTML = i
+					}
+					else
+					{
+						td.innerHTML = data[i][['short','short','name','chicken','meat','smoke','short'][j]]
+					}
 					tr.appendChild(td)
 				}
 				table.appendChild(tr)
@@ -3796,46 +3819,31 @@
 			data[i].moves = situation.moves[i]
 			total[1] += data[i].moves
 		}
-		if (Array.isArray(situation.lvl) && results[situation.lvl[0]])
+		const table = document.createElement('table')
+		const span = document.createElement('span')
+		if (complete())
 		{
-			results[situation.lvl[0]][situation.lvl[1]].data.push(total)
-			if (situation.required > total[0])
+			span.innerHTML = `Trasa: ${situation.lvlName} ukończona.`
+			span.innerHTML += `<br>Efektywność: ${complete()}`
+			div.classList.add('complete')
+			if (Array.isArray(situation.lvl) && results[situation.lvl[0]])
 			{
-				div.classList.add('complete')
+				results[situation.lvl[0]][situation.lvl[1]].data.push(total)
+				//
 				if (results[situation.lvl[0]][situation.lvl[1]+1])
 				{
 					results[situation.lvl[0]][situation.lvl[1]+1].unlocked = true
 				}
 			}
-			else
-			{
-				div.classList.remove('complete')
-			}
 			localStorage.setItem('agro-tetris: results',JSON.stringify(results))
 		}
 		else
 		{
-			if (situation.required > total[0])
-			{
-				div.classList.add('complete')
-			}
-			else
-			{
-				div.classList.remove('complete')
-			}
+			span.innerHTML = `Trasa: ${situation.lvlName} nie ukończona.`
+			div.classList.remove('complete')
 		}
+		span.innerHTML += `<br>Czas: ${Math.round(total[0]/60)}min &nbsp; Kroki: ${total[1]}`
 		data.push({name:'podsumowanie',time:total[0],moves:total[1]})
-		const table = document.createElement('table')
-		const span = document.createElement('span')
-		if (situation.required > total[0])
-		{
-			span.innerHTML = `Poziom ${situation.lvlName} ukończony.<br>`
-		}
-		else
-		{
-			span.innerHTML = `Poziom ${situation.lvlName} nie ukończony.<br>`
-		}
-		span.innerHTML += `Czas: ${total[0]}s &nbsp; Kroki: ${total[1]}`
 		if (true)
 		{
 			const tr = document.createElement('tr')
@@ -3862,6 +3870,55 @@
 		content.appendChild(table)
 		div.classList.remove('hidden')
 		showRoutes()
+		function complete()
+		{
+			let factor = 0.2
+			if (Array.isArray(situation.lvl))
+			{
+				factor = Math.max(0,10-(situation.lvl[0]||0)) * 0.05
+			}
+			if (total[1] > situation.required * (1+factor))
+			{
+				return false
+			}
+			else
+			{
+				const surplus = total[1]-situation.required
+				const effectiveness = 1 - Math.min(1,(surplus/situation.required) * (1/factor))
+				const procent = `${Math.round(effectiveness*1000)/10}%`
+				return procent
+			}
+		}
+	}
+	function required(route,lvl)
+	{
+		let pillar = {commodity:0,empty:0}
+		for (const shop of route.shops)
+		{
+			for (let i=0 ; i<shop.commodity.length ; i++)
+			{
+				if (Array.isArray(shop.commodity[i]))
+				{
+					pillar.commodity += shop.commodity[i].length
+				}
+				else
+				{
+					pillar.commodity ++
+				}
+			}
+			for (let i=0 ; i<shop.empty.length ; i++)
+			{
+				if (Array.isArray(shop.empty[i]))
+				{
+					pillar.empty += shop.empty[i].length
+				}
+				else
+				{
+					pillar.empty ++
+				}
+			}
+		}
+		return (pillar.commodity * 12) + (pillar.empty * 8)
 	}
 </script>
 </head>
@@ -3887,10 +3944,6 @@
 		</div>
 		<button>Dalej</button>
 	</footer>
-	<div class="window hidden" id="plan">
-		<div class="content"></div>
-		<button>OK</button>
-	</div>
 	<div class="window hidden" id="error">
 		<div class="content"></div>
 		<button>OK</button>
@@ -3900,8 +3953,12 @@
 		<button>OK</button>
 	</div>
 	<div class="window hidden" id="curtain">
-		<div class="content">Kliknij guzik gdy będziesz gotowy.</div>
+		<div class="content">Dla każdego etapu liczony jest czas.<br>Kliknij guzik gdy będziesz gotowy.</div>
 		<button>Gotowy</button>
+	</div>
+	<div class="window hidden" id="plan">
+		<div class="content"></div>
+		<button>OK</button>
 	</div>
 	<div class="window hidden" id="routes">
 		<span>Wybierz trasę</span>
