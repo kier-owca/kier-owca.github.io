@@ -3875,7 +3875,7 @@
 			let factor = 0.2
 			if (Array.isArray(situation.lvl))
 			{
-				factor = Math.max(0,10-(situation.lvl[0]||0)) * 0.05
+				factor = Math.max((8/situation.required),10-(situation.lvl[0]||0)) * 0.05
 			}
 			if (total[1] > situation.required * (1+factor))
 			{
@@ -3885,7 +3885,7 @@
 			{
 				const surplus = total[1]-situation.required
 				const effectiveness = 1 - Math.min(1,(surplus/situation.required) * (1/factor))
-				const procent = `${Math.round(effectiveness*1000)/10}%`
+				const procent = `${Math.min(1000,Math.round(effectiveness*1000)/10)}%`
 				return procent
 			}
 		}
