@@ -503,7 +503,6 @@
 				}
 				localStorage.setItem('agro-tetris: results',JSON.stringify(results))
 			}
-			alert(JSON.stringify(results))
 			refreshStatistics()
 			situation.click = 0
 			situation.hand = 0
@@ -512,6 +511,15 @@
 			document.getElementsByTagName('footer')[0].getElementsByTagName('button')[0].onclick = next
 			document.getElementById('showPlan').onclick = showPlan
 			document.getElementById('hamburger').onclick = showRoutes
+			const buttons = document.getElementById('routes').getElementsByTagName('button')
+			buttons[1].onclick = function()
+			{
+				if (situation.lvl)
+				{
+					document.getElementById('routes').classList.add('hidden')
+				}
+			}
+			buttons[2].onclick = showStatistic
 			const divWin = document.getElementsByClassName('window')
 			for (let div of divWin)
 			{
@@ -3738,6 +3746,40 @@
 			content.appendChild(section)
 		}
 	}
+	function showStatistic()
+	{
+		const routes = document.getElementById('routes')
+		const content = routes.getElementsByClassName('content')[0]
+		routes.classList.remove('hidden')
+		content.innerHTML = ''
+		for (let i=0 ; i<30 ; i++)
+		{
+			for (let j=0 ; j<3 ; j++)
+			{
+				const effect = ((results[j]||[])[i]||{})
+				if (i===0 || effect.unlocked)
+				{
+					content.innerHTML += `${((system.routes[j]||[])[i]||{}).name||'Błąd'}:<br>`
+					if (Array.isArray(effect.best))
+					{
+						content.innerHTML += `Najlepszy wynik:<br>Czas: ${Math.round(effect.best[0]/60)}min &nbsp; Kroki: ${effect.best[1]}<br>`
+					}
+					if (Array.isArray((effect.data||[])[0]))
+					{
+						content.innerHTML += `Ostatni wynik:<br>Czas: ${Math.round(effect.data[0][0]/60)}min &nbsp; Kroki: ${effect.data[0][1]}<br>`
+						const sum = [0,0]
+						for (let k=0 ; k<effect.data.length ; k++)
+						{
+							sum[0] += effect.data[k][0]
+							sum[1] += effect.data[k][1]
+						}
+						content.innerHTML += `średni wynik:<br>Czas: ${Math.round((sum[0]/effect.data.length)/60)}min &nbsp; Kroki: ${Math.round(sum[1]/effect.data.length)}<br>`
+					}
+					content.innerHTML += '<br>'
+				}
+			}
+		}
+	}
 	function showPlan()
 	{
 		if (!document.getElementById('plan').classList.contains('hidden'))
@@ -3829,7 +3871,19 @@
 			div.classList.add('complete')
 			if (Array.isArray(situation.lvl) && results[situation.lvl[0]])
 			{
+				if (!results[situation.lvl[0]][situation.lvl[1]].best)
+				{
+					results[situation.lvl[0]][situation.lvl[1]].best = [total[0],total[1]]
+				}
+				else
+				{
+					if (total[1] > results[situation.lvl[0]][situation.lvl[1]].best[1])
+					{
+						results[situation.lvl[0]][situation.lvl[1]].best = [total[0],total[1]]
+					}
+				}
 				results[situation.lvl[0]][situation.lvl[1]].data.push(total)
+				results[situation.lvl[0]][situation.lvl[1]].data = results[situation.lvl[0]][situation.lvl[1]].data.slice(9)
 				//
 				if (results[situation.lvl[0]][situation.lvl[1]+1])
 				{
@@ -3965,6 +4019,9 @@
 	<div class="window hidden" id="routes">
 		<span>Wybierz trasę</span>
 		<div class="content"></div>
+		<button style="display: none;">X</button>
+		<button style="width: 30vh; padding: 1vh">Anuluj</button>
+		<button style="width: 30vh; padding: 1vh">Statystyki</button>
 	</div>
 	<div class="window hidden" id="finish">
 		<div class="content"></div>
