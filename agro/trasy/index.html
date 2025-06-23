@@ -662,7 +662,7 @@
 				}
 				route.totalWeight = Math.round(route.totalWeight/100)/10
 				route.totalSpace = Math.round(route.totalSpace)
-				route.space = Math.round(timeSpace(route.stops[0].hour,route.stops[route.stops.length-1].hour))
+				route.space = Math.round(timeSpace(route.stops[0].hour,route.stops[route.stops.length-1].hour))+30
 				const keys = route.stops.filter(stop => stop.type === "X").length;
 				const doors = route.stops.filter(stop => (stop.type != "X" && stop.type != "K")).length;
 				route.difficulty = calcDifficulty(route.space,route.totalSpace,route.totalWeight,route.totalPallets,route.stops.length,keys,doors)
@@ -1482,6 +1482,14 @@
 				const time = create.element("div","time")
 				li[2].appendChild(time)
 				time.innerHTML = `${Math.round(route.totalSpace/60)}H (${Math.floor(route.space/60)}H ${addZero(Math.floor((route.space%60)))})`
+				if (route.totalSpace > 605)
+				{
+					time.style.color = "#a75757"
+				}
+				else if (route.totalSpace > 540)
+				{
+					time.style.color = "#a77557"
+				}
 				const weight = create.element("div","weight")
 				li[2].appendChild(weight)
 				weight.innerHTML = `${route.totalWeight} t. / ${route.totalPallets} pal.`
@@ -1698,7 +1706,20 @@
 				ctx.fillStyle = "#4d4d4d"
 				ctx.fillRect(5, TopPosition, 440, 2);
 				ctx.font = `bold 18px "Courier New", monospace`;
-				ctx.fillText(`+${Math.min(999,stop.space)}`, 447, TopPosition+6);
+				//
+				ctx.fillStyle = "#577f00"
+				ctx.fillText(`+`, 452, TopPosition+5);
+				if (stop.space > 25)
+				{
+					ctx.fillStyle = "#7f6100"
+					ctx.fillText(`+`, 467, TopPosition+5);
+				}
+				if (stop.space > 40)
+				{
+					ctx.fillStyle = "#7f0000"
+					ctx.fillText(`+`, 482, TopPosition+5);
+				}
+				ctx.fillStyle = "#4d4d4d"
 				ctx.fillRect(5, TopPosition+spacePosition, 440, 2);
 				ctx.fillStyle = "white"
 				ctx.font = `20px "Courier New", monospace`;
