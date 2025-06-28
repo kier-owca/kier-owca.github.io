@@ -1185,6 +1185,50 @@
 			}
 			content.appendChild(button)
 		},
+		chartDifficulty: function()
+		{
+			const content = document.getElementById("chart").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const h2 = document.createElement("h2")
+			h2.innerHTML = "Średnia trudność tras w czasie:<br><br>"
+			content.appendChild(h2)
+			let minDifficulty = 0
+			let maxDifficulty = 0
+			const listDifficulty = []
+			for (let i=0 ; i<data.itinerary.length ; i++)
+			{
+				listDifficulty[i] = [0,0];
+				for (const route of data.itinerary[i].list)
+				{
+					if (route)
+					{
+						listDifficulty[i][0] += route.difficulty
+						listDifficulty[i][1] ++
+					}
+				}
+				listDifficulty[i] = Math.round(listDifficulty[i][0]/(listDifficulty[i][1]||1))
+				if (minDifficulty < 1 || listDifficulty[i] < minDifficulty)
+				{
+					minDifficulty = listDifficulty[i]
+				}
+				if (listDifficulty[i] > maxDifficulty)
+				{
+					maxDifficulty = listDifficulty[i]
+				}
+			}
+			for (let i=0 ; i<data.itinerary.length ; i++)
+			{
+				const chart = Math.round((Math.max(0,listDifficulty[i]-minDifficulty)/(maxDifficulty-minDifficulty))*42)
+				h2.innerHTML += `${dateText(data.itinerary[i].start)}: ${listDifficulty[i]}pkt.<br>${"!".repeat(chart+2)}<br><br>`
+			}
+			const button = document.createElement("button")
+			button.innerHTML = "kopiuj"
+			button.onclick = function()
+			{
+				navigator.clipboard.writeText(h2.innerText || h2.textContent)
+			}
+			content.appendChild(button)
+		},
 		downloadAll: async function()
 		{
 			menu.classList.add("hidden")
@@ -1714,7 +1758,7 @@
 					ctx.fillStyle = "#7f6100"
 					ctx.fillText(`+`, 467, TopPosition+5);
 				}
-				if (stop.space > 38)
+				if (stop.space > 40)
 				{
 					ctx.fillStyle = "#7f0000"
 					ctx.fillText(`+`, 482, TopPosition+5);
@@ -2152,6 +2196,7 @@
 			<button data-path="ends" data-action="ends">Zakończenia tras</button>
 			<button data-path="newStops" data-action="newStops">Nowe sklepy</button>
 			<button data-path="chart" data-action="chartWeight">Wykres tonażu</button>
+			<button data-path="chart" data-action="chartDifficulty">Wykres trudności</button>
 			<button data-path="double" data-action="findDouble">Możliwe duble</button>
 		</section>
 		<section id="info" class="hidden">
