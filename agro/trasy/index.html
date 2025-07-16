@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Przeglądarka Tras</title>
+<meta name="theme-color" content="black">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22100%22%20height%3D%22100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%231B1B1B%22%20stroke%3D%22%23616161%22%20stroke-width%3D%224%22%20/%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2255%25%22%20text-anchor%3D%22middle%22%20fill%3D%22gold%22%20font-size%3D%2248%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22bold%22%20dominant-baseline%3D%22middle%22%3EPT%3C/text%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style type="text/css">
 	*
 	{
@@ -391,6 +394,41 @@
 		border-color: gold;
 	}
 </style>
+<script>
+	const manifest =
+	{
+		name: "Przeglądarka Tras",
+		short_name: "PT",
+		start_url: ".",
+		display: "standalone",
+		background_color: "black",
+		theme_color: "#1B1B1B",
+		icons:
+		[
+			{
+				"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABzUlEQVR4nO2Vv07DMBBFz7eQI+QgcAiUgAiUgAjIAjIAjaCB3JtVu5drkzKL83kOHh8YHdSW7ZrmUnzDjkl3YHxZVbgGwgoMG9QMCF8BL6jwQ/kWEeQBUBILAHmWj3GfPR2zvTxuAQYXwI5Th0mPoRo4b7IbcLjUbYMjYHXX/AzMkPvEHwAf5n9VX+QHHMPRV0zFOyD2z+H0S4UPNtrZUK4qg1+zHy7z9kUgC2EQ9Fe9wewKIE2Ai1TNOj8kWe7iy0+MSN/URKE7gEqBSC4JUPWm2JGhFZoYxXrZY4QlA/jkfwfwroC2vhwnkI1Y4AWQW1A7RTfEbS3bhKoZbmD1jN+BbwWwzP64g+gfg2JhVPA+aN8ZtdwBcCfmm0eYZgfDFw7gAjS7I+96pOnKAFQLJBvAbwe6PXkZayYtIFRg30pUljhJ4zFbSDyOdHXlFkpm6UghPiIA3kAfSnEQLA1JDbIagQnICnYaD2EGvNaRNIa5yAGkTfPrMZQlRA+W/kgnD8AhmbAiXfKGUoAAAAASUVORK5CYII=",
+				"type": "image/png",
+				"sizes": "32x32"
+			},
+			{
+			"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABzUlEQVR4nO2Vv07DMBBFz7eQI+QgcAiUgAiUgAjIAjIAjaCB3JtVu5drkzKL83kOHh8YHdSW7ZrmUnzDjkl3YHxZVbgGwgoMG9QMCF8BL6jwQ/kWEeQBUBILAHmWj3GfPR2zvTxuAQYXwI5Th0mPoRo4b7IbcLjUbYMjYHXX/AzMkPvEHwAf5n9VX+QHHMPRV0zFOyD2z+H0S4UPNtrZUK4qg1+zHy7z9kUgC2EQ9Fe9wewKIE2Ai1TNOj8kWe7iy0+MSN/URKE7gEqBSC4JUPWm2JGhFZoYxXrZY4QlA/jkfwfwroC2vhwnkI1Y4AWQW1A7RTfEbS3bhKoZbmD1jN+BbwWwzP64g+gfg2JhVPA+aN8ZtdwBcCfmm0eYZgfDFw7gAjS7I+96pOnKAFQLJBvAbwe6PXkZayYtIFRg30pUljhJ4zFbSDyOdHXlFkpm6UghPiIA3kAfSnEQLA1JDbIagQnICnYaD2EGvNaRNIa5yAGkTfPrMZQlRA+W/kgnD8AhmbAiXfKGUoAAAAASUVORK5CYII=",
+			"sizes": "192x192",
+			"type": "image/png"
+			},
+			{
+				"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABzUlEQVR4nO2Vv07DMBBFz7eQI+QgcAiUgAiUgAjIAjIAjaCB3JtVu5drkzKL83kOHh8YHdSW7ZrmUnzDjkl3YHxZVbgGwgoMG9QMCF8BL6jwQ/kWEeQBUBILAHmWj3GfPR2zvTxuAQYXwI5Th0mPoRo4b7IbcLjUbYMjYHXX/AzMkPvEHwAf5n9VX+QHHMPRV0zFOyD2z+H0S4UPNtrZUK4qg1+zHy7z9kUgC2EQ9Fe9wewKIE2Ai1TNOj8kWe7iy0+MSN/URKE7gEqBSC4JUPWm2JGhFZoYxXrZY4QlA/jkfwfwroC2vhwnkI1Y4AWQW1A7RTfEbS3bhKoZbmD1jN+BbwWwzP64g+gfg2JhVPA+aN8ZtdwBcCfmm0eYZgfDFw7gAjS7I+96pOnKAFQLJBvAbwe6PXkZayYtIFRg30pUljhJ4zFbSDyOdHXlFkpm6UghPiIA3kAfSnEQLA1JDbIagQnICnYaD2EGvNaRNIa5yAGkTfPrMZQlRA+W/kgnD8AhmbAiXfKGUoAAAAASUVORK5CYII=",
+				"sizes": "512x512",
+				"type": "image/png"
+			}
+		]
+	};
+	const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+	const manifestURL = URL.createObjectURL(blob);
+	const lk = document.createElement('link');
+	lk.rel = 'manifest';
+	lk.href = manifestURL;
+	document.head.appendChild(lk);
+</script>
 <script>
 	async function sleep(ms)
 	{
@@ -2254,5 +2292,25 @@
 		<input type="file" id="fileInput" accept=".csv, .tsv" multiple>
 		<label for="fileInput" class="button">Wybierz plik</label>
 	</div>
+	<script>
+		if ('serviceWorker' in navigator)
+		{
+			const swCode = `
+				self.addEventListener("install", e => {
+					e.waitUntil(
+						caches.open("pwa-cache-v1").then(cache =>
+							cache.addAll(["./"])
+						)
+					);
+				});
+				self.addEventListener("fetch", () => {});
+			`;
+			const blob = new Blob([swCode], { type: 'application/javascript' });
+			const swURL = URL.createObjectURL(blob);
+			navigator.serviceWorker.register(swURL).then(() => {
+				console.log("✅ Service Worker zarejestrowany.");
+			});
+		}
+	</script>
 </body>
 </html>
