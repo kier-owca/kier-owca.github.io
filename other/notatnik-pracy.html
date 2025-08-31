@@ -351,7 +351,7 @@
 				}
 			}
 			if (cycle[0].type != 1){return "Brak wpisu rozpoczęcia pracy"}
-			if (cycle[cycle.length].type != 1){return "Brak wpisu zakończenia pracy"}
+			if (cycle[cycle.length-1].type != 4){return "Brak wpisu zakończenia pracy"}
 			for (let i=1 ; i<cycle.length ; i++)
 			{
 				if (cycle[i-1].time > cycle[i].time)
@@ -407,6 +407,7 @@
 		nowCycle:[],
 		listCycles:[],
 		statistics:[],
+		edit: {},
 		load:
 		{
 			nowCycle: function()
@@ -754,7 +755,33 @@
 		},
 		edit: function(event)
 		{
-			//
+			const article = event.target.closest("article");
+			if (!article){return}
+			if (!article.dataset.edit){return}
+			data.edit = JSON.parse(article.dataset.edit)
+			if (data.edit.type === "nowCycle")
+			{
+				data.edit.object = JSON.parse(JSON.stringify(data.nowCycle))
+				editCycle()
+			}
+			else if (data.edit.type === "cycle")
+			{
+				data.edit.object = JSON.parse(JSON.stringify(data.listCycles[data.edit.index]))
+				editCycle()
+			}
+			else if (data.edit.type === "month")
+			{
+				data.edit.object = JSON.parse(JSON.stringify(data.statistics[data.edit.index]))
+				editMonth()
+			}
+			function editCycle()
+			{
+				console.log(data.edit)
+			}
+			function editMonth()
+			{
+				console.log(data.edit)
+			}
 		}
 	}
 	const refresh =
@@ -765,7 +792,9 @@
 			div.innerHTML  = '';
 			if (!Array.isArray(data.nowCycle)){return}
 			if (data.nowCycle.length < 1){return}
-			div.appendChild(create.cycle(data.nowCycle))
+			const cycle = create.cycle(data.nowCycle);
+			cycle.dataset.edit = `{"type":"nowCycle","index":${-1}}`;
+			div.appendChild(cycle);
 		},
 		listCycles: function()
 		{
@@ -801,6 +830,7 @@
 			for (let i=data.listCycles.length-1 ; i>=0 ; i--)
 			{
 				const cycle = create.cycle(data.listCycles[i],true);
+				cycle.dataset.edit = `{"type":"cycle","index":${i},"now":false}`
 				text += cycle.dataset.text+"\n"
 				div.appendChild(cycle);
 			}
@@ -902,6 +932,7 @@
 			for (let i=completeStatistics.length-1 ; i>=0 ; i--)
 			{
 				const month = create.month(completeStatistics[i])
+				month.dataset.edit = `{"type":"month","index":${i}}`
 				text += `\n\n${month.dataset.text}`
 				div.appendChild(month)
 			}
