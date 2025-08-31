@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Notatniik pracy</title>
+<style type="text/css">
+	*
+	{
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: rgba(0,0,0,0);
+	}
+	body
+	{
+		background: black;
+		color: white;
+		font-family: Arial, Helvetica, sans-serif;
+	}
+	main
+	{
+		position: relative;
+		width: 49vh;
+		left: 50%;
+		transform: translate(-50%,0);
+		padding-top: 5vh;
+		padding-bottom: 25vh;
+	}
+	main section
+	{
+		position: relative;
+		box-sizing: border-box;
+		width: 100%;
+		min-width: 5vh;
+		margin-top: 3vh;
+		margin-bottom: 3vh;
+		border: solid 0.4vh #252525;
+		padding: 1.5vh;
+	}
+	main h1, main h2, main h3
+	{
+		width: 100%;
+		padding-top: 0.2vh;
+		padding-bottom: 0.7vh;
+		text-align: center;
+		color: #D9CFAA;
+		font-size: 2.6vh;
+		letter-spacing: 0.07vh;
+	}
+	main h2
+	{
+		font-size: 2.5vh;
+	}
+	main h3
+	{
+		padding-left: 2vh;
+		font-size: 2vh;
+		text-align: left;
+		padding-top: 0.6vh;
+		padding-bottom: 0.1vh;
+	}
+	main article
+	{
+		background: #251B11;
+		padding-top: 0.7vh;
+		padding-bottom: 1.2vh;
+		margin-top: 1.5vh;
+		margin-bottom: 1.5vh;
+	}
+	summary
+	{
+		width: 100%;
+		padding-bottom: 1vh;
+		padding-top: 0.5vh;
+		font-size: 0.9em;
+		color: #D9CFAA;
+		font-size: 2vh;
+		text-align: center;
+		letter-spacing: 0.15vh;
+	}
+	summary::after
+	{
+		content: "- Rozwiń -"; 
+	}
+	details[open] > summary::after
+	{
+		content: "- Zwiń -";
+	}
+	summary, li
+	{
+		list-style: none;
+	}
+	summary::-webkit-details-marker, li::-webkit-details-marker
+	{
+		display: none;
+	}
+	main article ul
+	{
+		position: relative;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 1vh;
+		margin-bottom: 0.7vh;
+	}
+	main article li
+	{
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: center;
+		list-style: none;
+		padding-top: 0.2vh;
+		padding-bottom: 0.2vh;
+		font-size: 2vh;
+	}
+	main article li span:first-child
+	{
+		color: #B19D61;
+		letter-spacing: 0.04vh;
+	}
+	main article li span:last-child
+	{
+		color: white;
+		letter-spacing: 0.08vh;
+		font-family: 'Courier New', monospace;
+		font-weight: bold;
+	}
+	main article li span:not(:first-child):not(:last-child)
+	{
+		flex: 1;
+		margin-left: 1vh;
+		margin-right: 1vh;
+		box-sizing: border-box;
+		height: 0.5vh;
+		border-bottom: 0.5vh dotted #432F25;
+	}
+	main article .actions
+	{
+		position: relative;
+		box-sizing: border-box;
+		padding-left: 1.5vh;
+		padding-right: 1.5vh;
+		width: 100%;
+		height: 7vh;
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+	}
+	main article .actions > button
+	{
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		width: 5.6vh;
+		height: 5.6vh;
+		margin: 0.7vh;
+		background: #4D2500;
+		border-radius: 1vh;
+	}
+	button > svg
+	{
+		width: 90%;
+		fill: #1B0E00;
+	}
+	#control
+	{
+		position: fixed;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: center;
+		align-content: flex-start;
+		width: 49.5vh;
+		height: 14.7vh;
+		bottom: 0;
+		left: 50%;
+		transform: translate(-50%,0);
+		padding-top: 1vh;
+		background: black;
+		border-top-left-radius: 0.7vh;
+		border-top-right-radius: 0.7vh;
+	}
+	#control > button
+	{
+		box-sizing: content-box;
+		width: 10vh;
+		height: 10vh;
+		background: #251100;
+		border-top-left-radius: 1vh;
+		border-top-right-radius: 1vh;
+	}
+	#control > button.marked
+	{
+		transform: translate(0,3.5vh);
+	}
+	#control > button.active
+	{
+		background: #4D2500;
+	}
+	footer
+	{
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		height: 5vh;
+		background: #251B11;
+		border-top-left-radius: 0.5vh;
+		border-top-right-radius: 0.5vh;
+		border: solid 0.4vh #432F25;
+		border-bottom: none;
+		text-align: center;
+		align-content: center;
+		font-size: 2.3vh;
+		font-weight: bold;
+		letter-spacing: 0.1vh;
+		font-family: 'Courier New', monospace;
+		color: #EDB107;
+		animation: blink 2s infinite;
+	}
+	#infoWindow
+	{
+		position: fixed;
+		width: 42vh;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%,-50%);
+		padding: 1vh;
+		padding-top: 2vh;
+		padding-bottom: 2vh;
+		background: #251100;
+		border: solid 0.3vh #EDB107;
+	}
+	#infoWindow > h2
+	{
+		width: 100%;
+		padding-bottom: 3vh;
+		text-align: center;
+		font-size: 2.2vh;
+		letter-spacing: 0.07vh;
+	}
+	#infoWindow .actions
+	{
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: space-around;
+		align-items: center;
+	}
+	#infoWindow .actions > button
+	{
+		box-sizing: border-box;
+		min-width: 25%;
+		height: 4.5vh;
+		text-align: center;
+		align-content: center;
+		background: #4D2500;
+		border-radius: 0.7vh;
+		font-weight: bold;
+		font-size: 1.8vh;
+		color: #1B0E00;
+	}
+	.nonSelect
+	{
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	.hidden
+	{
+		display: none;
+	}
+	@keyframes blink
+	{
+		0%   { color: #EDB107; }
+		50%  { color: #6B4D11; }
+		100% { color: #EDB107; }
+	}
+</style>
+<script>
+	const system =
+	{
+		time: 0,
+		start: function()
+		{
+			const controlButtons = document.getElementById('control').getElementsByTagName('button')
+			for (const button of controlButtons)
+			{
+				actions.controlButtons[button.dataset.type].button = button
+				button.onclick = actions.controlButtons.action
+			}
+			data.load.nowCycle()
+			data.load.listCycles()
+			data.load.statistics()
+			data.archive()
+			actions.controlButtons.refresh()
+			refresh.nowCycle()
+			refresh.listCycles()
+			refresh.statistics()
+			system.refreshTime()
+			setInterval(system.refreshTime,3000)
+		},
+		now: function(date)
+		{
+			date = date || Date.now();
+			return Math.max(0,Math.floor(date/(60*1000)));
+		},
+		addEntry(type)
+		{
+			if (Array.isArray(data.nowCycle))
+			{
+				data.nowCycle.push({time:system.now(),type})
+			}
+		},
+		addCycle()
+		{
+			const error = system.testCycle(data.nowCycle);
+			if (!error)
+			{
+				data.listCycles.push(data.nowCycle)
+				data.nowCycle = []
+				data.save.nowCycle()
+				data.save.listCycles()
+				refresh.nowCycle()
+				refresh.listCycles()
+				refresh.statistics()
+				actions.controlButtons.refresh()
+			}
+			else
+			{
+				system.info(`Nastąpił błąd podczas zapisu:<br>${error}.`)
+			}
+		},
+		testCycle(cycle)
+		{
+			if (!cycle){return "Błąd programu 01"}
+			if (!Array.isArray(cycle)){return "Błąd programu 02"}
+			for (const entry of cycle)
+			{
+				if (!(entry||{}).type || !(entry||{}).time)
+				{
+					return "Uszkodzony wpis"
+				}
+				if (entry.type > 4)
+				{
+					return "Wpis zawiera błędny typ"
+				}
+			}
+			if (cycle[0].type != 1){return "Brak wpisu rozpoczęcia pracy"}
+			if (cycle[cycle.length].type != 1){return "Brak wpisu zakończenia pracy"}
+			for (let i=1 ; i<cycle.length ; i++)
+			{
+				if (cycle[i-1].time > cycle[i].time)
+				{
+					return "Niepoprawna kolejność wpisów"
+				}
+			}
+			return false
+		},
+		refreshTime()
+		{
+			const textDate = renderText.totalDate(Date.now()/(60000));
+			if (system.time != textDate)
+			{
+				system.time = textDate;
+				const footer = document.getElementsByTagName('footer')[0];
+				footer.innerHTML = textDate
+				refresh.nowCycle()
+			}
+		},
+		info(info)
+		{
+			const infoWindow = document.getElementById("infoWindow");
+			infoWindow.innerHTML = "";
+			const h2 = document.createElement("h2");
+			h2.innerHTML = info;
+			infoWindow.appendChild(h2)
+			const actions = document.createElement("div")
+			actions.className = "actions"
+			infoWindow.appendChild(actions)
+			const button = document.createElement("button")
+			button.innerHTML = "OK"
+			actions.appendChild(button)
+			button.onclick = function()
+			{
+				infoWindow.classList.add("hidden")
+			}
+			infoWindow.classList.remove("hidden")
+		}
+	}
+	const data =
+	{
+		/*
+			budowa danych:
+			nowCycle - aktualny cykl: lista wpisów
+			listCycles - lista cykli: lista cykli
+			statistics - statystyki: lista miesięcy
+			wpis: {time, type} - time: czas w minutach. type: typ wpisu
+			miesiąc: {full,standard,year,month,days} - full: czy był pełny (zaznacza użytkownik), standard: czy nie zawierał anomalii (zaznacza użytkownik), year: rok, month: nr miesiąca, days: lista dni ({work,sandwich} - minuty pracy i minuty przerwy)
+			kodowanie: dane są kodowane na potrzeby kompresji danych w pamięci przeglądarki
+			wartości liczbowe kodowane są z pomocą funkcji data.code.value() i odkodowywane data.decode.value()
+		*/
+		nowCycle:[],
+		listCycles:[],
+		statistics:[],
+		load:
+		{
+			nowCycle: function()
+			{
+				const storageName = `workTimeNotes-nowCycle`;
+				const code = (localStorage.getItem(storageName)||'');
+				if (!code){return}
+				data.nowCycle = data.decode.cycle(code)
+			},
+			listCycles: function()
+			{
+				const storageName = `workTimeNotes-listCycles`;
+				let code = (localStorage.getItem(storageName)||'');
+				if (!code){return}
+				code = code.split('$');
+				data.listCycles = [];
+				for (const q of code)
+				{
+					data.listCycles.push(data.decode.cycle(q))
+				}
+				data.listCycles.sort((a, b) => a[0].time - b[0].time);
+			},
+			statistics: function()
+			{
+				const storageName = `workTimeNotes-statistics`;
+				let code = (localStorage.getItem(storageName)||'');
+				if (!code){return}
+				code = code.split('$');
+				data.statistics = [];
+				for (const q of code)
+				{
+					data.statistics.push(data.decode.month(q))
+				}
+				data.statistics.sort((a, b) => (a.year + a.month) - (b.year + b.month));
+			},
+		},
+		save:
+		{
+			nowCycle: function()
+			{
+				const storageName = `workTimeNotes-nowCycle`;
+				const code = data.code.cycle(data.nowCycle)
+				localStorage.setItem(storageName,code||"")
+			},
+			listCycles: function()
+			{
+				const storageName = `workTimeNotes-listCycles`;
+				let code = ""
+				for (const q of data.listCycles)
+				{
+					code += data.code.cycle(q)+"$"
+				}
+				localStorage.setItem(storageName,(code||"$").slice(0,-1))
+			},
+			statistics: function()
+			{
+				const storageName = `workTimeNotes-statistics`;
+				let code = ""
+				for (const q of data.statistics)
+				{
+					code += data.code.month(q)+"$"
+				}
+				localStorage.setItem(storageName,(code||"$").slice(0,-1))
+			},
+		},
+		code:
+		{
+			value: function(v,length)
+			{
+				length = length||0;
+				if (!Number(v)){return "0".repeat(length)}
+				v = Math.max(0,v);
+				if (length)
+				{
+					return `${"0".repeat(length)}${v.toString(36)}`.slice(-length);
+				}
+				else
+				{
+					return v.toString(36);
+				}
+			},
+			cycle: function(c)
+			{
+				if (!Array.isArray(c)){debugger;return ""}
+				let code = "";
+				for (const q of c)
+				{
+					code += data.code.entry(q)+"!";
+				}
+				return (code||"!").slice(0,-1);
+			},
+			entry: function(e)
+			{
+				if (!e){debugger;return ""}
+				if (!(e||{}).type){debugger;return ""}
+				if (!(e||{}).time){debugger;return ""}
+				const time = Math.max(0,Math.round(e.time));
+				const type = Math.min(4,Math.max(0,Math.round(e.type)));
+				return data.code.value((time*5)+type);
+			},
+			month: function(m)
+			{
+				if (!m){debugger;return ""}
+				if (!(m||{}).year){debugger;return ""}
+				if (!Array.isArray((m||{}).days)){debugger;return ""}
+				const full = Math.max(0,Math.min(1,Math.floor(m.full)));
+				const standard = Math.max(0,Math.min(1,Math.floor(m.standard)));
+				const month = Math.max(0,Math.min(11,Math.round(m.month)));
+				const year = Math.max(0,Math.round(m.year-2000));
+				const value = (year*(12*2*2))+(month*4)+(standard*2)+full;
+				let code = `${data.code.value(value)}!`;
+				for (const q of m.days)
+				{
+					const work = Math.max(0,Math.min(7199,Math.round(q.work)))
+					const sandwich = Math.max(0,Math.min(7199,Math.round(q.sandwich)))
+					const value = (work*7200)+sandwich
+					code += data.code.value(value,5)
+				}
+				return code
+			}
+		},
+		decode:
+		{
+			value: function(code)
+			{
+				if (!code){debugger;return 0}
+				return parseInt(code, 36);
+			},
+			cycle: function(code)
+			{
+				if (!code){debugger;return []}
+				code = code.split('!')
+				const giveBack = [];
+				for (const q of code)
+				{
+					giveBack.push(data.decode.entry(q))
+				}
+				return giveBack
+			},
+			entry: function(code)
+			{
+				if (!code){debugger;return {time:0,type:0}}
+				const value = data.decode.value(code)
+				const time = Math.max(0,Math.floor(value/5))
+				const type = Math.floor(value%5)
+				return {time:time,type:type}
+			},
+			month: function(code)
+			{
+				const errorMonth = {full:0,standard:0,year:2000,month:0,days:[]}
+				if (!code){debugger;return errorMonth}
+				const [header, rest] = code.split("!")
+				if (!header || !rest){debugger;return errorMonth}
+				const value = data.decode.value(header)
+				const year = Math.floor(value / (12 * 2 * 2)) + 2000
+				const afterYear = value % (12 * 2 * 2)
+				const month = Math.floor(afterYear / 4)
+				const afterMonth = afterYear % 4
+				const standard = Math.floor(afterMonth / 2)
+				const full = afterMonth % 2
+				const days = []
+				for (let i = 0; i < rest.length; i += 5)
+				{
+					const part = rest.slice(i, i + 5)
+					if (part.length < 5){debugger;return errorMonth}
+					const value = data.decode.value(part)
+					const work = Math.floor(value / 7200)
+					const sandwich = value % 7200
+					days.push({ work, sandwich })
+				}
+				return {year,month,standard,full,days}
+			}
+		},
+		archive: function()
+		{
+			const ii = Math.max(0,data.listCycles.length - 35)
+			let iii = 0
+			for (let i=0 ; i<ii ; i++)
+			{
+				const cycle = data.listCycles[0]
+				if (!Array.isArray(cycle) || cycle.length < 2)
+				{
+					data.listCycles.shift()
+				}
+				else
+				{
+					const time = cycle[cycle.length-1].time
+					if (time*60000 < (Date.now()-3888000000))
+					{
+						iii ++
+						const date = new Date(cycle[0].time*60000)
+						const year = date.getFullYear()
+						const month = date.getMonth()
+						const statistics = calc.statistics.cycle(cycle)
+						const target = search(year,month)
+						target.days.push(statistics)
+						data.listCycles.shift()
+					}
+				}
+			}
+			if (iii)
+			{
+				data.save.statistics()
+				data.save.listCycles()
+			}
+			function search(year,month)
+			{
+				for (const q of data.statistics)
+				{
+					if (q.year === year && q.month === month)
+					{
+						return q
+					}
+				}
+				const newMonth = {full:1, standard:1, month, year, days:[]}
+				data.statistics.push(newMonth)
+				return newMonth
+			}
+		}
+	}
+	const actions =
+	{
+		controlButtons:
+		{
+			startWork:
+			{
+				active: 0,
+				marked: 0,
+				action: function()
+				{
+					system.addEntry(1)
+				}
+			},
+			startBreak:
+			{
+				active: 0,
+				marked: 0,
+				action: function()
+				{
+					system.addEntry(2)
+				}
+			},
+			endBreak:
+			{
+				active: 0,
+				marked: 0,
+				action: function()
+				{
+					system.addEntry(3)
+				}
+			},
+			endWork:
+			{
+				active: 0,
+				marked: 0,
+				action: function()
+				{
+					system.addEntry(4)
+					setTimeout(system.addCycle,2000)
+				}
+			},
+			action: function(event)
+			{
+				const type = (((event||{}).currentTarget||{}).dataset||{}).type
+				if (!event){debugger;return}
+				const button = actions.controlButtons[type]
+				if (button.active)
+				{
+					button.action()
+					actions.controlButtons.refresh()
+					data.save.nowCycle()
+					refresh.nowCycle()
+				}
+			},
+			refresh()
+			{
+				for (const key in actions.controlButtons)
+				{
+					if (typeof actions.controlButtons[key] === 'object')
+					{
+						actions.controlButtons[key].active = 0;
+						actions.controlButtons[key].marked = 0;
+					}
+				}
+				if (Array.isArray(data.nowCycle) && (data.nowCycle||[]).length>0)
+				{
+					if (data.nowCycle.some(e => e.type === 1))
+					{
+						actions.controlButtons.startWork.marked = 1
+					}
+					const lastType = data.nowCycle[data.nowCycle.length-1].type
+					if (lastType === 1)
+					{
+						actions.controlButtons.startBreak.active = 1
+						actions.controlButtons.endWork.active = 1
+					}
+					else if (lastType === 2)
+					{
+						actions.controlButtons.startBreak.marked = 1
+						actions.controlButtons.endBreak.active = 1
+					}
+					else if (lastType === 3)
+					{
+						actions.controlButtons.endWork.active = 1
+						actions.controlButtons.startBreak.active = 1
+					}
+					else if (lastType === 4)
+					{
+						actions.controlButtons.endWork.marked = 1
+					}
+				}
+				else
+				{
+					actions.controlButtons.startWork.active = 1
+				}
+				for (const key in actions.controlButtons)
+				{
+					if (typeof actions.controlButtons[key] === 'object')
+					{
+						const button = actions.controlButtons[key].button
+						button.className = ''
+						if (actions.controlButtons[key].marked)
+						{
+							button.classList.add('marked')
+						}
+						if (actions.controlButtons[key].active)
+						{
+							button.classList.add('active')
+						}
+					}
+				}
+			}
+		},
+		copy: function(event)
+		{
+			const article = event.target.closest("article");
+			if (!article){return}
+			if (article.dataset.text)
+			{
+				navigator.clipboard.writeText(article.dataset.text).then(() =>
+				{
+					system.info(`Skopiowano:<br>${article.dataset.nameText}`)
+				}).catch(err => console.error("Błąd kopiowania:", err));
+			}
+		},
+		edit: function(event)
+		{
+			//
+		}
+	}
+	const refresh =
+	{
+		nowCycle: function()
+		{
+			const div = document.getElementById('nowCycle');
+			div.innerHTML  = '';
+			if (!Array.isArray(data.nowCycle)){return}
+			if (data.nowCycle.length < 1){return}
+			div.appendChild(create.cycle(data.nowCycle))
+		},
+		listCycles: function()
+		{
+			const div = document.getElementById('listCycles');
+			div.innerHTML  = '';
+			const article = document.createElement('article');
+			div.appendChild(article);
+			const h2 = document.createElement('h2');
+			h2.innerHTML = "Rozpiska ogólna";
+			h2.classList.add('nonSelect');
+			article.appendChild(h2);
+			const details = document.createElement('details');
+			details.open = true;
+			article.appendChild(details);
+			const summary = document.createElement('summary');
+			details.appendChild(summary);
+			if (true)
+			{
+				const ul = document.createElement('ul')
+				ul.classList.add('nonSelect');
+				details.appendChild(ul);
+				for (let i=data.listCycles.length-1 ; i>=0 ; i--)
+				{
+					const day = data.listCycles[i]
+					const li = document.createElement('li')
+					li.innerHTML = `<span>${renderText.date(day[0].time)}</span><span></span><span>${renderText.space(day[0].time,day[day.length-1].time)}</span>`;
+					ul.appendChild(li)
+				}
+			}
+			if (!Array.isArray(data.listCycles)){return}
+			if (data.listCycles.length < 1){return}
+			let text = "";
+			for (let i=data.listCycles.length-1 ; i>=0 ; i--)
+			{
+				const cycle = create.cycle(data.listCycles[i],true);
+				text += cycle.dataset.text+"\n"
+				div.appendChild(cycle);
+			}
+			article.dataset.text = text;
+			article.dataset.nameText = "Wszystkie ostatnie cykle";
+			details.appendChild(create.buttonBox());
+		},
+		statistics: function()
+		{
+			let text = "Statystyki ogólne:\n"
+			const div = document.getElementById('statistics');
+			div.innerHTML  = '';
+			const article = document.createElement('article');
+			div.appendChild(article);
+			const h2 = document.createElement('h2');
+			h2.innerHTML = "Statystyki ogólne";
+			h2.classList.add('nonSelect');
+			article.appendChild(h2);
+			const details = document.createElement('details');
+			details.open = true;
+			article.appendChild(details);
+			const summary = document.createElement('summary');
+			details.appendChild(summary);
+			const completeStatistics = calc.completeStatistics();
+			const statisticsTotalMonth = calc.statistics.totalMonth(completeStatistics);
+			if (true)
+			{
+				const h3 = document.createElement('h3');
+				h3.innerHTML = "Średnio łącznie w miesiącu\n";
+				text += "Średnio łącznie w miesiącu\n";
+				h3.classList.add('nonSelect');
+				details.appendChild(h3);
+				const ul = document.createElement('ul')
+				ul.classList.add('nonSelect');
+				details.appendChild(ul);
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Ilość cykli</span><span></span><span>${statisticsTotalMonth.sum.cycle}</span>`;
+					text += `- Ilość cykli: ${statisticsTotalMonth.sum.cycle}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas w pracy</span><span></span><span>${renderText.space(statisticsTotalMonth.sum.work+statisticsTotalMonth.sum.sandwich)||'----'}</span>`;
+					text += `- Czas w pracy: ${renderText.space(statisticsTotalMonth.sum.work+statisticsTotalMonth.sum.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas pracowania</span><span></span><span>${renderText.space(statisticsTotalMonth.sum.work)||'----'}</span>`;
+					text += `- Czas pracowania: ${renderText.space(statisticsTotalMonth.sum.work)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas przerw</span><span></span><span>${renderText.space(statisticsTotalMonth.sum.sandwich)||'----'}</span>`;
+					text += `- Czas przerw: ${renderText.space(statisticsTotalMonth.sum.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+			}
+			if (true)
+			{
+				const h3 = document.createElement('h3');
+				h3.innerHTML = "Średnio w cyklu";
+				text += "Średnio w cyklu\n";
+				h3.classList.add('nonSelect');
+				details.appendChild(h3);
+				const ul = document.createElement('ul')
+				ul.classList.add('nonSelect');
+				details.appendChild(ul);
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas w pracy</span><span></span><span>${renderText.space(statisticsTotalMonth.average.work+statisticsTotalMonth.average.sandwich)||'----'}</span>`;
+					text += `- Czas w pracy: ${renderText.space(statisticsTotalMonth.average.work+statisticsTotalMonth.average.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas pracowania</span><span></span><span>${renderText.space(statisticsTotalMonth.average.work)||'----'}</span>`;
+					text += `- Czas pracowania: ${renderText.space(statisticsTotalMonth.average.work+statisticsTotalMonth.average.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas przerw</span><span></span><span>${renderText.space(statisticsTotalMonth.average.sandwich)||'----'}</span>`;
+					text += `- Czas przerw: ${renderText.space(statisticsTotalMonth.average.work+statisticsTotalMonth.average.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+			}
+			if (!Array.isArray(completeStatistics)){return}
+			if (completeStatistics.length < 1){return}
+			for (let i=completeStatistics.length-1 ; i>=0 ; i--)
+			{
+				const month = create.month(completeStatistics[i])
+				text += `\n\n${month.dataset.text}`
+				div.appendChild(month)
+			}
+			article.dataset.text = text;
+			article.dataset.nameText = "Statystyki wszystkich miesięcy";
+			details.appendChild(create.buttonBox())
+		},
+	}
+	const create =
+	{
+		cycle: function(cycle,details)
+		{
+			const article = document.createElement('article');
+			const h2 = document.createElement('h2');
+			h2.classList.add('nonSelect');
+			const textDate = [renderText.date(cycle[0].time),renderText.date(cycle[cycle.length-1].time)];
+			let text = "";
+			if (textDate[0] === textDate[1])
+			{
+				h2.innerHTML = textDate[0];
+				text += `Notatka z dnia: ${textDate[0]}\n`;
+				article.dataset.nameText = `Notatka z dnia: ${textDate[0]}`;
+			}
+			else
+			{
+				h2.innerHTML = `${textDate[0]} - ${textDate[1]}`;
+				text += `Notatka z dnia: ${textDate[0]} - ${textDate[1]}\n`;
+				article.dataset.nameText = `Notatka z dnia: ${textDate[0]} - ${textDate[1]}`;
+			}
+			article.appendChild(h2);
+			let target = article;
+			if (details)
+			{
+				const details = document.createElement('details');
+				details.open = true;
+				const summary = document.createElement('summary')
+				details.appendChild(summary)
+				article.appendChild(details);
+				target = details;
+			}
+			const statistics = calc.statistics.cycle(cycle);
+			if (true)
+			{
+				const ul = document.createElement('ul');
+				ul.classList.add('nonSelect');
+				if (true)
+				{
+					const li = document.createElement('li');
+					li.innerHTML = `<span>Czas w pracy</span><span></span><span>${renderText.space(statistics.work + statistics.sandwich)||'----'}</span>`;
+					text += `Czas w pracy: ${renderText.space(statistics.work + statistics.sandwich)||'---'}\n`;
+					ul.appendChild(li);
+				}
+				if (true)
+				{
+					const li = document.createElement('li');
+					li.innerHTML = `<span>Czas pracowania</span><span></span><span>${renderText.space(statistics.work)||'----'}</span>`;
+					text += `Czas pracowania: ${renderText.space(statistics.work)||'---'}\n`;
+					ul.appendChild(li);
+				}
+				if (true)
+				{
+					const li = document.createElement('li');
+					li.innerHTML = `<span>Czas przerw</span><span></span><span>${renderText.space(statistics.sandwich)||'----'}</span>`;
+					text += `Czas przerw: ${renderText.space(statistics.sandwich)||'----'}\n`;
+					ul.appendChild(li);
+				}
+				target.appendChild(ul);
+			}
+			if (true)
+			{
+				text += `Wpisy według godzin:\n`
+				const ul = document.createElement('ul');
+				ul.classList.add('nonSelect');
+				for (let i=0 ; i<cycle.length ; i++)
+				{
+					const entry = cycle[i];
+					const nextEntry = (cycle[i+1]||{time:system.now(),type:4});
+					const li = document.createElement('li');
+					const type = ['Błąd','Początek','Przerwa','Praca','Koniec','Błąd'][entry.type];
+					const space = renderText.space(nextEntry.time - entry.time);
+					if (entry.type < 4 && space)
+					{
+						li.innerHTML = `<span>${type} &nbsp; ${space}</span><span></span><span>${renderText.hour(entry.time)}</span>`;
+						text += `${renderText.hour(entry.time)} - ${type} (${space})\n`;
+					}
+					else
+					{
+						li.innerHTML = `<span>${type}</span><span></span><span>${renderText.hour(entry.time)}</span>`;
+						text += `${renderText.hour(entry.time)} - ${type}\n`;
+					}
+					ul.appendChild(li);
+				}
+				target.appendChild(ul);
+			}
+			article.dataset.text = text;
+			target.appendChild(create.buttonBox())
+			return article;
+		},
+		buttonBox: function()
+		{
+			const buttons = document.createElement('div');
+			buttons.className = 'actions';
+			if (true)
+			{
+				const button = document.createElement('button')
+				button.innerHTML = `<svg viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="m3.99 16.854-1.314 3.504a.75.75 0 0 0 .966.965l3.503-1.314a3 3 0 0 0 1.068-.687L18.36 9.175s-.354-1.061-1.414-2.122c-1.06-1.06-2.122-1.414-2.122-1.414L4.677 15.786a3 3 0 0 0-.687 1.068zm12.249-12.63 1.383-1.383c.248-.248.579-.406.925-.348.487.08 1.232.322 1.934 1.025.703.703.945 1.447 1.025 1.934.058.346-.1.677-.348.925L19.774 7.76s-.353-1.06-1.414-2.12c-1.06-1.062-2.121-1.415-2.121-1.415z"></path></svg>`
+				button.onclick = actions.edit
+				buttons.appendChild(button)
+			}
+			if (true)
+			{
+				const button = document.createElement('button')
+				button.innerHTML = `<svg viewBox="0 0 256 256"><path d="M48.186 92.137c0-8.392 6.49-14.89 16.264-14.89s29.827-.225 29.827-.225-.306-6.99-.306-15.88c0-8.888 7.954-14.96 17.49-14.96 9.538 0 56.786.401 61.422.401 4.636 0 8.397 1.719 13.594 5.67 5.196 3.953 13.052 10.56 16.942 14.962 3.89 4.402 5.532 6.972 5.532 10.604 0 3.633 0 76.856-.06 85.34-.059 8.485-7.877 14.757-17.134 14.881-9.257.124-29.135.124-29.135.124s.466 6.275.466 15.15-8.106 15.811-17.317 16.056c-9.21.245-71.944-.49-80.884-.245-8.94.245-16.975-6.794-16.975-15.422s.274-93.175.274-101.566zm16.734 3.946l-1.152 92.853a3.96 3.96 0 0 0 3.958 4.012l73.913.22a3.865 3.865 0 0 0 3.91-3.978l-.218-8.892a1.988 1.988 0 0 0-2.046-1.953s-21.866.64-31.767.293c-9.902-.348-16.672-6.807-16.675-15.516-.003-8.709.003-69.142.003-69.142a1.989 1.989 0 0 0-2.007-1.993l-23.871.082a4.077 4.077 0 0 0-4.048 4.014zm106.508-35.258c-1.666-1.45-3.016-.84-3.016 1.372v17.255c0 1.106.894 2.007 1.997 2.013l20.868.101c2.204.011 2.641-1.156.976-2.606l-20.825-18.135zm-57.606.847a2.002 2.002 0 0 0-2.02 1.988l-.626 96.291a2.968 2.968 0 0 0 2.978 2.997l75.2-.186a2.054 2.054 0 0 0 2.044-2.012l1.268-62.421a1.951 1.951 0 0 0-1.96-2.004s-26.172.042-30.783.042c-4.611 0-7.535-2.222-7.535-6.482S152.3 63.92 152.3 63.92a2.033 2.033 0 0 0-2.015-2.018l-36.464-.23z"></path></svg>`
+				button.onclick = actions.copy;
+				buttons.appendChild(button)
+			}
+			return buttons
+		},
+		month(month)
+		{
+			const article = document.createElement('article');
+			const h2 = document.createElement('h2');
+			h2.classList.add('nonSelect');
+			let text = "";
+			h2.innerHTML = `${renderText.month(month.month)} ${month.year||"????"}r.`;
+			text += `Z miesiąca: ${renderText.month(month.month)} ${month.year||"????"}r.\n`;
+			article.dataset.nameText = `Statystyki z miesiąca: ${renderText.month(month.month)} ${month.year||"????"}r.`;
+			article.appendChild(h2);
+			const details = document.createElement('details');
+			details.open = true;
+			article.appendChild(details);
+			const summary = document.createElement('summary');
+			details.appendChild(summary);
+			const statisticsMonth = calc.statistics.month(month);
+			if (true)
+			{
+				const h3 = document.createElement('h3');
+				h3.innerHTML = "Łącznie w miesiącu";
+				text += `Łącznie w miesiącu\n`;
+				h3.classList.add('nonSelect');
+				details.appendChild(h3);
+				const ul = document.createElement('ul')
+				ul.classList.add('nonSelect');
+				details.appendChild(ul);
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Ilość cykli</span><span></span><span>${statisticsMonth.sum.cycle}</span>`;
+					text += `- Ilość cykli: ${statisticsMonth.sum.cycle}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas w pracy</span><span></span><span>${renderText.space(statisticsMonth.sum.work+statisticsMonth.sum.sandwich)||'----'}</span>`;
+					text += `- Czas w pracy: ${renderText.space(statisticsMonth.sum.work+statisticsMonth.sum.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas pracowania</span><span></span><span>${renderText.space(statisticsMonth.sum.work)||'----'}</span>`;
+					ul.appendChild(li)
+					text += `- Czas pracowania: ${renderText.space(statisticsMonth.sum.work)||'----'}\n`;
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas przerw</span><span></span><span>${renderText.space(statisticsMonth.sum.sandwich)||'----'}</span>`;
+					ul.appendChild(li)
+					text += `- Czas przerw: ${renderText.space(statisticsMonth.sum.sandwich)||'----'}\n`;
+				}
+			}
+			if (true)
+			{
+				const h3 = document.createElement('h3');
+				h3.innerHTML = "Średnio w cyklu";
+				text += `Średnio w cyklu\n`;
+				h3.classList.add('nonSelect');
+				details.appendChild(h3);
+				const ul = document.createElement('ul')
+				ul.classList.add('nonSelect');
+				details.appendChild(ul);
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas w pracy</span><span></span><span>${renderText.space(statisticsMonth.average.work+statisticsMonth.average.sandwich)||'----'}</span>`;
+					text += `- Czas w pracy: ${renderText.space(statisticsMonth.average.work+statisticsMonth.average.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas pracowania</span><span></span><span>${renderText.space(statisticsMonth.average.work)||'----'}</span>`;
+					text += `- Czas pracowania: ${renderText.space(statisticsMonth.average.work)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Czas przerw</span><span></span><span>${renderText.space(statisticsMonth.average.sandwich)||'----'}</span>`;
+					text += `- Czas przerw: ${renderText.space(statisticsMonth.average.sandwich)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Minimalnie w pracy</span><span></span><span>${renderText.space(statisticsMonth.average.minTotal)||'----'}</span>`;
+					text += `- Minimalnie w pracy: ${renderText.space(statisticsMonth.average.minTotal)||'----'}\n`;
+					ul.appendChild(li)
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					li.innerHTML = `<span>Maksymalnie w pracy</span><span></span><span>${renderText.space(statisticsMonth.average.maxTotal)||'----'}</span>`;
+					text += `- Maksymalnie w pracy: ${renderText.space(statisticsMonth.average.maxTotal)||'----'}\n`;
+					ul.appendChild(li)
+				}
+			}
+			article.dataset.text = text;
+			details.appendChild(create.buttonBox())
+			return article
+		}
+	}
+	const calc =
+	{
+		statistics:
+		{
+			cycle: function(cycle)
+			{
+				const giveBack = {work:0, sandwich:0};
+				if (!cycle){debugger;return giveBack}
+				let active = 0;
+				for (let i=0 ; i<cycle.length ; i++)
+				{
+					const entry = cycle[i]
+					const nextEntry = (cycle[i+1]||{time:system.now(),type:4})
+					if (active)
+					{
+						if (entry.type === 3)
+						{
+							giveBack.work += nextEntry.time - entry.time
+						}
+						else if (entry.type === 2)
+						{
+							giveBack.sandwich += nextEntry.time - entry.time
+						}
+						else if (entry.type === 4)
+						{
+							active = 0
+							break
+						}
+					}
+					else
+					{
+						if (entry.type === 1)
+						{
+							giveBack.work += nextEntry.time - entry.time
+							active = 1
+						}
+					}
+				}
+				return giveBack
+			},
+			month: function(month)
+			{
+				const giveBack = {sum:{cycle:0,work:0,sandwich:0},average:{work:0,sandwich:0,minTotal:0,maxTotal:0}};
+				for (const day of month.days)
+				{
+					giveBack.sum.cycle ++;
+					giveBack.sum.work += day.work;
+					giveBack.sum.sandwich += day.sandwich;
+					const total = day.work + day.sandwich;
+					if (giveBack.average.minTotal === 0 || giveBack.average.minTotal > total)
+					{
+						giveBack.average.minTotal = total
+					}
+					if (giveBack.average.maxTotal === 0 || giveBack.average.maxTotal < total)
+					{
+						giveBack.average.maxTotal = total
+					}
+				}
+				giveBack.average.work = Math.round(giveBack.sum.work/giveBack.sum.cycle)
+				giveBack.average.sandwich = Math.round(giveBack.sum.sandwich/giveBack.sum.cycle)
+				return giveBack;
+			},
+			totalMonth: function(statistics)
+			{
+				const giveBack = {sum:{cycle:[0,0],work:[0,0],sandwich:[0,0]},average:{work:[0,0],sandwich:[0,0]}};
+				for (const month of statistics)
+				{
+					if (month.full)
+					{
+						giveBack.sum.cycle[0] += month.days.length;
+						giveBack.sum.cycle[1] ++;
+						if (month.standard)
+						{
+							for (const day of month.days)
+							{
+								giveBack.sum.work[0] += day.work;
+								giveBack.sum.sandwich[0] += day.sandwich;
+							}
+							giveBack.sum.work[1] ++;
+							giveBack.sum.sandwich[1] ++;
+						}
+					}
+					if (month.standard)
+					{
+						for (const day of month.days)
+						{
+							giveBack.average.work[0] += day.work;
+							giveBack.average.sandwich[0] += day.sandwich;
+							giveBack.average.work[1] ++;
+							giveBack.average.sandwich[1] ++;
+						}
+					}
+				}
+				for (const k1 in giveBack)
+				{
+					for (const k2 in giveBack[k1])
+					{
+						giveBack[k1][k2] = giveBack[k1][k2][0]/(giveBack[k1][k2][1]||1);
+						if (k2 === 'cycle')
+						{
+							giveBack[k1][k2] = Math.round(giveBack[k1][k2]*10)/10;
+						}
+						else
+						{
+							giveBack[k1][k2] = Math.round(giveBack[k1][k2]);
+						}
+					}
+				}
+				return giveBack;
+			}
+		},
+		completeStatistics: function()
+		{
+			const copyStatistics = JSON.parse(JSON.stringify(data.statistics));
+			for (let i=0 ; i<data.listCycles.length ; i++)
+			{
+				const cycle = data.listCycles[0];
+				if (Array.isArray(cycle) && cycle.length < 2)
+				{
+					const date = new Date(cycle[0].time*60000);
+					const year = date.getFullYear();
+					const month = date.getMonth();
+					const statistics = calc.statistics.cycle(cycle);
+					const target = search(year,month);
+					target.days.push(statistics);
+				}
+			}
+			return copyStatistics;
+			function search(year,month)
+			{
+				for (const q of copyStatistics)
+				{
+					if (q.year === year && q.month === month)
+					{
+						return q
+					}
+				}
+				const newMonth = {full:1, standard:1, month, year, days:[]}
+				copyStatistics.push(newMonth)
+				return newMonth
+			}
+		},
+	}
+	const renderText =
+	{
+		space: function(time1,time2)
+		{
+			if (!time2)
+			{
+				time2 = time1;
+				time1 = 0;
+			}
+			let space = time2 - (time1||0);
+			if (!(space > 0)){return ""}
+			return `${Math.floor(space/60)}H${("0"+(space%60)).slice(-2)}`
+		},
+		date: function(time)
+		{
+			if (!time){return ""}
+			const d = new Date(time*(1000*60))
+			const days = ["nd","pon","wt","śr","czw","pt","sb","ERR"]
+			return `${("0"+d.getDate()).slice(-2)}.${("0"+(d.getMonth()+1)).slice(-2)}.${d.getFullYear()}r. ${days[d.getDay()]}`
+		},
+		totalDate: function(time)
+		{
+			if (!time){return ""}
+			const d = new Date(time*(1000*60))
+			return `${("0"+d.getDate()).slice(-2)}.${("0"+(d.getMonth()+1)).slice(-2)}.${d.getFullYear()}r. &nbsp; ${("0"+d.getHours()).slice(-2)}:${("0"+d.getMinutes()).slice(-2)}`
+		},
+		hour: function(time)
+		{
+			if (!time){return ""}
+			const d = new Date(time*(1000*60))
+			return `${("0"+d.getHours()).slice(-2)}:${("0"+d.getMinutes()).slice(-2)}`
+		},
+		month: function(number)
+		{
+			const months = ["Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","Październik","Listopad","Grudzień","Błędzień"];
+			return months[number||0]
+		},
+	}
+</script>
+</head>
+<body onload="system.start()">
+	<main>
+		<section>
+			<h1 class="nonSelect">Tworzony cykl</h1>
+			<div id="nowCycle">
+			</div>
+		</section>
+		<section>
+			<h1 class="nonSelect">Ostatnie cykle</h1>
+			<details>
+				<summary></summary>
+				<div id="listCycles">
+				</div>
+			</details>
+		</section>
+		<section>
+			<h1 class="nonSelect">Statystyki</h1>
+			<details>
+				<summary></summary>
+				<div id="statistics">
+				</div>
+			</details>
+		</section>
+	</main>
+	<div id="control">
+		<button data-type="startWork">
+			<svg viewBox="0 0 100 100">
+				<polygon points="70,50 30,20 70,50 30,80 70,50" style="fill:none;stroke:#1B0E00;stroke-width:20" />
+			</svg>
+		</button>
+		<button data-type="startBreak">
+			<svg viewBox="0 0 100 100">
+				<polygon points="30,20 30,80" style="fill:none;stroke:#1B0E00;stroke-width:20" />
+				<polygon points="70,20 70,80" style="fill:none;stroke:#1B0E00;stroke-width:20" />
+			</svg>
+		</button>
+		<button data-type="endBreak">
+			<svg viewBox="0 0 100 100">
+				<polygon points="30,20 70,50 30,80" style="fill:#1B0E00;" />
+			</svg>
+		</button>
+		<button data-type="endWork">
+			<svg viewBox="0 0 100 100">
+				<polygon points="30,50 70,20 30,50 70,80 30,50" style="fill:none;stroke:#1B0E00;stroke-width:20" />
+			</svg>
+		</button>
+		<footer></footer>
+	</div>
+	<div id="infoWindow" class="hidden"></div>
+</body>
+</html>
