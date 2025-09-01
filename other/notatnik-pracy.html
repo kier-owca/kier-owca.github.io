@@ -263,6 +263,28 @@
 		font-size: 1.8vh;
 		color: #1B0E00;
 	}
+	#edit
+	{
+		position: fixed;
+		width: 42vh;
+		min-height: 42vh;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%,-50%);
+		padding: 1vh;
+		padding-top: 2vh;
+		padding-bottom: 2vh;
+		background: #251100;
+		border: solid 0.3vh #EDB107;
+	}
+	#edit > h2
+	{
+		width: 100%;
+		padding-bottom: 3vh;
+		text-align: center;
+		font-size: 2.2vh;
+		letter-spacing: 0.07vh;
+	}
 	.nonSelect
 	{
 		-webkit-user-select: none;
@@ -587,7 +609,7 @@
 			let iii = 0
 			for (let i=0 ; i<ii ; i++)
 			{
-				const cycle = data.listCycles[0]
+				const cycle = data.listCycles[i]
 				if (!Array.isArray(cycle) || cycle.length < 2)
 				{
 					data.listCycles.shift()
@@ -1273,8 +1295,8 @@
 			const copyStatistics = JSON.parse(JSON.stringify(data.statistics));
 			for (let i=0 ; i<data.listCycles.length ; i++)
 			{
-				const cycle = data.listCycles[0];
-				if (Array.isArray(cycle) && cycle.length < 2)
+				const cycle = data.listCycles[i];
+				if (Array.isArray(cycle) && cycle.length >1)
 				{
 					const date = new Date(cycle[0].time*60000);
 					const year = date.getFullYear();
@@ -1389,5 +1411,16 @@
 		<footer></footer>
 	</div>
 	<div id="infoWindow" class="hidden"></div>
+	<div id="edit" class="hidden">
+		<h2>Edytowanie cyklu</h2>
+		<form>
+			<div>
+				<input type="radio" name="type" value="1"><br>
+				<input type="radio" name="type" value="2"><br>
+				<input type="radio" name="type" value="3"><br>
+				<input type="radio" name="type" value="4"><br>
+			</div>
+		</form>
+	</div>
 </body>
 </html>
