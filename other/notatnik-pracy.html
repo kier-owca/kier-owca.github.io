@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Notatniik pracy</title>
+<meta name="theme-color" content="#251B11">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%234D2500"/><polygon points="70,50 30,20 70,50 30,80 70,50" fill="none" stroke="%231B0E00" stroke-width="20"/></svg>'>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style type="text/css">
 	*
 	{
@@ -161,7 +164,7 @@
 	}
 	button > svg
 	{
-		width: 90%;
+		height: 90%;
 		fill: #1B0E00;
 	}
 	#control
@@ -267,15 +270,32 @@
 	{
 		position: fixed;
 		width: 42vh;
-		min-height: 42vh;
+		height: 70vh;
+		overflow-y: auto;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%,-50%);
-		padding: 1vh;
+		padding: 0.5vh;
 		padding-top: 2vh;
-		padding-bottom: 2vh;
-		background: #251100;
+		padding-bottom: 5vh;
+		background: #1B0E00;
 		border: solid 0.3vh #EDB107;
+		scrollbar-color: #EDB107 #4D2500;
+	}
+	#edit::-webkit-scrollbar
+	{
+		width: 1vh;
+		height: 1vh;
+	}
+	#edit::-webkit-scrollbar-track
+	{
+		background: #4D2500;
+		border-radius: 0.4vh
+	}
+	#edit::-webkit-scrollbar-thumb
+	{
+		background: #EDB107;
+		border-radius: 0.4vh
 	}
 	#edit > h2
 	{
@@ -284,6 +304,153 @@
 		text-align: center;
 		font-size: 2.2vh;
 		letter-spacing: 0.07vh;
+		color: #D9CFAA;
+	}
+	#edit h3
+	{
+		font-size: 2vh;
+		letter-spacing: 0.05vh;
+		color: #B19D61;
+		padding-bottom: 1.5vh;
+	}
+	#edit span
+	{
+		font-size: 1.8vh;
+		letter-spacing: 0.02vh;
+		color: #B19D61;
+	}
+	#edit ul
+	{
+		width: 100%;
+	}
+	#edit li
+	{
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		align-content: center;
+		height: 11vh;
+		background: #251100;
+		margin-top: 2vh;
+		margin-bottom: 2vh;
+		padding-top: 1vh;
+		padding-bottom: 1vh;
+		border: solid 0.3vh #4D2500;
+		border-left: none;
+		border-right: none;
+	}
+	#edit li > div:first-child
+	{
+		width: 7vh;
+	}
+	#edit li > div:last-child
+	{
+		flex: 1;
+	}
+	#edit li > div
+	{
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		align-content: center;
+		height: 100%;
+	}
+	#edit li > div > div
+	{
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		align-items: center;
+		align-content: center;
+	}
+	#edit li > div > button
+	{
+		width: 5vh;
+		height: 5vh;
+		border-radius: 0.7vh;
+		background: #4D2500;
+	}
+	#edit li > div > div button
+	{
+		width: 5vh;
+		height: 5vh;
+		border-radius: 0.7vh;
+		margin-left: 0.7vh;
+		margin-right: 0.7vh;
+		background: #4D2500;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+	}
+	#edit li > div > div button.selected
+	{
+		background: #EDB107;
+	}
+	#edit li > div > div button.close
+	{
+		background: #4D0000;
+		margin-left: 2vh;
+	}
+	#edit li > button.add
+	{
+		width: 100%;
+		height: 5vh;
+		border-radius: 0.7vh;
+		margin-left: 0.7vh;
+		margin-right: 0.7vh;
+		background: #4D2500;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+	}
+	#edit > button
+	{
+		width: 90%;
+		margin: 5%;
+		height: 5vh;
+		border-radius: 0.7vh;
+		background: #4D2500;
+		align-items: center;
+		align-content: center;
+		font-size: 2vh;
+		font-weight: bold;
+		letter-spacing: 0.1vh;
+	}
+	#edit > button.delete
+	{
+		background: #4D0000;
+	}
+	#edit > button.save
+	{
+		background: #1b4d00;
+	}
+	#edit li input[type="date"], #edit li input[type="time"]
+	{
+		height: 5vh;
+		background: white;
+		margin-left: 0.7vh;
+		margin-right: 0.7vh;
+		padding-left: 1.7vh;
+		padding-right: 1.7vh;
+		font-size: 1.8vh;
+	}
+	#edit li input[type="checkbox"]
+	{
+		accent-color: #4D2500;
+		transform: scale(2.4);
+		width: 7vh;
 	}
 	.nonSelect
 	{
@@ -303,6 +470,41 @@
 		100% { color: #EDB107; }
 	}
 </style>
+<script>
+	const manifest =
+	{
+		name: "Notatnik Czasu Pracy",
+		short_name: "N-CZ-P",
+		start_url: ".",
+		display: "standalone",
+		background_color: "black",
+		theme_color: "#251B11",
+		icons:
+		[
+			{
+				"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM0RDI1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw1MCAzMCwyMCA3MCw1MCAzMCw4MCA3MCw1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUIwRTAwIiBzdHJva2Utd2lkdGg9IjIwIi8+Cjwvc3ZnPg==",
+				"type": "image/png",
+				"sizes": "32x32"
+			},
+			{
+			"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM0RDI1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw1MCAzMCwyMCA3MCw1MCAzMCw4MCA3MCw1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUIwRTAwIiBzdHJva2Utd2lkdGg9IjIwIi8+Cjwvc3ZnPg==",
+			"sizes": "192x192",
+			"type": "image/png"
+			},
+			{
+				"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM0RDI1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw1MCAzMCwyMCA3MCw1MCAzMCw4MCA3MCw1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUIwRTAwIiBzdHJva2Utd2lkdGg9IjIwIi8+Cjwvc3ZnPg==",
+				"sizes": "512x512",
+				"type": "image/png"
+			}
+		]
+	};
+	const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+	const manifestURL = URL.createObjectURL(blob);
+	const lk = document.createElement('link');
+	lk.rel = 'manifest';
+	lk.href = manifestURL;
+	document.head.appendChild(lk);
+</script>
 <script>
 	const system =
 	{
@@ -394,7 +596,7 @@
 				refresh.nowCycle()
 			}
 		},
-		info(info)
+		info(info,buttons)
 		{
 			const infoWindow = document.getElementById("infoWindow");
 			infoWindow.innerHTML = "";
@@ -404,12 +606,29 @@
 			const actions = document.createElement("div")
 			actions.className = "actions"
 			infoWindow.appendChild(actions)
-			const button = document.createElement("button")
-			button.innerHTML = "OK"
-			actions.appendChild(button)
-			button.onclick = function()
+			if (!Array.isArray(buttons))
 			{
-				infoWindow.classList.add("hidden")
+				const button = document.createElement("button")
+				button.innerHTML = "OK"
+				actions.appendChild(button)
+				button.onclick = function()
+				{
+					infoWindow.classList.add("hidden")
+				}
+			}
+			else
+			{
+				for (const but of buttons)
+				{
+					const button = document.createElement("button")
+					button.innerHTML = but.text
+					actions.appendChild(button)
+					button.onclick = function()
+					{
+						infoWindow.classList.add("hidden")
+						but.function()
+					}
+				}
 			}
 			infoWindow.classList.remove("hidden")
 		}
@@ -582,7 +801,7 @@
 				const errorMonth = {full:0,standard:0,year:2000,month:0,days:[]}
 				if (!code){debugger;return errorMonth}
 				const [header, rest] = code.split("!")
-				if (!header || !rest){debugger;return errorMonth}
+				if (!header){debugger;return errorMonth}
 				const value = data.decode.value(header)
 				const year = Math.floor(value / (12 * 2 * 2)) + 2000
 				const afterYear = value % (12 * 2 * 2)
@@ -784,25 +1003,34 @@
 			if (data.edit.type === "nowCycle")
 			{
 				data.edit.object = JSON.parse(JSON.stringify(data.nowCycle))
-				editCycle()
+				refresh.editWindow()
 			}
 			else if (data.edit.type === "cycle")
 			{
 				data.edit.object = JSON.parse(JSON.stringify(data.listCycles[data.edit.index]))
-				editCycle()
+				refresh.editWindow()
 			}
 			else if (data.edit.type === "month")
 			{
-				data.edit.object = JSON.parse(JSON.stringify(data.statistics[data.edit.index]))
-				editMonth()
-			}
-			function editCycle()
-			{
-				console.log(data.edit)
-			}
-			function editMonth()
-			{
-				console.log(data.edit)
+				for (let i=0 ; i<data.statistics.length ; i++)
+				{
+					const month = data.statistics[i]
+					if (month.month === data.edit.month && month.year === data.edit.year)
+					{
+						data.edit.object = JSON.parse(JSON.stringify(month))
+						refresh.editWindow()
+						return
+					}
+				}
+				const month = {}
+				month.month = data.edit.month
+				month.year = data.edit.year
+				month.full = 1;
+				month.standard = 1;
+				month.days = [];
+				data.edit.object = JSON.parse(JSON.stringify(month))
+				refresh.editWindow()
+				return
 			}
 		}
 	}
@@ -820,6 +1048,7 @@
 		},
 		listCycles: function()
 		{
+			data.listCycles.sort((a, b) => a[0].time - b[0].time);
 			const div = document.getElementById('listCycles');
 			div.innerHTML  = '';
 			const article = document.createElement('article');
@@ -838,7 +1067,7 @@
 				const ul = document.createElement('ul')
 				ul.classList.add('nonSelect');
 				details.appendChild(ul);
-				for (let i=data.listCycles.length-1 ; i>=0 ; i--)
+				for (let i=0 ; i<data.listCycles.length ; i++)
 				{
 					const day = data.listCycles[i]
 					const li = document.createElement('li')
@@ -858,7 +1087,7 @@
 			}
 			article.dataset.text = text;
 			article.dataset.nameText = "Wszystkie ostatnie cykle";
-			details.appendChild(create.buttonBox());
+			details.appendChild(create.buttonBox(true));
 		},
 		statistics: function()
 		{
@@ -954,14 +1183,105 @@
 			for (let i=completeStatistics.length-1 ; i>=0 ; i--)
 			{
 				const month = create.month(completeStatistics[i])
-				month.dataset.edit = `{"type":"month","index":${i}}`
+				month.dataset.edit = `{"type":"month","month":${completeStatistics[i].month},"year":${completeStatistics[i].year}}`
 				text += `\n\n${month.dataset.text}`
 				div.appendChild(month)
 			}
 			article.dataset.text = text;
 			article.dataset.nameText = "Statystyki wszystkich miesięcy";
-			details.appendChild(create.buttonBox())
+			details.appendChild(create.buttonBox(true))
 		},
+		editWindow: function()
+		{
+			const editWindow = document.getElementById('edit')
+			editWindow.innerHTML = ""
+			if (data.edit.type === "cycle" || data.edit.type === "now")
+			{
+				const h2 = document.createElement('h2')
+				h2.innerHTML = 'Edytowanie cyklu'
+				editWindow.appendChild(h2)
+				const ul = document.createElement('ul')
+				editWindow.appendChild(ul)
+				for (let i=0 ; i<(data.edit.object||[]).length ; i++)
+				{
+					ul.appendChild(create.entry(i,data.edit.object[i]))
+				}
+				if (true)
+				{
+					const li = document.createElement('li')
+					ul.appendChild(li)
+					const button = document.createElement('button')
+					li.appendChild(button)
+					button.className = "add"
+					button.innerHTML = '<svg viewBox="0 0 100 100"><polygon points="50,50 50,10 50,90 50,50 0,50 100,50 50,50" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>'
+					button.onclick = edit.add
+				}
+				if (true)
+				{
+					const button = document.createElement('button')
+					editWindow.appendChild(button)
+					button.className = "delete"
+					button.innerHTML = 'Usuń'
+					button.onclick = ()=>{edit.delete(true)}
+				}
+				if (true)
+				{
+					const button = document.createElement('button')
+					editWindow.appendChild(button)
+					button.className = "save"
+					button.innerHTML = 'Zapisz'
+					button.onclick = edit.save
+				}
+				editWindow.classList.remove('hidden')
+			}
+			else if (data.edit.type === "month")
+			{
+				const h2 = document.createElement('h2')
+				h2.innerHTML = 'Edytowanie miesiąca'
+				editWindow.appendChild(h2)
+				const ul = document.createElement('ul')
+				editWindow.appendChild(ul)
+				for (let i=0 ; i<2 ; i++)
+				{
+					const li = document.createElement('li')
+					ul.appendChild(li)
+					const h3 = document.createElement('h3')
+					h3.innerHTML = ['Czy miesiąc pełny','Czy miesiąc standardowy'][i]
+					li.appendChild(h3)
+					const input = document.createElement('input')
+					input.type = 'checkbox'
+					if (data.edit.object[['full','standard'][i]])
+					{
+						input.checked = true;
+					}
+					li.appendChild(input)
+					const span = document.createElement('span')
+					span.innerHTML = ['Zaznacz pole jeżeli w danym miesiącu nie było wolnego i był wprowadzany każdy czas pracy. Zaznaczenie pola wpływa na liczenie statystyk.','Zaznacz pole jeżeli w danym miesiącu wszystkie wprowadzone cykle były typowymi cyklami bez anomalii. Zaznaczenie pola wpływa na liczenie statystyk.'][i]
+					li.appendChild(span)
+				}
+				if (true)
+				{
+					const button = document.createElement('button')
+					editWindow.appendChild(button)
+					button.className = "delete"
+					button.innerHTML = 'Usuń'
+					button.onclick = ()=>{edit.delete(true)}
+				}
+				if (true)
+				{
+					const button = document.createElement('button')
+					editWindow.appendChild(button)
+					button.className = "save"
+					button.innerHTML = 'Zapisz'
+					button.onclick = edit.save
+				}
+				editWindow.classList.remove('hidden')
+			}
+			else
+			{
+				editWindow.classList.add('hidden')
+			}
+		}
 	}
 	const create =
 	{
@@ -1050,21 +1370,21 @@
 				target.appendChild(ul);
 			}
 			article.dataset.text = text;
-			target.appendChild(create.buttonBox())
+			target.appendChild(create.buttonBox(true,true))
 			return article;
 		},
-		buttonBox: function()
+		buttonBox: function(copy,edit)
 		{
 			const buttons = document.createElement('div');
 			buttons.className = 'actions';
-			if (true)
+			if (edit)
 			{
 				const button = document.createElement('button')
 				button.innerHTML = `<svg viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="m3.99 16.854-1.314 3.504a.75.75 0 0 0 .966.965l3.503-1.314a3 3 0 0 0 1.068-.687L18.36 9.175s-.354-1.061-1.414-2.122c-1.06-1.06-2.122-1.414-2.122-1.414L4.677 15.786a3 3 0 0 0-.687 1.068zm12.249-12.63 1.383-1.383c.248-.248.579-.406.925-.348.487.08 1.232.322 1.934 1.025.703.703.945 1.447 1.025 1.934.058.346-.1.677-.348.925L19.774 7.76s-.353-1.06-1.414-2.12c-1.06-1.062-2.121-1.415-2.121-1.415z"></path></svg>`
 				button.onclick = actions.edit
 				buttons.appendChild(button)
 			}
-			if (true)
+			if (copy)
 			{
 				const button = document.createElement('button')
 				button.innerHTML = `<svg viewBox="0 0 256 256"><path d="M48.186 92.137c0-8.392 6.49-14.89 16.264-14.89s29.827-.225 29.827-.225-.306-6.99-.306-15.88c0-8.888 7.954-14.96 17.49-14.96 9.538 0 56.786.401 61.422.401 4.636 0 8.397 1.719 13.594 5.67 5.196 3.953 13.052 10.56 16.942 14.962 3.89 4.402 5.532 6.972 5.532 10.604 0 3.633 0 76.856-.06 85.34-.059 8.485-7.877 14.757-17.134 14.881-9.257.124-29.135.124-29.135.124s.466 6.275.466 15.15-8.106 15.811-17.317 16.056c-9.21.245-71.944-.49-80.884-.245-8.94.245-16.975-6.794-16.975-15.422s.274-93.175.274-101.566zm16.734 3.946l-1.152 92.853a3.96 3.96 0 0 0 3.958 4.012l73.913.22a3.865 3.865 0 0 0 3.91-3.978l-.218-8.892a1.988 1.988 0 0 0-2.046-1.953s-21.866.64-31.767.293c-9.902-.348-16.672-6.807-16.675-15.516-.003-8.709.003-69.142.003-69.142a1.989 1.989 0 0 0-2.007-1.993l-23.871.082a4.077 4.077 0 0 0-4.048 4.014zm106.508-35.258c-1.666-1.45-3.016-.84-3.016 1.372v17.255c0 1.106.894 2.007 1.997 2.013l20.868.101c2.204.011 2.641-1.156.976-2.606l-20.825-18.135zm-57.606.847a2.002 2.002 0 0 0-2.02 1.988l-.626 96.291a2.968 2.968 0 0 0 2.978 2.997l75.2-.186a2.054 2.054 0 0 0 2.044-2.012l1.268-62.421a1.951 1.951 0 0 0-1.96-2.004s-26.172.042-30.783.042c-4.611 0-7.535-2.222-7.535-6.482S152.3 63.92 152.3 63.92a2.033 2.033 0 0 0-2.015-2.018l-36.464-.23z"></path></svg>`
@@ -1175,8 +1495,87 @@
 				}
 			}
 			article.dataset.text = text;
-			details.appendChild(create.buttonBox())
+			details.appendChild(create.buttonBox(true,true))
 			return article
+		},
+		entry: function(index,entry)
+		{
+			const li = document.createElement('li')
+			li.dataset.index = index||-1
+			if (!entry || typeof entry != "object"){return li}
+			const date = new Date((entry.time||0)*60000)
+			if (true)
+			{
+				const div_1 = document.createElement('div')
+				for (let i=0 ; i<2 ; i++)
+				{
+					const button = document.createElement('button')
+					button.innerHTML = ['<svg viewBox="0 0 100 100"><polygon points="50,30 20,70 50,30 80,70 50,30" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>','<svg viewBox="0 0 100 100"><polygon points="50,70 20,30 50,70 80,30 50,70" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>'][i]
+					button.onclick = ()=>{edit.move(index,[-1,1][i])}
+					div_1.appendChild(button)
+				}
+				li.appendChild(div_1)
+			}
+			if (true)
+			{
+				const div_1 = document.createElement('div')
+				if (true)
+				{
+					const div_2 = document.createElement('div')
+					for (let i=0 ; i<5 ; i++)
+					{
+						const button = document.createElement('button')
+						const imgs =
+						[
+							'<svg viewBox="0 0 100 100"><polygon points="70,50 30,20 70,50 30,80 70,50" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>',
+							'<svg viewBox="0 0 100 100"><polygon points="30,20 30,80" style="fill:none;stroke:#1B0E00;stroke-width:20" /><polygon points="70,20 70,80" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>',
+							'<svg viewBox="0 0 100 100"><polygon points="30,20 70,50 30,80" style="fill:#1B0E00;" /></svg>',
+							'<svg viewBox="0 0 100 100"><polygon points="30,50 70,20 30,50 70,80 30,50" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>',
+							'<svg viewBox="0 0 100 100"><polygon points="50,50 20,20 50,50 80,20 50,50 80,80 50,50 20,80 50,50" style="fill:none;stroke:#1B0E00;stroke-width:20" /></svg>',
+						]
+						button.innerHTML = imgs[i]
+						if (i===4)
+						{
+							button.className = "close"
+						}
+						else if ((i+1)===(entry.type||0))
+						{
+							button.className = "selected"
+						}
+						button.onclick = ()=>{edit.type(index,i+1)}
+						div_2.appendChild(button)
+					}
+					div_1.appendChild(div_2)
+				}
+				if (true)
+				{
+					const div_2 = document.createElement('div')
+					if (true)
+					{
+						const input = document.createElement('input')
+						input.type = 'date'
+						let yyyy = date.getFullYear();
+						let mm = `00${date.getMonth() + 1}`.slice(-2)
+						let dd = `00${date.getDate()}`.slice(-2)
+						input.value = `${yyyy}-${mm}-${dd}`;
+						input.addEventListener("change",(event)=>{edit.change(index,event)})
+						div_2.appendChild(input)
+					}
+					if (true)
+					{
+						const input = document.createElement('input')
+						input.type = 'time'
+						let hh = `00${date.getHours()}`.slice(-2)
+						let min = `00${date.getMinutes()}`.slice(-2)
+						input.value = `${hh}:${min}`;
+						input.addEventListener("change",(event)=>{edit.change(index,event)})
+						div_2.appendChild(input)
+					}
+					div_1.appendChild(div_2)
+				}
+				li.appendChild(div_1)
+			}
+			return li
 		}
 	}
 	const calc =
@@ -1360,6 +1759,170 @@
 			return months[number||0]
 		},
 	}
+	const edit =
+	{
+		move: function(index,dir)
+		{
+			const newIndex = index + dir;
+			if (!(newIndex < 0 || newIndex >= data.edit.object.length))
+			{
+				const entries = data.edit.object;
+				[entries[index], entries[newIndex]] = [entries[newIndex], entries[index]];
+				refresh.editWindow()
+			}
+		},
+		type: function(index,type)
+		{
+			if (type > 0 && type < 5)
+			{
+				const entry = data.edit.object[index]
+				entry.type = type
+			}
+			else if (type === 5)
+			{
+				data.edit.object.splice(index, 1);
+			}
+			refresh.editWindow()
+		},
+		change: function(index,event)
+		{
+			const input = event.target;
+			const value = input.value;
+			const type = input.type;
+			const entry = data.edit.object[index]
+			const d = new Date(entry.time*60000);
+			if (type === "date")
+			{
+				const [year, month, day] = value.split("-").map(Number);
+				d.setFullYear(year);
+				d.setMonth(month - 1);
+				d.setDate(day);
+			} 
+			else if (type === "time")
+			{
+				const [hour, minute] = value.split(":").map(Number);
+				d.setHours(hour);
+				d.setMinutes(minute);
+				d.setSeconds(0);
+			}
+			entry.time = Math.round(d.getTime()/60000);
+		},
+		add: function()
+		{
+			const entry = {time:system.now(),type:3}
+			data.edit.object.push(entry)
+			refresh.editWindow()
+		},
+		save: function()
+		{
+			if (!data.edit.object)
+			{
+				data.edit = {};
+				refresh.editWindow()
+			}
+			else if (data.edit.type === "now")
+			{
+				data.nowCycle = data.edit.object;
+				data.save.nowCycle()
+				data.edit = {};
+				refresh.editWindow()
+				refresh.nowCycle()
+			}
+			else if (data.edit.type === "cycle")
+			{
+				data.listCycles[data.edit.index] = data.edit.object;
+				data.save.listCycles()
+				data.edit = {};
+				refresh.editWindow()
+				refresh.listCycles()
+				refresh.statistics()
+			}
+			else if (data.edit.type === "month")
+			{
+				const checkbox = document.getElementById('edit').getElementsByTagName('input')
+				for (let i=0 ; i<2 ; i++)
+				{
+					if (checkbox[i])
+					{
+						if (checkbox[i].checked)
+						{
+							data.edit.object[['full','standard'][i]] = 1;
+						}
+						else
+						{
+							data.edit.object[['full','standard'][i]] = 0;
+						}
+					}
+				}
+				for (let i=0 ; i<data.statistics.length ; i++)
+				{
+					const month = data.statistics[i]
+					if (month.month === data.edit.month && month.year === data.edit.year)
+					{
+						data.statistics[i] = data.edit.object
+						data.edit = {}
+						data.save.statistics()
+						refresh.editWindow()
+						refresh.statistics()
+						return
+					}
+				}
+				data.statistics.push(data.edit.object)
+				data.edit = {}
+				data.save.statistics()
+				refresh.editWindow()
+				refresh.statistics()
+				return
+			}
+		},
+		delete: function(question)
+		{
+			if (question)
+			{
+				system.info("Czy na pewno chcesz usunąć?",[{text:'Tak',function:edit.delete},{text:'Nie',function:function(){}}])
+				return
+			}
+			if (!data.edit.object)
+			{
+				data.edit = {};
+				refresh.editWindow()
+			}
+			else if (data.edit.type === "now")
+			{
+				data.nowCycle = [];
+				data.save.nowCycle()
+				data.edit = {};
+				refresh.editWindow()
+				refresh.nowCycle()
+			}
+			else if (data.edit.type === "cycle")
+			{
+				data.listCycles.splice(data.edit.index, 1);
+				data.save.listCycles()
+				data.edit = {};
+				refresh.editWindow()
+				refresh.listCycles()
+				refresh.statistics()
+			}
+			else if (data.edit.type === "month")
+			{
+				debugger
+				for (let i=0 ; i<data.statistics.length ; i++)
+				{
+					const month = data.statistics[i]
+					if (month.month === data.edit.month && month.year === data.edit.year)
+					{
+						data.statistics.splice(i, 1);
+						return
+					}
+				}
+				data.edit = {}
+				data.save.statistics()
+				refresh.editWindow()
+				refresh.statistics()
+			}
+		}
+	}
 </script>
 </head>
 <body onload="system.start()">
@@ -1410,17 +1973,7 @@
 		</button>
 		<footer></footer>
 	</div>
+	<div id="edit" class="hidden"></div>
 	<div id="infoWindow" class="hidden"></div>
-	<div id="edit" class="hidden">
-		<h2>Edytowanie cyklu</h2>
-		<form>
-			<div>
-				<input type="radio" name="type" value="1"><br>
-				<input type="radio" name="type" value="2"><br>
-				<input type="radio" name="type" value="3"><br>
-				<input type="radio" name="type" value="4"><br>
-			</div>
-		</form>
-	</div>
 </body>
 </html>
