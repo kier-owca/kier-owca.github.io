@@ -543,7 +543,7 @@
 		},
 		addCycle()
 		{
-			const error = system.testCycle(data.nowCycle);
+			const error = system.testCycle(data.nowCycle,"total");
 			if (!error)
 			{
 				data.listCycles.push(data.nowCycle)
@@ -560,7 +560,7 @@
 				system.info(`Nastąpił błąd podczas zapisu:<br>${error}.`)
 			}
 		},
-		testCycle(cycle)
+		testCycle(cycle,total)
 		{
 			if (!cycle){return "Błąd programu 01"}
 			if (!Array.isArray(cycle)){return "Błąd programu 02"}
@@ -576,12 +576,16 @@
 				}
 			}
 			if (cycle[0].type != 1){return "Brak wpisu rozpoczęcia pracy"}
-			if (cycle[cycle.length-1].type != 4){return "Brak wpisu zakończenia pracy"}
+			if (total && cycle[cycle.length-1].type != 4){return "Brak wpisu zakończenia pracy"}
 			for (let i=1 ; i<cycle.length ; i++)
 			{
 				if (cycle[i-1].time > cycle[i].time)
 				{
 					return "Niepoprawna kolejność wpisów"
+				}
+				if (i<cycle.length-1 && (cycle[i].type === 1 || cycle[i].type === 4))
+				{
+					return "Typy wpisów nie mają wymaganej kolejności"
 				}
 			}
 			return false
@@ -1196,7 +1200,7 @@
 		{
 			const editWindow = document.getElementById('edit')
 			editWindow.innerHTML = ""
-			if (data.edit.type === "cycle" || data.edit.type === "now")
+			if (data.edit.type === "cycle" || data.edit.type === "nowCycle")
 			{
 				const h2 = document.createElement('h2')
 				h2.innerHTML = 'Edytowanie cyklu'
@@ -1821,16 +1825,33 @@
 				data.edit = {};
 				refresh.editWindow()
 			}
-			else if (data.edit.type === "now")
+			else if (data.edit.type === "nowCycle")
 			{
+				const error = system.testCycle(data.edit.object)
+				if (error)
+				{
+					return system.info(`Nie można zapisać:<br>${error}`)
+				}
 				data.nowCycle = data.edit.object;
-				data.save.nowCycle()
 				data.edit = {};
 				refresh.editWindow()
-				refresh.nowCycle()
+				if (data.nowCycle[data.nowCycle.length-1].type === 4)
+				{
+					system.addCycle()
+				}
+				else
+				{
+					data.save.nowCycle()
+					refresh.nowCycle()
+				}
 			}
 			else if (data.edit.type === "cycle")
 			{
+				const error = system.testCycle(data.edit.object,"total")
+				if (error)
+				{
+					return system.info(`Nie można zapisać:<br>${error}`)
+				}
 				data.listCycles[data.edit.index] = data.edit.object;
 				data.save.listCycles()
 				data.edit = {};
@@ -1888,7 +1909,7 @@
 				data.edit = {};
 				refresh.editWindow()
 			}
-			else if (data.edit.type === "now")
+			else if (data.edit.type === "nowCycle")
 			{
 				data.nowCycle = [];
 				data.save.nowCycle()
@@ -1978,5 +1999,3 @@
 	<div id="infoWindow" class="hidden"></div>
 </body>
 </html>
-
-
