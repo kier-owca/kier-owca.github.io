@@ -476,7 +476,7 @@
 	{
 		name: "Notatnik Czasu Pracy",
 		short_name: "N-CZ-P",
-		start_url: ".",
+		start_url: "./",
 		display: "standalone",
 		background_color: "black",
 		theme_color: "#251B11",
@@ -484,18 +484,18 @@
 		[
 			{
 				"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM0RDI1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw1MCAzMCwyMCA3MCw1MCAzMCw4MCA3MCw1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUIwRTAwIiBzdHJva2Utd2lkdGg9IjIwIi8+Cjwvc3ZnPg==",
-				"type": "image/png",
+				"type": "image/svg+xml",
 				"sizes": "32x32"
 			},
 			{
 			"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM0RDI1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw1MCAzMCwyMCA3MCw1MCAzMCw4MCA3MCw1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUIwRTAwIiBzdHJva2Utd2lkdGg9IjIwIi8+Cjwvc3ZnPg==",
 			"sizes": "192x192",
-			"type": "image/png"
+			"type": "image/svg+xml"
 			},
 			{
 				"src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM0RDI1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw1MCAzMCwyMCA3MCw1MCAzMCw4MCA3MCw1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUIwRTAwIiBzdHJva2Utd2lkdGg9IjIwIi8+Cjwvc3ZnPg==",
 				"sizes": "512x512",
-				"type": "image/png"
+				"type": "image/svg+xml"
 			}
 		]
 	};
@@ -570,7 +570,7 @@
 				{
 					return "Uszkodzony wpis"
 				}
-				if (entry.type > 4)
+				if (!(Number(entry.type)>0 && Number(entry.type)<5))
 				{
 					return "Wpis zawiera błędny typ"
 				}
@@ -592,7 +592,7 @@
 		},
 		refreshTime()
 		{
-			const textDate = renderText.totalDate(Date.now()/(60000));
+			const textDate = renderText.totalDate(Math.floor(Date.now()/60000));
 			if (system.time != textDate)
 			{
 				system.time = textDate;
@@ -718,13 +718,16 @@
 				}
 				localStorage.setItem(storageName,(code||"$").slice(0,-1))
 			},
-		},
+		},const month = 
 		code:
 		{
 			value: function(v,length)
 			{
 				length = length||0;
-				if (!Number(v)){return "0".repeat(length)}
+				if (!Number(v))
+				{
+					v = 0
+				}
 				v = Math.max(0,v);
 				if (length)
 				{
@@ -1641,8 +1644,8 @@
 						giveBack.average.maxTotal = total
 					}
 				}
-				giveBack.average.work = Math.round(giveBack.sum.work/giveBack.sum.cycle)
-				giveBack.average.sandwich = Math.round(giveBack.sum.sandwich/giveBack.sum.cycle)
+				giveBack.average.work = Math.round(giveBack.sum.work/(giveBack.sum.cycle||1))
+				giveBack.average.sandwich = Math.round(giveBack.sum.sandwich/(giveBack.sum.cycle||1))
 				return giveBack;
 			},
 			totalMonth: function(statistics)
