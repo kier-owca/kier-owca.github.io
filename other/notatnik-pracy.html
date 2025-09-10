@@ -1308,9 +1308,9 @@
 			}
 			else
 			{
-				h2.innerHTML = `${textDate[0]} - ${textDate[1]}`;
+				h2.innerHTML = `${textDate[0]}<br>-<br>${textDate[1]}`;
 				text += `Notatka z dnia: ${textDate[0]} - ${textDate[1]}\n`;
-				article.dataset.nameText = `Notatka z dnia: ${textDate[0]}<br>-<br>${textDate[1]}`;
+				article.dataset.nameText = `Notatka z dnia: ${textDate[0]} - ${textDate[1]}`;
 			}
 			article.appendChild(h2);
 			let target = article;
