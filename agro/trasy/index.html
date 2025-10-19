@@ -1208,11 +1208,11 @@
 						stops[0].push(data.itinerary[i].list[j].stops[k].name)
 					}
 				}
-				for (let j=0 ; j<data.itinerary[i+1].list.length ; j++)
+				for (let j=0 ; j<data.itinerary[i-1].list.length ; j++)
 				{
-					for (let k=0 ; k<data.itinerary[i+1].list[j].stops.length ; k++)
+					for (let k=0 ; k<data.itinerary[i-1].list[j].stops.length ; k++)
 					{
-						stops[1].push(data.itinerary[i+1].list[j].stops[k].name)
+						stops[1].push(data.itinerary[i-1].list[j].stops[k].name)
 					}
 				}
 				for (let stop of stops[0])
