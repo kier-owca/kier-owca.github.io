@@ -1190,6 +1190,58 @@
 			}
 			content.appendChild(button)
 		},
+		deletedStops: function()
+		{
+			const content = document.getElementById("newStops").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			const h2 = document.createElement("h2")
+			h2.innerHTML = "Usunięte sklepy:<br><br>"
+			content.appendChild(h2)
+			for (let i=data.itinerary.length-1 ; i>0 ; i--)
+			{
+				let text = ""
+				const stops = [[],[]]
+				for (let j=0 ; j<data.itinerary[i].list.length ; j++)
+				{
+					for (let k=0 ; k<data.itinerary[i].list[j].stops.length ; k++)
+					{
+						stops[0].push(data.itinerary[i].list[j].stops[k].name)
+					}
+				}
+				for (let j=0 ; j<data.itinerary[i+1].list.length ; j++)
+				{
+					for (let k=0 ; k<data.itinerary[i+1].list[j].stops.length ; k++)
+					{
+						stops[1].push(data.itinerary[i+1].list[j].stops[k].name)
+					}
+				}
+				for (let stop of stops[0])
+				{
+					for (let j=0 ; j<stops[1].length+1 ; j++)
+					{
+						if (j === stops[1].length)
+						{
+							text += ` - ${stop}<br>`
+						}
+						else if (stop === stops[1][j])
+						{
+							break
+						}
+					}
+				}
+				if (text.length>1)
+				{
+					h2.innerHTML += `------- ${dateText(data.itinerary[i].start)} -------<br>${text}<br>`
+				}
+			}
+			const button = document.createElement("button")
+			button.innerHTML = "kopiuj"
+			button.onclick = function()
+			{
+				navigator.clipboard.writeText(h2.innerText || h2.textContent)
+			}
+			content.appendChild(button)
+		},
 		chartWeight: function()
 		{
 			const content = document.getElementById("chart").getElementsByClassName("content")[0]
@@ -2233,6 +2285,7 @@
 			<span class="separator"></span>
 			<button data-path="ends" data-action="ends">Zakończenia tras</button>
 			<button data-path="newStops" data-action="newStops">Nowe sklepy</button>
+			<button data-path="newStops" data-action="deletedStops">Usunięte sklepy</button>
 			<button data-path="chart" data-action="chartWeight">Wykres tonażu</button>
 			<button data-path="chart" data-action="chartDifficulty">Wykres trudności</button>
 			<button data-path="double" data-action="findDouble">Możliwe duble</button>
