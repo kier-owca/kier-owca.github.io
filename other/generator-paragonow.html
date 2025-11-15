@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Generator Paragonów</title>
+	<style>
+		*
+		{
+			margin: 0;
+			padding: 0;
+		}
+		body
+		{
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: center;
+			align-content: center;
+			background: #252525;
+			font-size: 2vh;
+		}
+		canvas
+		{
+			background: red;
+			width: 49vh;
+			image-rendering: pixelated;
+		}
+		ul
+		{
+			list-style: none;
+		}
+		li
+		{
+			width: 49vh;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center;
+			align-content: center;
+			color: white;
+		}
+		li>button
+		{
+			width: 100%;
+			height: 4vh;
+			font-size: 2.2vh;
+			text-align: center;
+			background: #004d00;
+			border: solid 0.5vh black;
+			color: white;
+			border-radius: 0.7vh;
+			margin-top: 1vh;
+			margin-bottom: 1vh;
+		}
+		input
+		{
+			font-size: 2vh;
+			padding: 0.5vh 1vh;
+			border: 0.2vh solid #444;
+			background: white;
+			color: black;
+			outline: none;
+			margin-top: 0.5vh;
+			margin-bottom: 0.5vh;
+		}
+	</style>
+	<script>
+		function load()
+		{
+			document.getElementsByTagName("canvas")[0].onclick = saveCanvasAsImage
+			document.getElementsByName("shop")[0].value = localStorage.getItem("shop")||"NAZWA SKLEPU";
+			document.getElementsByName("adres1")[0].value = localStorage.getItem("adres1")||"Adres 1";
+			document.getElementsByName("adres2")[0].value = localStorage.getItem("adres2")||"Adres 2";
+			const nip = Array.from(document.getElementsByName("nip")[0].getElementsByTagName("input"));
+			for (let i=0 ; i<nip.length ; i++)
+			{
+				nip[i].value = localStorage.getItem(`nip${i}`)||`${Math.floor(Math.random()*10)}${Math.floor(Math.random()*10)}`;
+			}
+			const today = new Date().toISOString().split("T")[0];
+			document.getElementsByName("date")[0].value = today;
+			const ul = document.getElementsByTagName("ul")[0];
+			for (let i=0 ; i<15 ; i++)
+			{
+				const li = document.createElement("li");
+				li.className = `product${i}`;
+				li.innerHTML = `<input style="width:40%" type="text" class="name"><input style="width:17%" type="number" class="quantity" value="1"><input style="width:17%" type="number" class="price" value="2.22">`;
+				ul.appendChild(li);
+			}
+			const button = document.createElement("button");
+			button.innerHTML = "generuj";
+			button.onclick = create;
+			const li = document.createElement("li");
+			li.appendChild(button);
+			ul.appendChild(li);
+		}
+		function create()
+		{
+			const shop = (document.getElementsByName("shop")[0].value).slice(0,40);
+			localStorage.setItem("shop",shop);
+			document.getElementsByName("shop")[0].value = shop;
+			const adres1 = (document.getElementsByName("adres1")[0].value).slice(0,40);
+			localStorage.setItem("adres1",adres1);
+			document.getElementsByName("adres1")[0].value = adres1;
+			const adres2 = (document.getElementsByName("adres2")[0].value).slice(0,40);
+			localStorage.setItem("adres2",adres2);
+			document.getElementsByName("adres2")[0].value = adres2;
+			const nip = Array.from(document.getElementsByName("nip")[0].getElementsByTagName("input"));
+			const n = ["","","",""];
+			for (let i=0 ; i<nip.length ; i++)
+			{
+				n[i] = (nip[i].value).slice(0,2);
+				localStorage.setItem(`nip${i}`,n[i]);
+				nip[i].value = n[i];
+			}
+			const products = [];
+			for (let i=0 ; i<15 ; i++)
+			{
+				const product = document.getElementsByClassName(`product${i}`)[0];
+				const p = {};
+				p.name = product.getElementsByClassName("name")[0].value;
+				p.quantity = Number(product.getElementsByClassName("quantity")[0].value.replace(",", "."));
+				p.price = Number(product.getElementsByClassName("price")[0].value.replace(",", "."));
+				if (p.name && p.quantity && p.price)
+				{
+					p.type = Math.floor(Math.random()*3);
+					p.sum = p.price * p.quantity;
+					products.push(p);
+				}
+			}
+			const vat = [0,0,0,0];
+			let sum = 0;
+			for (p of products)
+			{
+				vat[p.type] += p.sum;
+				sum += p.sum;
+			}
+			const v = []
+			for (let i=0 ; i<3 ; i++)
+			{
+				v[i] = Math.round(((vat[i]*10000)/[123,108,105][i])*[0.23,0.08,0.05][i])/100
+			}
+			const data = [];
+			data.push({text:shop})
+			if (adres1)
+			{
+				data.push({text:adres1})
+			}
+			if (adres2)
+			{
+				data.push({text:adres2})
+			}
+			if (n[0]!="00")
+			{
+				data.push({text:`NIP ${n[0]}-${n[1]}-${n[2]}-${n[3]}`})
+			}
+			data.push({text:[document.getElementsByName("date")[0].value,``,``,`${Math.floor(Math.random()*10)}${Math.floor(Math.random()*10)}${"QWERTFDHYZ"[Math.floor(Math.random()*10)]}${Math.floor(Math.random()*10)}`]})
+			data.push({text:`PARAGON FIKSALNY`,bold:true})
+			for (p of products)
+			{
+				data.push({text:[p.name,`${"ABC"[p.type]}`,`${p.quantity}X${price(p.price)}`,`${price(p.sum)}${"ABC"[p.type]}`]})
+			}
+			data.push({separator:true})
+			data.push({text:[`Sprzed. opodatk. A`,``,``,`${price(vat[0])}`]})
+			data.push({text:[`Kwota PTU A 23%`,``,``,`${price(v[0])}`]})
+			data.push({text:[`Sprzed. opodatk. B`,``,``,`${price(vat[1])}`]})
+			data.push({text:[`Kwota PTU B 8%`,``,``,`${price(v[1])}`]})
+			data.push({text:[`Sprzed. opodatk. C`,``,``,`${price(vat[2])}`]})
+			data.push({text:[`Kwota PTU C 5%`,``,``,`${price(v[2])}`]})
+			data.push({text:[`ŁĄCZNA KWOTA PTU`,``,``,`${price(v[0]+v[1]+v[2])}`]})
+			data.push({text:[`SUMA`,``,``,`${price(sum)}`],bold:true})
+			data.push({separator:true})
+			const now = new Date();
+			const hours = now.getHours();
+			const minutes = now.getMinutes();
+			const seconds = now.getSeconds();
+			data.push({text:[`0735 #Kasa ${Math.floor(Math.random()*3)+1} Kasjer nr ${Math.floor(Math.random()*17)+1}`,``,``,`${pad(hours)}:${pad(minutes)}`]})
+			data.push({text:`nr sys.: ${Math.floor(Math.random()*10)}${"QWERTFDHYZ"[Math.floor(Math.random()*10)]}${Math.floor(Math.random()*10)}${Math.floor(Math.random()*10)}`})
+			draw(data)
+			function price(value)
+			{
+				return `${Math.floor(value)},${pad(Math.round((value%1)*100))}`
+			}
+			function pad(n)
+			{
+				return `00${n}`.slice(-2)
+			}
+		}
+		function draw(data)
+		{
+			const canvas = document.getElementById("paragon");
+			canvas.height = (data.length*(17*2))+(17*3)
+			const ctx = canvas.getContext("2d");
+			ctx.fillStyle = "#ffffff";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			let h = 2
+			ctx.fillStyle = "#000";
+			ctx.font = "bold 20px 'Consolas'"; //d = 4.4
+			ctx.save();
+			ctx.scale(1, 2);
+			for (let l of data)
+			{
+				line(l)
+			}
+			ctx.restore();
+			function line(data)
+			{
+				if (data.bold)
+				{
+					ctx.font = "bold 25px 'Consolas'";
+					h += 19
+				}
+				else
+				{
+					ctx.font = "20px 'Consolas'";
+					h += 17
+				}
+				if (typeof data.text === "string")
+				{
+					let metrics = ctx.measureText(data.text);
+					ctx.fillText(data.text, Math.max(0,450-metrics.width)/2, h);
+				}
+				else if (Array.isArray(data.text))
+				{
+					ctx.fillText(data.text[0], 5, h);
+					for (let i=1 ; i<data.text.length ; i++)
+					{
+						let metrics = ctx.measureText(data.text[i]);
+						ctx.fillText(data.text[i].replace(".", ","), [0,225,340,445][i]-metrics.width, h);
+					}
+				}
+				else if (data.separator)
+				{
+					let metrics = ctx.measureText(" - ");
+					const text = " - ".repeat(Math.floor(450/metrics.width))
+					metrics = ctx.measureText(text);
+					ctx.fillText(text, Math.max(0,450-metrics.width)/2, h);
+				}
+			}
+		}
+		function saveCanvasAsImage(event)
+		{
+			canvas = event.currentTarget
+			// Pobierz dane canvasa w formacie PNG
+			const dataURL = canvas.toDataURL("image/png");
+
+			// Stwórz tymczasowy link
+			const link = document.createElement("a");
+			link.href = dataURL;
+			link.download = `PARAGON ${document.getElementsByName("shop")[0].value}`;
+
+			// Kliknij link, żeby wywołać zapis
+			link.click();
+		}
+	</script>
+</head>
+<body onload="load()">
+	<ul>
+		<li>
+			<input style="width:100%" type="text" name="shop">
+		</li>
+		<li>
+			<input style="width:100%" type="text" name="adres1">
+		</li>
+		<li>
+			<input style="width:100%" type="text" name="adres2">
+		</li>
+		<li name="nip">
+			<input style="width:17%" type="number" maxlength="2" name="nip1" /> -
+			<input style="width:17%" type="number" maxlength="2" name="nip2"  /> -
+			<input style="width:17%" type="number" maxlength="2" name="nip3"  /> -
+			<input style="width:17%" type="number" maxlength="2" name="nip4"  />
+		</li>
+		<li>
+			<input style="width:100%" type="date" name="date" />
+		</li>
+	</ul>
+<canvas id="paragon" width="450" height="450"></canvas>
+</body>
+</html>
