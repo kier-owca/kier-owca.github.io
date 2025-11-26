@@ -25,6 +25,8 @@
 		width: 98vw;
 		background: #1b1b1b;
 		border-top: solid 0.4vh #252525;
+		touch-action: none;
+    	-ms-touch-action: none;
 	}
 	#keyboard > .box
 	{
@@ -569,6 +571,10 @@
 			webRTC.load() // musi być zawsze
 			document.addEventListener("dragstart", e => e.preventDefault());
 			document.addEventListener("drop", e => e.preventDefault());
+			const keyboard = document.getElementById("keyboard");
+			keyboard.addEventListener("touchstart", e => e.preventDefault(), { passive:false });
+			keyboard.addEventListener("touchmove",  e => e.preventDefault(), { passive:false });
+			keyboard.addEventListener("touchend",   e => e.preventDefault(), { passive:false });
 			const keys = document.getElementById("keys")
 			for (let i=0 ; i<9 ; i++)
 			{
