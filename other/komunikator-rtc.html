@@ -675,7 +675,6 @@
 			},
 			pointermove: function(event)
 			{
-				alert("pointermove")
 				if (system.keys.path.length < 1){return}
 				const id = Number(event.target.dataset.id);
 				const lastPaht = system.keys.path[system.keys.path.length-1];
@@ -687,7 +686,6 @@
 			},
 			pointerup: function(event)
 			{
-				alert("pointerup")
 				if (system.keys.path.length < 1){return}
 				const id = Number(event.target.dataset.id);
 				const lastPaht = system.keys.path[system.keys.path.length-1];
@@ -868,6 +866,7 @@
 			},
 			write: function(user,h,complete)
 			{
+				alert(h)
 				if (complete)
 				{
 					system.user.statement[user].push(h);
@@ -1016,5 +1015,3 @@
 	</div>
 </body>
 </html>
-
-
