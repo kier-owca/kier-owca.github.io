@@ -693,6 +693,8 @@
 				{
 					system.keys.path.push(id);
 				}
+				alert(`${system.keys.path} ${id}`)
+				event.currentTarget.style.background = "green"
 				system.action(system.keys.path,"complete");
 				system.keys.path = [];
 			},
@@ -1014,3 +1016,4 @@
 	</div>
 </body>
 </html>
+
