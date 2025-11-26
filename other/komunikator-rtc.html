@@ -140,7 +140,7 @@
 	}
 	.statement > .char > svg > path
 	{
-		fill: black;
+		fill: #111111;
 	}
 	.statement > .char > svg > path.active
 	{
@@ -228,98 +228,71 @@
 	}
 </style>
 <script>
-	const webRTC = {
-	pc: null,
-	channel: null,
-
-	load: function() {
-		if (this.pc) return; // unikamy ponownego tworzenia
-		this.pc = new RTCPeerConnection();
-
-		this.pc.ondatachannel = (e) => {
-			this.channel = e.channel;
-			this.channel.onopen = this.event.onopen;
-			this.channel.onmessage = this.event.onmessage;
-		};
-	},
-
-	event: {
-		onopen: function() {
-			console.log("KANAŁ OTWARTY");
-			document.getElementById("pair")?.remove();
-			document.getElementById("pairWindow")?.remove();
-			document.getElementById("history").innerHTML = "";
+	const webRTC =
+	{
+		pc: null,
+		channel: null,
+		load: function()
+		{
+			webRTC.pc = new RTCPeerConnection();
+			webRTC.pc.ondatachannel = (e) =>
+			{
+				webRTC.channel = e.channel;
+				webRTC.channel.onopen = webRTC.event.onopen;
+				webRTC.channel.onmessage = webRTC.event.onmessage;
+			}
 		},
-		onmessage: function(e) {
-			const m = JSON.parse(e.data);
-			if (m[0] === 1) system.user.write("B", m[1], m[2]);
-			if (m[0] === 2) system.user.send("B", m[1]);
-			if (m[0] === 3) system.user.delete("B");
-		}
-	},
-
-	// --- Funkcja generowania oferty (A) ---
-	getOffer: async function() {
-		this.load();
-
-		// Tworzymy kanał danych A -> B
-		this.channel = this.pc.createDataChannel("tunnel");
-		this.channel.onopen = this.event.onopen;
-		this.channel.onmessage = this.event.onmessage;
-
-		// Tworzymy ofertę
-		const offer = await this.pc.createOffer();
-		await this.pc.setLocalDescription(offer); // ustaw lokalnie ofertę
-		await this._waitIceComplete();
-
-		return this.pc.localDescription.sdp;
-	},
-
-	// --- Funkcja przyjmowania oferty (B) i generowania odpowiedzi ---
-	acceptOffer: async function(offerSDP) {
-		this.load();
-
-		// Ustawiamy remote description z oferty A
-		await this.pc.setRemoteDescription({ type: "offer", sdp: offerSDP });
-
-		// Tworzymy kanał danych odpowiedzi (B -> A) automatycznie przez ondatachannel
-		const answer = await this.pc.createAnswer();
-		await this.pc.setLocalDescription(answer); // ustawiamy lokalnie odpowiedź
-		await this._waitIceComplete();
-
-		return this.pc.localDescription.sdp; // zwracamy SDP odpowiedzi
-	},
-
-	// --- Funkcja ustawiania odpowiedzi (A) ---
-	acceptAnswer: async function(answerSDP) {
-		this.load();
-
-		// Sprawdzamy, czy lokalna oferta już istnieje
-		if (this.pc.signalingState !== "have-local-offer") {
-			console.error("Nie można ustawić remote answer – PC nie ma lokalnej oferty!");
-			return;
-		}
-
-		await this.pc.setRemoteDescription({ type: "answer", sdp: answerSDP });
-	},
-
-	send: function(msg) {
-		if (this.channel && this.channel.readyState === "open") {
-			this.channel.send(msg);
-		} else {
-			console.warn("Kanał nie jest otwarty!");
-		}
-	},
-
-	_waitIceComplete: function() {
-		return new Promise(resolve => {
-			if (!this.pc) return resolve();
-			this.pc.onicecandidate = (e) => {
-				if (!e.candidate) resolve();
-			};
-		});
-	},
-	code: function(sdp)
+		event:
+		{
+			onopen: function()
+			{
+				console.log("KANAŁ OTWARTY");
+				document.getElementById("pair").remove();
+				document.getElementById("pairWindow").remove();
+				document.getElementById("history").innerHTML = "";
+			},
+			onmessage: function(e)
+			{
+				const m = JSON.parse(e.data)
+				if (m[0] === 1)
+				{
+					system.user.write("B",m[1],m[2])
+				}
+				if (m[0] === 2)
+				{
+					system.user.send("B",m[1])
+				}
+				if (m[0] === 3)
+				{
+					system.user.delete("B")
+				}
+			}
+		},
+		getOffer: async function()
+		{
+			if (!webRTC.pc) {webRTC.load()}
+			webRTC.channel = webRTC.pc.createDataChannel("tunnel");
+			webRTC.channel.onopen = webRTC.event.onopen;
+			webRTC.channel.onmessage = webRTC.event.onmessage;
+			const offer = await webRTC.pc.createOffer();
+			await webRTC.pc.setLocalDescription(offer);
+			await webRTC._waitIceComplete();
+			await webRTC._waitForLocalOffer();
+			return webRTC.pc.localDescription.sdp;
+		},
+		acceptOffer: async function(offerSDP)
+		{
+			await webRTC.pc.setRemoteDescription({ type: "offer", sdp: offerSDP });
+			const answer = await webRTC.pc.createAnswer();
+			await webRTC.pc.setLocalDescription(answer);
+			await webRTC._waitIceComplete();
+			return webRTC.pc.localDescription.sdp;
+		},
+		acceptAnswer: async function(answerSDP)
+		{
+			await webRTC.pc.setRemoteDescription({ type: "answer", sdp: answerSDP });
+		},
+		code: function(sdp)
 		{
 			const data = 
 			[
@@ -553,8 +526,44 @@
 				return out;
 			}
 		},
-};
-
+		send: function(msg)
+		{
+			if (webRTC.channel && webRTC.channel.readyState === "open")
+			{
+				webRTC.channel.send(msg);
+			}
+			else
+			{
+				console.warn("Kanał nie jest otwarty!");
+			}
+		},
+		_waitIceComplete: function()
+		{
+			return new Promise(resolve =>
+			{
+				webRTC.pc.onicecandidate = e =>
+				{
+					if (!e.candidate) resolve();
+				};
+			});
+		},
+		_waitForLocalOffer()
+		{
+			return new Promise(resolve => {
+			if (webRTC.pc.signalingState === "have-local-offer") {
+				resolve();
+				return;
+			}
+			const check = () => {
+				if (webRTC.pc.signalingState === "have-local-offer") {
+					webRTC.pc.removeEventListener("signalingstatechange", check);
+					resolve();
+				}
+			};
+				webRTC.pc.addEventListener("signalingstatechange", check);
+			});
+		}
+	};
 </script>
 <script>
 	const system =
