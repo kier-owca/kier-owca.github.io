@@ -318,7 +318,241 @@
 				if (!e.candidate) resolve();
 			};
 		});
-	}
+	},
+	code: function(sdp)
+		{
+			const data = 
+			[
+				{
+					// v=0 -> przewidywalne, niepotrzebne
+					reg: /^v=/i,
+					func: s => ""  // zwracamy pusty string
+				},
+				{
+					// o=- 0 0 IN IP4 127.0.0.1 -> większość przewidywalna, zostawiamy puste
+					reg: /^o=/i,
+					func: s => ""
+				},
+				{
+					// s=- -> zawsze s=-, pomijamy
+					reg: /^s=/i,
+					func: s => ""
+				},
+				{
+					// t=0 0 -> przewidywalne
+					reg: /^t=/i,
+					func: s => ""
+				},
+				{
+					// a=ice-ufrag: -> zamiana nazwy na 1 znak + wartość bez zmian
+					reg: /^a=ice-ufrag:/i,
+					func: s => s.split(":")[1]
+				},
+				{
+					// a=ice-pwd: -> 1 znak + wartość
+					reg: /^a=ice-pwd:/i,
+					func: s => s.split(":")[1]
+				},
+				{
+					// a=fingerprint:sha-256: -> prefix "f" + wartość bez dwukropków, małe litery
+					reg: /^a=fingerprint:/i,
+					func: s => 
+					{
+						const d = (s.match(/fingerprint:sha-256 (?<d>.+)/).groups||{d:""}).d;
+						return d.toLowerCase().replaceAll(":", "");
+					}
+				},
+				{
+					// m= -> zamiana nazwy na "m" + wartość
+					reg: /^m=/i,
+					func: s => s.substring(2)
+				},
+				{
+					// c= -> zamiana nazwy na "c" + wartość
+					reg: /^c=/i,
+					func: s => s.substring(2)
+				},
+				{
+					reg: /^a=candidate:/i,
+					func: s =>
+					{
+						let parts = s.split(":");
+						parts.shift(); // usuwamy "a=candidate"
+
+						// połącz resztę w jeden string
+						let val = parts.join("").toLowerCase();
+
+						// sprasowanie powtarzalnych fragmentów
+						val = val
+							.replace(/\btyp\s+host\b/gi, "h")
+							.replace(/\btyp\s+srflx\b/gi, "s")
+							.replace(/\btyp\s+relay\b/gi, "r")
+							.replace(/\bgeneration\s+0\b/gi, "g0")
+							.replace(/\bnetwork-cost\s+999\b/gi, "n9");
+
+						return val;
+					}
+				}
+			];
+
+			const lines = sdp.split(/\r?\n/).filter(l => l.trim().length > 0);
+			let out = "";
+
+			for (let line of lines)
+			{
+				// znajdź odpowiedni index w data
+				let idx = data.findIndex(d => d.reg.test(line));
+				if (idx === -1){continue}
+				const func = data[idx].func;
+
+				// zakodowanie wartości
+				const value = func(line);
+
+				// kodowanie długości wartości w 2 znaki base32
+				let len32 = value.length.toString(32).padStart(2, "0");
+
+				// kodowanie indeksu funkcji w 1 znak base32
+				let idx32 = idx.toString(32);
+
+				// dodanie do out: długość + indeks + wartość
+				out += len32 + idx32 + value;
+			}
+
+			return escapeForLink(out);
+
+			function escapeForLink(str)
+			{
+				return str.replace(/q| |\/|\.|-|\+|:|=|,|;|#|%|\?|@|!/g, match => {
+					switch(match)
+					{
+						case "q": return "qq";
+						case " ": return "qa";
+						case "/": return "qb";
+						case ".": return "qc";
+						case "-": return "qd";
+						case "+": return "qe";
+						case ":": return "qf";
+						case "=": return "qg";
+						case ",": return "qh";
+						case ";": return "qi";
+						case "#": return "qj";
+						case "%": return "qk";
+						case "?": return "ql";
+						case "@": return "qm";
+						case "!": return "qn";
+					}
+				});
+			}
+		},
+		decode: function(str)
+		{
+			const data = 
+			[
+				{ prefix: "v", func: () => "v=0" },
+				{ prefix: "o", func: () => "o=- 0 0 IN IP4 127.0.0.1" },
+				{ prefix: "s", func: () => "s=-" },
+				{ prefix: "t", func: () => "t=0 0" },
+				{ prefix: "u", func: val => "a=ice-ufrag:" + val },
+				{ prefix: "p", func: val => "a=ice-pwd:" + val },
+				{ prefix: "f", func: val => 
+					{
+						// fingerprint, przywracamy dwukropki co 2 znaki
+						let hex = val.match(/.{1,2}/g).join(":");
+						return "a=fingerprint:sha-256 " + hex;
+					}
+				},
+				{ prefix: "m", func: val => "m=" + val },
+				{ prefix: "c", func: val => "c=" + val },
+				{ prefix: "i", func: val =>
+					{
+						val = val
+							.replace(/h/g, "---h---")
+							.replace(/s/g, "---s---")
+							.replace(/r/g, "---r---")
+							.replace(/g0/g, "---g0---")
+							.replace(/n9/g, "---n0---");
+						// ICE candidate: przywracamy spacje i powtarzalne fragmenty
+						val = val
+							.replace(/---h---/g, "typ host ")
+							.replace(/---s---/g, "typ srflx ")
+							.replace(/---r---/g, "typ relay ")
+							.replace(/---g0---/g, "generation 0 ")
+							.replace(/---n0---/g, "network-cost 999 ");
+
+						// dodaj prefiks a=candidate:
+						return "a=candidate:" + val;
+					}
+				}
+			];
+
+			// najpierw odwracamy escape znaków
+			str = unescapeFromLink(str);
+
+			let pos = 0;
+			let out = "";
+
+			while (pos < str.length)
+			{
+				// odczyt długości wartości (2 znaki base32)
+				let len32 = str.substr(pos, 2);
+				let len = parseInt(len32, 32);
+				pos += 2;
+
+				// odczyt indeksu funkcji (1 znak base32)
+				let idx32 = str[pos];
+				let idx = parseInt(idx32, 32);
+				pos += 1;
+
+				// odczyt wartości
+				let val = str.substr(pos, len);
+				pos += len;
+
+				// przywracanie linii SDP
+				const func = data[idx]?.func || (v => v);
+				out += func(val) + "\r\n";
+			}
+
+			return out;
+
+			// ----------------------
+			// funkcje escape odwrotne
+			// ----------------------
+			function unescapeFromLink(str)
+			{
+				let out = "";
+				for (let i = 0; i < str.length; i++)
+				{
+					if (str[i] === "q")
+					{
+						const next = str[i+1];
+						switch(next)
+						{
+							case "q": out += "q"; i++; break;
+							case "a": out += " "; i++; break;
+							case "b": out += "/"; i++; break;
+							case "c": out += "."; i++; break;
+							case "d": out += "-"; i++; break;
+							case "e": out += "+"; i++; break;
+							case "f": out += ":"; i++; break;
+							case "g": out += "="; i++; break;
+							case "h": out += ","; i++; break;
+							case "i": out += ";"; i++; break;
+							case "j": out += "#"; i++; break;
+							case "k": out += "%"; i++; break;
+							case "l": out += "?"; i++; break;
+							case "m": out += "@"; i++; break;
+							case "n": out += "!"; i++; break;
+							default: out += "q"; break;
+						}
+					}
+					else
+					{
+						out += str[i];
+					}
+				}
+				return out;
+			}
+		},
 };
 
 </script>
@@ -774,4 +1008,3 @@
 	</div>
 </body>
 </html>
-
