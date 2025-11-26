@@ -667,6 +667,7 @@
 			path: [],
 			pointerdown: function(event)
 			{
+				alert("pointerdown")
 				const id = Number(event.target.dataset.id);
 				if (id)
 				{
@@ -675,6 +676,7 @@
 			},
 			pointermove: function(event)
 			{
+				alert("pointermove")
 				if (system.keys.path.length < 1){return}
 				const id = Number(event.target.dataset.id);
 				const lastPaht = system.keys.path[system.keys.path.length-1];
@@ -686,6 +688,7 @@
 			},
 			pointerup: function(event)
 			{
+				alert("pointerup")
 				if (system.keys.path.length < 1){return}
 				const id = Number(event.target.dataset.id);
 				const lastPaht = system.keys.path[system.keys.path.length-1];
@@ -1014,3 +1017,4 @@
 	</div>
 </body>
 </html>
+
