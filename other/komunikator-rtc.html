@@ -693,13 +693,13 @@
 				{
 					system.keys.path.push(id);
 				}
+				alert(JSON.stringify(path),id)
 				system.action(system.keys.path,"complete");
 				system.keys.path = [];
 			},
 		},
 		action(path,complete)
 		{
-			alert(path)
 			let drawPath = [];
 			for (let i=1 ; i<path.length ; i++)
 			{
