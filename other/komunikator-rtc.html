@@ -578,7 +578,6 @@
 			for (let i=0 ; i<9 ; i++)
 			{
 				const div = document.createElement("div")
-				if (i==0){div.style.background = "yellow"}
 				div.dataset.id = "187206345"[i]
 				keys.appendChild(div)
 				div.addEventListener("pointerdown",system.keys.pointerdown)
@@ -668,7 +667,7 @@
 			path: [],
 			pointerdown: function(event)
 			{
-				const id = Number(event.target.dataset.id);
+				const id = Number(event.currentTarget.dataset.id);
 				if (id)
 				{
 					system.keys.path = [id];
@@ -677,7 +676,7 @@
 			pointermove: function(event)
 			{
 				if (system.keys.path.length < 1){return}
-				const id = Number(event.target.dataset.id);
+				const id = Number(event.currentTarget.dataset.id);
 				const lastPaht = system.keys.path[system.keys.path.length-1];
 				if (lastPaht!=id)
 				{
@@ -688,13 +687,12 @@
 			pointerup: function(event)
 			{
 				if (system.keys.path.length < 1){return}
-				const id = Number(event.target.dataset.id);
+				const id = Number(event.currentTarget.dataset.id);
 				const lastPaht = system.keys.path[system.keys.path.length-1];
 				if (id != lastPaht)
 				{
 					system.keys.path.push(id);
 				}
-				alert(`${JSON.stringify(system.keys.path)},${id}`)
 				system.action(system.keys.path,"complete");
 				system.keys.path = [];
 			},
@@ -1016,5 +1014,3 @@
 	</div>
 </body>
 </html>
-
-
