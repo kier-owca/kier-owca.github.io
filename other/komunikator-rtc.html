@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8" />
-<title>komunikator webRTC</title>
+<title>komunikator WebRTC</title>
 <style>
 	*
 	{
@@ -587,7 +587,7 @@
 					{
 						// fingerprint, przywracamy dwukropki co 2 znaki
 						let hex = val.match(/.{1,2}/g).join(":");
-						return "a=fingerprint:sha-256 " + hex;
+						return "a=fingerprint:sha-256 " + hex.toUpperCase();
 					}
 				},
 				{ prefix: "m", func: val => "m=" + val },
@@ -689,6 +689,15 @@
 	{
 		load: function()
 		{
+			window.onerror = function(message, source, lineno, colno, error)
+			{
+				alert("Błąd JS:\n" + message + "\nLinia: " + lineno + ", Kolumna: " + colno);
+				return false; // pozwala normalnie logować w konsoli
+			};
+			window.onunhandledrejection = function(event)
+			{
+				alert("Błąd w Promise:\n" + event.reason);
+			};
 			webRTC.load() // musi być zawsze
 			const keyboard = document.getElementById("keyboard");
 			keyboard.addEventListener("dragstart", e => e.preventDefault());
@@ -719,7 +728,7 @@
 			buttons[0].onclick = async function()
 			{
 				const w = document.getElementById("pairWindow")
-				w.innerHTML = ""
+				w.innerHTML = "To może potrwać kilka sekund."
 				let span = document.createElement("span")
 				span.className = "code"
 				offer = await webRTC.getOffer();
@@ -763,7 +772,7 @@
 					let code = document.getElementById("pairWindow").getElementsByTagName("textarea")[0].value
 					answer = await webRTC.acceptOffer(webRTC.decode(code));
 					const w = document.getElementById("pairWindow")
-					w.innerHTML = ""
+					w.innerHTML = "To może potrwać kilka sekund."
 					let span = document.createElement("span")
 					span.className = "code"
 					code = webRTC.code(answer)
