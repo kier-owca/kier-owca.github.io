@@ -318,8 +318,21 @@
 				sdp: sdp
 			};
 
+			// jeśli pc nie jest w stanie 'have-local-offer', poczekaj
+			if (this.pc.signalingState !== "have-local-offer") {
+				await new Promise(resolve => {
+					const check = () => {
+						if (this.pc.signalingState === "have-local-offer") {
+							this.pc.removeEventListener("signalingstatechange", check);
+							resolve();
+						}
+					};
+					this.pc.addEventListener("signalingstatechange", check);
+				});
+			}
+
 			await this.pc.setRemoteDescription(answer);
-		},
+		}
 		send: function(msg)
 		{
 			if (webRTC.channel && webRTC.channel.readyState === "open")
