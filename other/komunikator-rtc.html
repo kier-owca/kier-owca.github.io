@@ -236,6 +236,8 @@
 
 		load: function()
 		{
+			if (this.pc) return; // unikamy wielokrotnego ładowania
+
 			this.pc = new RTCPeerConnection(
 			{
 				iceServers: [{urls: "stun:stun.l.google.com:19302"}]
@@ -251,11 +253,15 @@
 
 			this.pc.ondatachannel = e =>
 			{
-				this.channel = e.channel;
-				this.channel.onopen = this.event.onopen;
-				this.channel.onmessage = this.event.onmessage;
+				if (!this.channel)
+				{
+					this.channel = e.channel;
+					this.channel.onopen = this.event.onopen;
+					this.channel.onmessage = this.event.onmessage;
+				}
 			};
 		},
+
 		reset: function()
 		{
 			if (this.pc)
@@ -266,63 +272,67 @@
 			this.channel = null;
 			this._busy = false;
 		},
+
 		getOffer: async function()
 		{
 			if (this._busy) return;
 			this._busy = true;
 
-			if (this.pc) this.reset();
+			this.reset();
 			this.load();
 
-			this.channel = this.pc.createDataChannel("tunnel");
-			this.channel.onopen = this.event.onopen;
-			this.channel.onmessage = this.event.onmessage;
+			if (!this.channel)
+			{
+				this.channel = this.pc.createDataChannel("tunnel");
+				this.channel.onopen = this.event.onopen;
+				this.channel.onmessage = this.event.onmessage;
+			}
 
 			const offer = await this.pc.createOffer();
 			await this.pc.setLocalDescription(offer);
 
-			await this._waitIceComplete();
+			await this._waitIceComplete(15000); // 15s timeout
 
 			this._busy = false;
 			return this.pc.localDescription.sdp;
 		},
+
 		acceptOffer: async function(sdp)
 		{
 			if (this._busy) return;
 			this._busy = true;
 
-			if (this.pc) this.reset();
+			this.reset();
 			this.load();
 
-			const offer =
-			{
-				type: "offer",
-				sdp: sdp
-			};
-
+			const offer = { type: "offer", sdp: sdp };
 			await this.pc.setRemoteDescription(offer);
 
 			const answer = await this.pc.createAnswer();
 			await this.pc.setLocalDescription(answer);
 
-			await this._waitIceComplete();
+			await this._waitIceComplete(15000);
 
 			this._busy = false;
 			return this.pc.localDescription.sdp;
 		},
+
 		acceptAnswer: async function(sdp)
 		{
-			const answer =
-			{
-				type: "answer",
-				sdp: sdp
-			};
+			if (this._busy) return;
+			this._busy = true;
 
-			// jeśli pc nie jest w stanie 'have-local-offer', poczekaj
-			if (this.pc.signalingState !== "have-local-offer") {
-				await new Promise(resolve => {
-					const check = () => {
-						if (this.pc.signalingState === "have-local-offer") {
+			const answer = { type: "answer", sdp: sdp };
+
+			// poczekaj, aż PC ma lokalną ofertę
+			if (this.pc.signalingState !== "have-local-offer")
+			{
+				await new Promise(resolve =>
+				{
+					const check = () =>
+					{
+						if (this.pc.signalingState === "have-local-offer")
+						{
 							this.pc.removeEventListener("signalingstatechange", check);
 							resolve();
 						}
@@ -332,43 +342,64 @@
 			}
 
 			await this.pc.setRemoteDescription(answer);
+			this._busy = false;
 		},
+
 		send: function(msg)
 		{
-			if (webRTC.channel && webRTC.channel.readyState === "open")
+			if (this.channel && this.channel.readyState === "open")
 			{
-				webRTC.channel.send(msg);
+				this.channel.send(msg);
 			}
 			else
 			{
 				console.warn("Kanał nie jest otwarty!");
 			}
 		},
-		_waitIceComplete: function()
+
+		_waitIceComplete: function(timeout = 10000)
 		{
-			return new Promise(resolve =>
+			return new Promise((resolve, reject) =>
 			{
 				if (this.pc.iceGatheringState === "complete")
 				{
 					return resolve();
 				}
-				this._iceResolve = resolve;
+
+				let timer = setTimeout(() =>
+				{
+					if (this._iceResolve) this._iceResolve = null;
+					alert("Błąd: ICE nie zebrał wszystkich kandydatów w wyznaczonym czasie!");
+					resolve();
+				}, timeout);
+
+				this._iceResolve = () =>
+				{
+					clearTimeout(timer);
+					this._iceResolve = null;
+					resolve();
+				};
 			});
 		},
-		_waitForLocalOffer()
+
+		_waitForLocalOffer: function()
 		{
-			return new Promise(resolve => {
-			if (webRTC.pc.signalingState === "have-local-offer") {
-				resolve();
-				return;
-			}
-			const check = () => {
-				if (webRTC.pc.signalingState === "have-local-offer") {
-					webRTC.pc.removeEventListener("signalingstatechange", check);
+			return new Promise(resolve =>
+			{
+				if (this.pc.signalingState === "have-local-offer")
+				{
 					resolve();
+					return;
 				}
-			};
-				webRTC.pc.addEventListener("signalingstatechange", check);
+				const check = () =>
+				{
+					if (this.pc.signalingState === "have-local-offer")
+					{
+						this.pc.removeEventListener("signalingstatechange", check);
+						resolve();
+					}
+				};
+				this.pc.addEventListener("signalingstatechange", check);
 			});
 		},
 		event:
