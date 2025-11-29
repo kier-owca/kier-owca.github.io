@@ -745,6 +745,7 @@
 				let span = document.createElement("span")
 				span.className = "code"
 				offer = await webRTC.getOffer();
+				w.innerHTML = ""
 				const code = webRTC.code(offer)
 				span.innerHTML = code
 				w.appendChild(span)
@@ -757,13 +758,15 @@
 				span.innerHTML = "Jesteś urządzeniem A. Wyślij powyższy kod na urządzenie B i poproś o kod zwrotny. Kod zdwotny wklej w okno niżej i kliknij paruj."
 				w.appendChild(span)
 				const textarea = document.createElement("textarea")
-				textarea.innerHTML = "miejsce_na_kod_z_urzadzenia_B"
+				textarea.innerHTML = "miejsce_na_kod_z_urzadzenia_B_(ZAMIEN_NA_KOD)"
 				w.appendChild(textarea)
 				const button = document.createElement("button")
 				button.innerHTML = "Paruj"
 				button.onclick = async function()
 				{
+					const w = document.getElementById("pairWindow")
 					const code = document.getElementById("pairWindow").getElementsByTagName("textarea")[0].value
+					w.innerHTML = "To może potrwać kilka sekund."
 					await webRTC.acceptAnswer(webRTC.decode(code));
 				}
 				w.appendChild(button)
@@ -776,16 +779,17 @@
 				span.innerHTML = "Jesteś urządzeniem B. W okno niżej wklej kod z urządzenia A i kliknij paruj. Aplikacja wygeneruje kod zwrotny. Wyślij go na urządzenie A i poczekaj na sparowanie."
 				w.appendChild(span)
 				const textarea = document.createElement("textarea")
-				textarea.innerHTML = "miejsce_na_kod_z_urzadzenia_A"
+				textarea.innerHTML = "miejsce_na_kod_z_urzadzenia_A_(ZAMIEN_NA_KOD)"
 				w.appendChild(textarea)
 				const button = document.createElement("button")
 				button.innerHTML = "Paruj"
 				button.onclick = async function()
 				{
-					let code = document.getElementById("pairWindow").getElementsByTagName("textarea")[0].value
-					answer = await webRTC.acceptOffer(webRTC.decode(code));
 					const w = document.getElementById("pairWindow")
+					let code = w.getElementsByTagName("textarea")[0].value
 					w.innerHTML = "To może potrwać kilka sekund."
+					answer = await webRTC.acceptOffer(webRTC.decode(code));
+					w.innerHTML = ""
 					let span = document.createElement("span")
 					span.className = "code"
 					code = webRTC.code(answer)
@@ -1159,4 +1163,3 @@
 	</div>
 </body>
 </html>
-
