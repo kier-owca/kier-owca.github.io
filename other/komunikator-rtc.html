@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8" />
-<title>WebRTC – automatyczne parowanie</title>
+<title>komunikator webRTC</title>
 <style>
 	*
 	{
@@ -232,15 +232,131 @@
 	{
 		pc: null,
 		channel: null,
+		_busy: false,
+
 		load: function()
 		{
-			webRTC.pc = new RTCPeerConnection();
-			webRTC.pc.ondatachannel = (e) =>
+			this.pc = new RTCPeerConnection(
 			{
-				webRTC.channel = e.channel;
-				webRTC.channel.onopen = webRTC.event.onopen;
-				webRTC.channel.onmessage = webRTC.event.onmessage;
+				iceServers: [{urls: "stun:stun.l.google.com:19302"}]
+			});
+
+			this.pc.onicecandidate = e =>
+			{
+				if (!e.candidate)
+				{
+					if (this._iceResolve) this._iceResolve();
+				}
+			};
+
+			this.pc.ondatachannel = e =>
+			{
+				this.channel = e.channel;
+				this.channel.onopen = this.event.onopen;
+				this.channel.onmessage = this.event.onmessage;
+			};
+		},
+		reset: function()
+		{
+			if (this.pc)
+			{
+				try { this.pc.close() } catch(e){}
 			}
+			this.pc = null;
+			this.channel = null;
+			this._busy = false;
+		},
+		getOffer: async function()
+		{
+			if (this._busy) return;
+			this._busy = true;
+
+			if (this.pc) this.reset();
+			this.load();
+
+			this.channel = this.pc.createDataChannel("tunnel");
+			this.channel.onopen = this.event.onopen;
+			this.channel.onmessage = this.event.onmessage;
+
+			const offer = await this.pc.createOffer();
+			await this.pc.setLocalDescription(offer);
+
+			await this._waitIceComplete();
+
+			this._busy = false;
+			return this.pc.localDescription.sdp;
+		},
+		acceptOffer: async function(sdp)
+		{
+			if (this._busy) return;
+			this._busy = true;
+
+			if (this.pc) this.reset();
+			this.load();
+
+			const offer =
+			{
+				type: "offer",
+				sdp: sdp
+			};
+
+			await this.pc.setRemoteDescription(offer);
+
+			const answer = await this.pc.createAnswer();
+			await this.pc.setLocalDescription(answer);
+
+			await this._waitIceComplete();
+
+			this._busy = false;
+			return this.pc.localDescription.sdp;
+		},
+		acceptAnswer: async function(sdp)
+		{
+			const answer =
+			{
+				type: "answer",
+				sdp: sdp
+			};
+
+			await this.pc.setRemoteDescription(answer);
+		},
+		send: function(msg)
+		{
+			if (webRTC.channel && webRTC.channel.readyState === "open")
+			{
+				webRTC.channel.send(msg);
+			}
+			else
+			{
+				console.warn("Kanał nie jest otwarty!");
+			}
+		},
+		_waitIceComplete: function()
+		{
+			return new Promise(resolve =>
+			{
+				if (this.pc.iceGatheringState === "complete")
+				{
+					return resolve();
+				}
+				this._iceResolve = resolve;
+			});
+		},
+		_waitForLocalOffer()
+		{
+			return new Promise(resolve => {
+			if (webRTC.pc.signalingState === "have-local-offer") {
+				resolve();
+				return;
+			}
+			const check = () => {
+				if (webRTC.pc.signalingState === "have-local-offer") {
+					webRTC.pc.removeEventListener("signalingstatechange", check);
+					resolve();
+				}
+			};
+				webRTC.pc.addEventListener("signalingstatechange", check);
+			});
 		},
 		event:
 		{
@@ -267,30 +383,6 @@
 					system.user.delete("B")
 				}
 			}
-		},
-		getOffer: async function()
-		{
-			if (!webRTC.pc) {webRTC.load()}
-			webRTC.channel = webRTC.pc.createDataChannel("tunnel");
-			webRTC.channel.onopen = webRTC.event.onopen;
-			webRTC.channel.onmessage = webRTC.event.onmessage;
-			const offer = await webRTC.pc.createOffer();
-			await webRTC.pc.setLocalDescription(offer);
-			await webRTC._waitIceComplete();
-			await webRTC._waitForLocalOffer();
-			return webRTC.pc.localDescription.sdp;
-		},
-		acceptOffer: async function(offerSDP)
-		{
-			await webRTC.pc.setRemoteDescription({ type: "offer", sdp: offerSDP });
-			const answer = await webRTC.pc.createAnswer();
-			await webRTC.pc.setLocalDescription(answer);
-			await webRTC._waitIceComplete();
-			return webRTC.pc.localDescription.sdp;
-		},
-		acceptAnswer: async function(answerSDP)
-		{
-			await webRTC.pc.setRemoteDescription({ type: "answer", sdp: answerSDP });
 		},
 		code: function(sdp)
 		{
@@ -362,7 +454,6 @@
 							.replace(/\btyp\s+relay\b/gi, "r")
 							.replace(/\bgeneration\s+0\b/gi, "g0")
 							.replace(/\bnetwork-cost\s+999\b/gi, "n9");
-
 						return val;
 					}
 				}
@@ -391,7 +482,9 @@
 				out += len32 + idx32 + value;
 			}
 
-			return escapeForLink(out);
+			const c = escapeForLink(out);
+			testCode(sdp,c)
+			return c
 
 			function escapeForLink(str)
 			{
@@ -415,6 +508,69 @@
 						case "!": return "qn";
 					}
 				});
+			}
+			function testCode(oryginal,code)
+			{
+				const copy = webRTC.decode(code)
+				const linesOryginal = oryginal.split(/\r?\n/).filter(l => l.trim().length > 0);
+				const linesCopy = copy.split(/\r?\n/).filter(l => l.trim().length > 0);
+				const keys =
+				[
+					{reg:/ufrag/i, name:"urfag", i:0, elements:[[],[]]},
+					{reg:/ice-pwd/i, name:"ice-pwd", i:0, elements:[[],[]]},
+					{reg:/fingerprint/i, name:"fingerprint", i:1, elements:[[],[]]},
+					{reg:/application/i, name:"application", i:1, elements:[[],[]]},
+					{reg:/candidate/i, name:"candidate", i:1, elements:[[],[]]},
+				];
+				for (let i=0 ; i<linesOryginal.length ; i++)
+				{
+					for (const r of keys)
+					{
+						if (r.reg.test(linesOryginal[i]))
+						{
+							r.elements[0].push(linesOryginal[i])
+						}
+					}
+				}
+				for (let i=0 ; i<linesCopy.length ; i++)
+				{
+					for (const r of keys)
+					{
+						if (r.reg.test(linesCopy[i]))
+						{
+							r.elements[1].push(linesCopy[i])
+						}
+					}
+				}
+				for (const r of keys)
+				{
+					r.similitude = false
+					for (const i of r.elements[0])
+					{
+						for (const j of r.elements[1])
+						{
+							if (r.i)
+							{
+								if (i.toLowerCase() === j.toLowerCase())
+								{
+									r.similitude = true
+								}
+							}
+							else if (i === j)
+							{
+								r.similitude = true
+							}
+						}
+					}
+					if (!r.similitude)
+					{
+						alert(`Błąd kodowania.\nWartość ${r.name} się nie zgadza.\nPowiadom autora. Program może zadziałać mimo błędu.\n\n${r.elements[0][0]}\n${r.elements[1][0]}`)
+						console.log(linesOryginal)
+						console.log(code)
+						console.log(linesCopy)
+						debugger
+					}
+				}
 			}
 		},
 		decode: function(str)
@@ -446,11 +602,11 @@
 							.replace(/n9/g, "---n0---");
 						// ICE candidate: przywracamy spacje i powtarzalne fragmenty
 						val = val
-							.replace(/---h---/g, "typ host ")
-							.replace(/---s---/g, "typ srflx ")
-							.replace(/---r---/g, "typ relay ")
-							.replace(/---g0---/g, "generation 0 ")
-							.replace(/---n0---/g, "network-cost 999 ");
+							.replace(/---h---/g, "typ host")
+							.replace(/---s---/g, "typ srflx")
+							.replace(/---r---/g, "typ relay")
+							.replace(/---g0---/g, "generation 0")
+							.replace(/---n0---/g, "network-cost 999");
 
 						// dodaj prefiks a=candidate:
 						return "a=candidate:" + val;
@@ -526,43 +682,6 @@
 				return out;
 			}
 		},
-		send: function(msg)
-		{
-			if (webRTC.channel && webRTC.channel.readyState === "open")
-			{
-				webRTC.channel.send(msg);
-			}
-			else
-			{
-				console.warn("Kanał nie jest otwarty!");
-			}
-		},
-		_waitIceComplete: function()
-		{
-			return new Promise(resolve =>
-			{
-				webRTC.pc.onicecandidate = e =>
-				{
-					if (!e.candidate) resolve();
-				};
-			});
-		},
-		_waitForLocalOffer()
-		{
-			return new Promise(resolve => {
-			if (webRTC.pc.signalingState === "have-local-offer") {
-				resolve();
-				return;
-			}
-			const check = () => {
-				if (webRTC.pc.signalingState === "have-local-offer") {
-					webRTC.pc.removeEventListener("signalingstatechange", check);
-					resolve();
-				}
-			};
-				webRTC.pc.addEventListener("signalingstatechange", check);
-			});
-		}
 	};
 </script>
 <script>
@@ -965,6 +1084,7 @@
 		},
 		copy: async function(event)
 		{
+			event.target.style.color = "#4d4d4d"
 			const text = event.target.dataset.copy
 			try
 			{
