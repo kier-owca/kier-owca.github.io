@@ -664,7 +664,7 @@
 					route.hour = `${addZero(route.date.getHours())}:${addZero(route.date.getMinutes())}`
 				}
 				route.date = Math.floor((Number(route.date)||0)/(1000*60*60))
-				const stops = row[scheme.stops-1].match(/\[\d{2}:\d{2}\][^\[\]-]+(?:\[[^-]+?\])?\[[^-]*?\/[\d\.,]+(?:kg)?\](?:-)?/g)
+				const stops = row[scheme.stops-1].match(/\[\d{2}:\d{2}\][^\[\]-]+(?:\[[^-]+?\])?\[[^-]*?(?:\/[\d\.,]+)?(?:kg)?\](?:-)?/g)
 				route.stops = []
 				route.totalWeight = 0
 				route.totalPallets = 0
@@ -678,7 +678,7 @@
 					stop.type = ((match.match(/\[(?<type>[^ ][^ ]?[^ ]?)\]/i)||{}).groups||{}).type||"X"
 					stop.pallets = Number(((match.match(/\[(?:[^\[\]]+:)?(?<pallets>\d+(?:[\.,]\d+)?)\/\d+(?:[\.,]\d+)?\]/i)||{}).groups||{}).pallets)||1
 					stop.pallets = Math.round(stop.pallets*2)
-					stop.weight = Number(((match.match(/\[(?:[^\[\]]+:)?\d+(?:[\.,]\d+)?\/(?<weight>\d+(?:[\.,]\d+)?)\]/i)||{}).groups||{}).weight)||404
+					stop.weight = Number(((match.match(/\[(?:[^\[\]]+:)?\d+(?:[\.,]\d+)?\/(?<weight>\d+(?:[\.,]\d+)?)\]/i)||{}).groups||{}).weight)||1
 					route.stops.push(stop)
 				}
 				for (let i=0 ; i<route.stops.length ; i++)
@@ -1437,6 +1437,113 @@
 				navigator.clipboard.writeText(h2.innerText || h2.textContent)
 			}
 			content.appendChild(button)
+		},
+        anomaly: function()
+		{
+			const content = document.getElementById("anomaly").getElementsByClassName("content")[0]
+			content.innerHTML = ""
+			if (!data.itinerary[data.markedItinerary]){return}
+			const line = JSON.parse(JSON.stringify(data.itinerary[data.markedItinerary]))
+			if (!Array.isArray(line.list)){return}
+            const h2 = document.createElement("h2")
+			h2.innerHTML = `Anomalia z dnia: ${dateText(line.start)}:<br><br>`
+            content.appendChild(h2)
+            const button = document.createElement("button")
+            button.innerHTML = "kopiuj"
+            button.onclick = function()
+            {
+                navigator.clipboard.writeText(h2.innerText || h2.textContent)
+            }
+            content.appendChild(button)
+            console.log(line.list)
+			for (let i=0 ; i<line.list.length ; i++)
+			{
+                const l = line.list[i]
+                const anomalyList = []
+                if (l.difficulty > 75)
+                {
+                    anomalyList.push("zbyt trudna trasa")
+                }
+                if (Number(l.hour.slice(0,2)) < 17)
+                {
+                    if (Number(l.hour.slice(0,2)) > 12)
+                    {
+                        anomalyList.push("bardzo wczesna")
+                    }
+                    else if (Number(l.hour.slice(0,2)) > 3)
+                    {
+                        anomalyList.push("bardzo późna")
+                    }
+                }
+                if (l.totalSpace > 660)
+                {
+                    anomalyList.push(`długi czas pracy ogólnej (${Math.floor(l.totalSpace/60)}H ${addZero(Math.floor((l.totalSpace%60)))})`)
+                }
+                else if (l.totalSpace < 240 && l.stops.length > 2)
+                {
+                    anomalyList.push(`krótki czas pracy ogólnej (${Math.floor(l.totalSpace/60)}H ${addZero(Math.floor((l.totalSpace%60)))})`)
+                }
+                if (l.space > 360)
+                {
+                    anomalyList.push(`długi czas pracy na sklepach (${Math.floor(l.space/60)}H ${addZero(Math.floor((l.space%60)))})`)
+                }
+                if (l.totalWeight > 6.9)
+                {
+                    anomalyList.push(`duży tonaż (${l.totalWeight}t)`)
+                }
+                if (l.totalPallets > 30)
+                {
+                    anomalyList.push(`dużo palet (${l.totalPallets})`)
+                }
+                else if (l.totalPallets < 6)
+                {
+                    anomalyList.push(`mało palet (${l.totalPallets})`)
+                }
+                if (l.stops.length > 14)
+                {
+                    anomalyList.push(`dużo sklepów (${l.stops.length})`)
+                }
+                else if (l.stops.length < 5)
+                {
+                    anomalyList.push(`mało sklepów (${l.stops.length})`)
+                }
+                for (let j=0 ; j<l.stops.length ; j++)
+                {
+                    const stop = l.stops[j]
+                    if (stop.pallets > 4)
+                    {
+                        anomalyList.push(`dużo palet na sklepie ${stop.name} (${stop.pallets})`)
+                    }
+                    if (stop.weight > 10)
+                    {
+                        anomalyList.push(`dużo towaru na sklep ${stop.name} (${Math.round(stop.weight*100)}kg)`)
+                    }
+                    if (j>0 && stop.space > 54)
+                    {
+                        anomalyList.push(`długi dojazd na sklep ${stop.name} (${stop.space}min)`)
+                    }
+                    if (stop.space < 11)
+                    {
+                        anomalyList.push(`zbyt krótki dojazd na sklep ${stop.name} (${stop.space}min)`)
+                    }
+                    if (Number(stop.hour.slice(0,2)) < 14)
+                    {
+                        if (Number(stop.hour.slice(0,2)) > 6)
+                        {
+                            anomalyList.push(`późny rozładunek na sklepie ${stop.name} (${stop.hour})`)
+                        }
+                    }
+                }
+                if (anomalyList.length > 0)
+                {
+                    h2.innerHTML += `Trasa #${l.nr||i+1} (${l.hour})<br>`
+                    for (let a of anomalyList)
+                    {
+                        h2.innerHTML += `- ${a}<br>`   
+                    }
+                    h2.innerHTML += "<br>"
+                }
+			}
 		},
 	}
 	function dateText(dateValue)
@@ -2251,6 +2358,12 @@
 			<span class="separator"></span>
 			<div class="content"></div>
 		</section>
+        <section id="anomaly" class="hidden">
+			<h1>Anomalia</h1>
+			<button data-path="statistics">Cofnij</button>
+			<span class="separator"></span>
+			<div class="content"></div>
+		</section>
 		<section id="other" class="hidden">
 			<h1>Inne</h1>
 			<button data-path="main">Cofnij</button>
@@ -2289,6 +2402,7 @@
 			<button data-path="chart" data-action="chartWeight">Wykres tonażu</button>
 			<button data-path="chart" data-action="chartDifficulty">Wykres trudności</button>
 			<button data-path="double" data-action="findDouble">Możliwe duble</button>
+            <button data-path="anomaly" data-action="anomaly">Anomalia</button>
 		</section>
 		<section id="info" class="hidden">
 			<h1>Informacje</h1>
